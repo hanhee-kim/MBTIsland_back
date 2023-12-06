@@ -49,41 +49,7 @@ public class EmailService {
 		msgg += "<div style={{fontSize:'130%',letterSpacing:'3px'}}>";
 		msgg += "CODE:<strong>";
 		msgg += ePw + "</strong><div><br/> "; // 메일에 인증번호 넣기
-		msgg += "</div>";
-		
-		
-		
-//	      
-//	        
-//	          
-//	          <br/>
-//	            
-//	          <br/>
-//	            
-//	          <br/>
-//	              
-//	                <br/>
-//	                
-//	                
-//	                
-//	              </div>
-//	        <br/> 
-//	      </div>
-//	    </div>
-//	      </div>
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		msgg += "</div>";		
 		
 		message.setText(msgg, "utf-8", "html");// 내용, charset 타입, subtype
 		// 보내는 사람의 이메일 주소, 보내는 사람 이름
