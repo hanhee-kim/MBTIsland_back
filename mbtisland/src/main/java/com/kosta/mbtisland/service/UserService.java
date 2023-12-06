@@ -9,7 +9,8 @@ public interface UserService {
 	UserEntity getUserByUserIdx(Integer userIdx) throws Exception;
 	//username으로 유저 조회
 	UserEntity getUserByUsername(String username) throws Exception;
-
+	//userEmail로 유저 조회(이메일인증을 받을것이므로 유니크한값이여야함)
+	UserEntity getUserByUserEmail(String userEmail) throws Exception;
 	
 
 }

@@ -45,4 +45,14 @@ public class UserServiceImpl implements UserService{
 		}
 	}
 
+	@Override
+	public UserEntity getUserByUserEmail(String userEmail) throws Exception {
+		UserEntity user = userRepository.findByUserEmail(userEmail);
+		if(user != null) {
+			return user;
+		}else {
+			return null;
+		}
+	}
+
 }

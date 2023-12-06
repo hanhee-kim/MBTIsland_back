@@ -33,34 +33,37 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		System.out.println("security config진입");
 		http
-		.addFilter(corsFilter) // 도메인이 다른 곳에서 들어오는것을 허용하는 필터를 넣어줌
-		.csrf().disable()	 //다른 도메인으로 부터의 csrf 공격 비활성화
-		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) //session 비활성화
-		.and()
-		.formLogin().disable()	//로그인 폼 사용 비활성화
-		.httpBasic().disable()	//httpBasic은 header에 username과 password 를 암호화하지 않고 주고 받는다. 이를 사용하지 않겠다.
-		.addFilter(new JwtAuthenticationFilter(authenticationManager()))	// DB확인
-		.addFilter(new JwtAuthorizationFilter(authenticationManager(),userRepository))
+		.addFilter(corsFilter)  //다른 도메인 접근 허용
+		.csrf().disable() //csrf 공격 비활성화
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); //session 비활성화
+
+	//Login
+	http
+		.formLogin().disable() //로그인 폼 사용 비활성화
+		.httpBasic().disable() //httpBasic은 header에 username,password를 암호화하지 않은 상태로 주고 받는다. 이를 사용하지 않겠다.
+		.addFilter(new JwtAuthenticationFilter(authenticationManager()));  //UsernamePasswordAuthenticationFilter
+	
+//    //oauth2Login
+//    http
+//		.oauth2Login()
+//        .authorizationEndpoint().baseUri("/oauth2/authorization")  // 소셜 로그인 url
+//        .and()
+//        .redirectionEndpoint().baseUri("/oauth2/callback/*")  // 소셜 인증 후 redirect url
+//        .and()
+//        .userInfoEndpoint().userService(principalOauth2UserService)  // 회원 정보 처리
+//        .and()
+//        .successHandler(oAuth2LoginSuccessHandler);
+
+    http
+		.addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository)) //BasicAuthenticationFilter
 		.authorizeRequests()
-//		.antMatchers("/user/**").authenticated() // 로그인해야해!
-//		.antMatchers("/admin/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')") // 로그인 & 권한
-//		.antMatchers("/manager/**").access("hasRole('ROLE_MANAGER')")
-		.antMatchers("/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
-		.antMatchers("/manager/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')") // 로그인 & 권한
-		.antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
-		//user 접근은 유저or매니저or관리자 가능
-		//manager 접근은 매니저 or 관리자 가능
-		//admin 접근은 관리자만 가능
-		.anyRequest().permitAll(); // 나머지는 허용
-	}	
-	//세션에 넣어놓는건 필터에서 저장한 세션을 컨트롤러에서 가져다 쓰라고 만드는 것.
+		.antMatchers("/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
+		.antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')") // 로그인 & 권한
+		.anyRequest().permitAll(); // 나머지는 허용		
 	
-	
-	
-	
-	
-	
+}	
 	
 	
 	
