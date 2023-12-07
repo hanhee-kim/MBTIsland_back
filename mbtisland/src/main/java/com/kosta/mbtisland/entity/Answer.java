@@ -1,6 +1,6 @@
 package com.kosta.mbtisland.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,7 +39,7 @@ public class Answer {
 	
 	@Column
 	@CreationTimestamp
-	private Date writeDate;
+	private Timestamp writeDate;
 	
 	@Column
 	private String writerId;

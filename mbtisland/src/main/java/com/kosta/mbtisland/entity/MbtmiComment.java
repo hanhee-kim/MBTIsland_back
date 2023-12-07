@@ -1,6 +1,6 @@
 package com.kosta.mbtisland.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -51,7 +51,7 @@ public class MbtmiComment {
 	
 	@Column
 	@CreationTimestamp
-	private Date writeDate;
+	private Timestamp writeDate;
 	
 	@Column
 //	@Column(columnDefinition = "VARCHAR(1) DEFAULT 'N'")

@@ -1,6 +1,7 @@
 package com.kosta.mbtisland.entity;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,7 +42,7 @@ public class FileVo {
 	private Integer fileSize;
 	@Column
 	@CreationTimestamp
-	private Date uploadDate;
+	private Timestamp uploadDate;
 	@Column
 	private Integer postNo;
 	@Column
