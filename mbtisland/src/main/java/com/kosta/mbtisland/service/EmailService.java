@@ -22,7 +22,7 @@ public class EmailService {
 //	private static final String ADMIN_ADDRESS="MBTIsland@naver.com";
 	private String ePw; //인증번호
 	
-	//mail작성
+	//인증 mail작성
 	public MimeMessage createMail(String to) throws MessagingException, UnsupportedEncodingException {
 		System.out.println("보내는 대상 : " + to);
 		System.out.println("인증 번호 : " + ePw);
@@ -84,7 +84,7 @@ public class EmailService {
 		return key.toString();
 	}
 
-		// 메일 발송
+		// 인증 메일 발송
 		// sendSimpleMessage 의 매개변수로 들어온 to 는 곧 이메일 주소가 되고,
 		// MimeMessage 객체 안에 내가 전송할 메일의 내용을 담는다.
 		// 그리고 bean 으로 등록해둔 javaMail 객체를 사용해서 이메일 send!!		
@@ -100,6 +100,39 @@ public class EmailService {
 				throw new IllegalArgumentException();
 			}
 			return ePw; // 메일로 보냈던 인증 코드를 서버로 반환
+		}
+		
+		
+		
+	//id찾기 메일 발송
+		
+		public MimeMessage createFindIdMail(String to,String id) throws MessagingException, UnsupportedEncodingException {
+			
+			MimeMessage message = mailSender.createMimeMessage();
+
+			message.addRecipients(Message.RecipientType.TO, to);// 보내는 대상
+			message.setSubject("MBTIsland 아이디 찾기");// 제목
+
+			String msgg = "";
+			msgg += "<div style={{background-color:'#fdfdfd',border-radius:'15px',box-shadow:'5px 5px 5px 5px gray '}}>";
+			msgg += "<div style={{margin:'100px',text-align:'center'}}>";
+			msgg += "<h1> * 안녕하세요 * </h1>";
+			msgg += "<br/>";
+			msgg += "<h1> MBTI 커뮤니티 MBTIsland 입니다.</h1>";
+			msgg += "<br/>";
+			msgg += "<div style={{font-size:'130%'}}>요청하신 ID찾기 메일입니다.</div>";
+			msgg += "<br/>";
+			msgg += "<div style={{fontSize:'130%'}}>저희 MBTIsland를 찾아주셔서 감사합니다!</div>";
+			msgg += "<br/>";
+			msgg += "<div style={{border:'1px solid black',border-radius:'20px'}}>";
+			msgg += "<br/>";
+			msgg += "<h3 style={{color:'black'}}>회원님의 ID는 "+id+"입니다.</h3>";
+			msgg += "<br/>";
+			
+			message.setText(msgg, "utf-8", "html");// 내용, charset 타입, subtype
+			// 보내는 사람의 이메일 주소, 보내는 사람 이름
+			message.setFrom(new InternetAddress("914gksl914@naver.com", "MBTIsland_Admin"));// 보내는 사람
+			return message;
 		}
 	
 

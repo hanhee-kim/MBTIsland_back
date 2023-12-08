@@ -59,14 +59,14 @@ public class UserEntity {
 	private String providerId;
 	
 
-//	//유저 권한이 여러개일때?
-//	public List<String> getRoleList() {
-//		if(this.userRole.length()>0) {
-//			return Arrays.asList(this.userRole.split(","));
-//		}
-//		return new ArrayList<>();
-//	}
-//	
+	//
+	public List<String> getRoleList() {
+		if(this.userRole.length()>0) {
+			return Arrays.asList(this.userRole.split(","));
+		}
+		return new ArrayList<>();
+	}
+	
 	
 	
 	

@@ -1,7 +1,10 @@
 package com.kosta.mbtisland.controller;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kosta.mbtisland.config.auth.PrincipalDetails;
 import com.kosta.mbtisland.entity.UserEntity;
 import com.kosta.mbtisland.repository.UserRepository;
 import com.kosta.mbtisland.service.EmailService;
@@ -44,6 +48,7 @@ public class UserController {
 		}
 	}
 	
+	//가입시 메일 보내기 누를때
 	@GetMapping("/sendmail/{userEmail}")
 	public ResponseEntity<Object> sendmail(@PathVariable String userEmail){
 		try {
@@ -62,7 +67,8 @@ public class UserController {
 		}
 	}
 	
-	@PostMapping("/123")
+	//가입할때
+	@PostMapping("/join")
 	public String join(@RequestBody UserEntity sendUser) {
 		System.out.println("join controller진입");
 		sendUser.setUserPassword(bCryptPasswordEncoder.encode(sendUser.getUserPassword()));
@@ -76,6 +82,31 @@ public class UserController {
 			e.printStackTrace();
 			return e.getMessage();
 		}
+	}
+	
+	//main 로드시에 실행
+	@GetMapping("/user")
+	public ResponseEntity<UserEntity> user(Authentication authentication) {
+		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
+		System.out.println(principalDetails.getUser().getUserIdx());
+		System.out.println(principalDetails.getUser().getUsername());
+		System.out.println(principalDetails.getUser().getUserPassword());
+		System.out.println(principalDetails.getUser().getUserRole());
+		return new ResponseEntity<UserEntity>(principalDetails.getUser(), HttpStatus.OK);
+	}
+	
+	
+	//아이디찾기
+	@PostMapping("/find")
+	public ResponseEntity<Object> findIdPassword(@RequestBody Map<String,String> param){
+		String email = (String)param.get("userEmil");
+		String type = (String)param.get("type");
+		if(type.equals("ID")) {
+			//id찾기
+		}else {
+			//password찾기
+		}
+		return new ResponseEntity<Object>("",HttpStatus.OK);
 	}
 	
 	

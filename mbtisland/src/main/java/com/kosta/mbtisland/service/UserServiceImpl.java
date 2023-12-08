@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService{
 			//changeDate 셋팅
 			user.setUserMbtiChangeDate(new Timestamp(new Date().getTime()));
 			//userRole 셋ㅌ
-			user.setUserRole("USER");
+			user.setUserRole("ROLE_USER");
 			userRepository.save(user);
 		}else {
 			throw new Exception("아이디 중복");

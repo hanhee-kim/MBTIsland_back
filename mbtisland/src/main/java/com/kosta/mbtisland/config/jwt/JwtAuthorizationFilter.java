@@ -34,6 +34,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 			throws IOException, ServletException {
 		String header = request.getHeader(JwtProperties.HEADER_STRING);
 		System.out.println("header Authrization:"+header);
+		System.out.println("인증의 doFilter  ");
 		
 		if(header==null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
 			chain.doFilter(request, response);
@@ -41,11 +42,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 		}
 		
 		String token=request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX,"");
-		
+		System.out.println("token??: "+token);
 		//토큰 검증
 		String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token).getClaim("username").asString();
-		
+		System.out.println("username ?? : "+username);
 		if(username!=null) {
+			System.out.println("username이 널이 아니면?");
 			UserEntity user = userRepository.findByUsername(username);
 			
 			PrincipalDetails principalDetails = new PrincipalDetails(user);

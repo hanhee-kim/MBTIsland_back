@@ -60,7 +60,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 		} else {  //가입되어있지 않으면 insert
 			user = UserEntity.builder().username(oAuth2UserInfo.getProvider()+"_"+oAuth2UserInfo.getProviderId())
 				.userEmail(oAuth2UserInfo.getEmail())
-//				.role("ROLE_USER")
+				.userRole("ROLE_GUEST")
 				.provider(oAuth2UserInfo.getProvider())
 				.providerId(oAuth2UserInfo.getProviderId())
 //				.password(bCryptPasswordEncoder.encode(oauthPassword))
