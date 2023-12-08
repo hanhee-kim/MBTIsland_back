@@ -42,50 +42,57 @@ public class NoticeServiceImpl implements NoticeService {
 			noticeRepository.deleteById(no);
 		}
 	}
+	
+	
 
 	// PageInfo계산시 필요한 게시글수 조회 (필터, 검색어 적용)
 	@Override
 	public Integer noticeCntByCriteria(String filter, String searchTerm) throws Exception {
 		Long totalCnt = 0L;
 		Long displayCnt = 0L;
-		Long hideCnt = 0L;
+		Long hiddenCnt = 0L;
 		
 		if(filter==null) {
 			if(searchTerm==null) totalCnt = noticeRepository.count();
-			else totalCnt = noticeRepository.countByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(searchTerm, searchTerm);
+			else totalCnt = noticeDslRepository.countBySearchTerm(searchTerm);
 			return totalCnt.intValue();
 			
-		} else if(filter.equals("N")) { //
+		} else if(filter.equals("N")) { 
 			if(searchTerm==null) displayCnt = noticeRepository.countByIsHided("N");
-			else displayCnt = noticeRepository.countByIsHidedAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase("N", searchTerm, searchTerm);
+			else displayCnt = noticeDslRepository.countBySearchTermPlusDisplay(searchTerm);
 			return displayCnt.intValue();
 			
 		} else {
-			if(searchTerm==null) hideCnt = noticeRepository.countByIsHided("Y");
-			else hideCnt = noticeRepository.countByIsHidedAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase("Y", searchTerm, searchTerm);
-			return hideCnt.intValue();
+			if(searchTerm==null) hiddenCnt = noticeRepository.countByIsHided("Y");
+			else hiddenCnt = noticeDslRepository.countBySearchTermPlusHidden(searchTerm);
+			return hiddenCnt.intValue();
 		}
 	}
 	
-	// 프론트에 표시하기 위한 게시글수 조회
-	@Override
-	public Map<String, Integer> getNoticeCounts() {
-		Map<String, Integer> counts = new HashMap<>();
-		
-		Long totalCntLong = noticeRepository.count();
-		Integer totalCnt = totalCntLong.intValue();
-		Long hiddenCntLong = noticeRepository.countByIsHided("Y");
-		Integer hiddenCnt = hiddenCntLong.intValue();
-		Long displayCntLong = noticeRepository.countByIsHided("N");
-		Integer displayCnt = displayCntLong.intValue();
-		
-		counts.put("totalCnt", totalCnt);
-		counts.put("hiddenCnt", hiddenCnt);
-		counts.put("displayCnt", displayCnt);
-		
-		return counts;
-	}
+	// 프론트에 표시하기 위한 전체, 표시, 숨김 게시글수 조회(검색어유무에 따라 달라지도록 함)
+		@Override
+		public Map<String, Integer> getNoticeCounts(String searchTerm, String isHidden) throws Exception {
+			
+			System.out.println("검색어: " + searchTerm + ", 필터값: " + isHidden);
+			
+			Map<String, Integer> counts = new HashMap<>();
+			Long totalCnt = noticeRepository.count();
+			Long displayCnt = noticeRepository.countByIsHided("N");
+			Long hiddenCnt = noticeRepository.countByIsHided("Y");
 
+			// 검색수행시 새로 조회
+			if(searchTerm!=null) {
+				totalCnt = noticeDslRepository.countBySearchTerm(searchTerm);
+				displayCnt = noticeDslRepository.countBySearchTermPlusDisplay(searchTerm);
+				hiddenCnt = noticeDslRepository.countBySearchTermPlusHidden(searchTerm);
+			} 
+			
+			counts.put("totalCnt", totalCnt.intValue());
+			counts.put("displayCnt", displayCnt.intValue());
+			counts.put("hiddenCnt", hiddenCnt.intValue());
+			return counts;
+		}
+		
 	// 공지사항 상세 조회
 	@Override
 	public Notice noticeDetail(Integer no) throws Exception {
@@ -123,6 +130,8 @@ public class NoticeServiceImpl implements NoticeService {
 		
 		return noticeList;
 	}
+
+	
 	
 	
 	

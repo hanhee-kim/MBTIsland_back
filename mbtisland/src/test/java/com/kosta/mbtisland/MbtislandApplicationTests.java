@@ -96,6 +96,14 @@ class MbtislandApplicationTests {
 	}
 	
 	
+	// dsl검색에따른 데이터수 조회
+	@Test
+	void noticeCountBySearchTerm() throws Exception {
+		String searchTerm = "숨긴";
+		Long totalCnt = noticeDslRepository.countBySearchTerm(searchTerm);
+		System.out.println("결과: " + totalCnt);
+	}
+	
 	
 	
 	

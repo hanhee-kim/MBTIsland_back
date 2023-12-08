@@ -60,11 +60,35 @@ public class NoticeDslRepository {
 		return query.fetch();
 	}
 	
+	
+	// 검색적용된 totalCnt 조회
+	public Long countBySearchTerm(String searchTerm) {
+		return jpaQueryfactory.select(notice.count()).from(notice)
+								.where(notice.title.containsIgnoreCase(searchTerm)
+										.or(notice.content.containsIgnoreCase(searchTerm)))
+								.fetchOne();
+	}
+	// 검색적용된 displayCnt 조회
+	public Long countBySearchTermPlusDisplay(String searchTerm) {
+		return jpaQueryfactory.select(notice.count()).from(notice)
+								.where(
+										notice.isHided.eq("N")
+											.and(notice.title.containsIgnoreCase(searchTerm)
+													.or(notice.content.containsIgnoreCase(searchTerm)))
+										)
+								.fetchOne();
+	}
+	// 검색적용된 hiddenCnt 조회
+	public Long countBySearchTermPlusHidden(String searchTerm) {
+		return jpaQueryfactory.select(notice.count()).from(notice)
+				.where(
+						notice.isHided.eq("Y")
+						.and(notice.title.containsIgnoreCase(searchTerm)
+								.or(notice.content.containsIgnoreCase(searchTerm)))
+						)
+				.fetchOne();
+	}
 
-	
-	
-	
-	
 	
 
 }

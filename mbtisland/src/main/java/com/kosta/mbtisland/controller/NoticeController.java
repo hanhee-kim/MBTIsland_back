@@ -36,7 +36,8 @@ public class NoticeController {
 //											, @PathVariable(required=false) String hidden
 //											, @PathVariable(required=false) Integer page) {
 	
-	public ResponseEntity<Map<String, Object>> noticeList(@RequestParam(required = false) String search
+//	public ResponseEntity<Map<String, Object>> noticeList(@RequestParam(required = false) String search
+	public ResponseEntity<Object> noticeList(@RequestParam(required = false) String search
 														, @RequestParam(required = false) String hidden
 														, @RequestParam(required = false) Integer page) {
 		
@@ -48,20 +49,17 @@ public class NoticeController {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
 			List<Notice> noticeList = noticeService.noticeListBySearchAndFilterAndPaging(search, hidden, pageInfo);
-			Map<String, Integer> noticeCnts = noticeService.getNoticeCounts();
+			Map<String, Integer> noticeCnts = noticeService.getNoticeCounts(search, hidden);
 			System.out.println(noticeCnts);
 			
 			Map<String, Object> res = new HashMap<>();
 	        res.put("pageInfo", pageInfo);
-	        res.put("noticelist", noticeList);
-//	        res.put("totalCnt", noticeCnts.get("totalCnt"));
-//	        res.put("hiddenCnt", noticeCnts.get("hiddenCnt"));
-//	        res.put("displayCnt", noticeCnts.get("displayCnt"));
+	        res.put("noticeList", noticeList);
 	        res.put("noticeCnts", noticeCnts);
-	        return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+	        return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 	
