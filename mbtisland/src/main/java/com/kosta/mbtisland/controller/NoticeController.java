@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,16 +24,8 @@ public class NoticeController {
 	@Autowired
 	private NoticeService noticeService;
 
-	// 공지사항 목록 (url매핑 바꿀것)
-	@GetMapping({"noticelist", "/noticelist/{page}"
-				, "/noticelist/{search}/{page}"
-				, "/noticelist/{search}"
-				, "/noticelist/{hidden}/{page}"
-				, "/noticelist/{hidden}"
-				, "/noticelist/{search}/{hidden}/{page}"
-				, "/noticelist/{search}/{hidden}"
-				})
-//	public ResponseEntity<Map<String, Object>> noticeList(@RequestParam(required = false) String search
+	// 공지사항 목록
+	@GetMapping("/noticelist")
 	public ResponseEntity<Object> noticeList(@RequestParam(required = false) String search
 														, @RequestParam(required = false) String hidden
 														, @RequestParam(required = false) Integer page) {
@@ -65,6 +58,17 @@ public class NoticeController {
 		try {
 			noticeService.changeIsHided(noArr);
 			return new ResponseEntity<Object>(Arrays.toString(noArr) + " 의 일괄처리 성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	// 공지사항 일괄 삭제 처리
+	@DeleteMapping("/deletenotice/{noArr}")
+	public ResponseEntity<Object> deleteNoticeBundle(@PathVariable Integer[] noArr) {
+		try {
+			noticeService.deleteNotice(noArr);
+			return new ResponseEntity<Object>(Arrays.toString(noArr) + " 의 일괄삭제 성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
