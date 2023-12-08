@@ -62,13 +62,15 @@ public class UserController {
 		}
 	}
 	
-	@PostMapping("/join")
+	@PostMapping("/123")
 	public String join(@RequestBody UserEntity sendUser) {
+		System.out.println("join controller진입");
 		sendUser.setUserPassword(bCryptPasswordEncoder.encode(sendUser.getUserPassword()));
 		try {
-			System.out.println("join controller진입");
+//			System.out.println("join controller진입");
 			System.out.println(sendUser.getUsername());
 			userService.joinUser(sendUser);
+			
 			return "정상회원가입";
 		} catch (Exception e) {
 			e.printStackTrace();
