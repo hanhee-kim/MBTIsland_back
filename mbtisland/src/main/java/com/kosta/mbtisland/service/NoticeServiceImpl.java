@@ -103,6 +103,11 @@ public class NoticeServiceImpl implements NoticeService {
 		int pagesPerGroup = 10;
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
 		List<Notice> noticeList = noticeDslRepository.findNoticeListBySearchAndFilterAndPaging(sValue, isHided, pageRequest);
+		
+		System.out.println("***서비스 파라미터\nnoticeListsValue: " + sValue + "\nisHided: " + isHided);
+		System.out.println("noticeList: " + noticeList);
+		
+		
 		if(noticeList.size()==0) throw new Exception("해당하는 게시글이 존재하지 않습니다.");
 		
 		Integer allCount = noticeCntByCriteria(isHided, sValue);

@@ -31,11 +31,16 @@ public class NoticeController {
 				, "/noticelist/{search}/{hidden}/{page}"
 				, "/noticelist/{search}/{hidden}"
 				})
-	public ResponseEntity<Map<String, Object>> noticeList(@PathVariable(required=false) String search
-											, @PathVariable(required=false) String hidden
-											, @PathVariable(required=false) Integer page) {
+	
+//	public ResponseEntity<Map<String, Object>> noticeList(@PathVariable(required=false) String search
+//											, @PathVariable(required=false) String hidden
+//											, @PathVariable(required=false) Integer page) {
+	
+	public ResponseEntity<Map<String, Object>> noticeList(@RequestParam(required = false) String search
+														, @RequestParam(required = false) String hidden
+														, @RequestParam(required = false) Integer page) {
 		
-		System.out.println("컨트롤러가 받은 파라미터 출력-----");
+		System.out.println("***컨트롤러가 받은 파라미터 출력-----");
 		System.out.println("search: " + search);
 		System.out.println("hidden: " + hidden);
 		System.out.println("page: " + page);
