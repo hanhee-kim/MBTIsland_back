@@ -1,5 +1,6 @@
 package com.kosta.mbtisland.controller;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class NoticeController {
 	@Autowired
 	private NoticeService noticeService;
 
-	// 공지사항 목록
+	// 공지사항 목록 (url매핑 바꿀것)
 	@GetMapping({"noticelist", "/noticelist/{page}"
 				, "/noticelist/{search}/{page}"
 				, "/noticelist/{search}"
@@ -31,11 +32,6 @@ public class NoticeController {
 				, "/noticelist/{search}/{hidden}/{page}"
 				, "/noticelist/{search}/{hidden}"
 				})
-	
-//	public ResponseEntity<Map<String, Object>> noticeList(@PathVariable(required=false) String search
-//											, @PathVariable(required=false) String hidden
-//											, @PathVariable(required=false) Integer page) {
-	
 //	public ResponseEntity<Map<String, Object>> noticeList(@RequestParam(required = false) String search
 	public ResponseEntity<Object> noticeList(@RequestParam(required = false) String search
 														, @RequestParam(required = false) String hidden
@@ -57,6 +53,18 @@ public class NoticeController {
 	        res.put("noticeList", noticeList);
 	        res.put("noticeCnts", noticeCnts);
 	        return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 공지사항 일괄 숨김/해제 처리
+	@GetMapping("/hidenotice/{noArr}")
+	public ResponseEntity<Object> hideNoticeBundle(@PathVariable Integer[] noArr) {
+		try {
+			noticeService.changeIsHided(noArr);
+			return new ResponseEntity<Object>(Arrays.toString(noArr) + " 의 일괄처리 성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
