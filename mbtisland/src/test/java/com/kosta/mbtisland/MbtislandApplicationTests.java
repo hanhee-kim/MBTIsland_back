@@ -1,25 +1,43 @@
 package com.kosta.mbtisland;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 
+import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtwhy;
+import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.service.MbtwhyServiceImpl;
 
 @SpringBootTest
 class MbtislandApplicationTests {
 	
 	@Autowired
-	MbtwhyServiceImpl mbtwhyServiceImpl;
+	private MbtwhyServiceImpl mbtwhyServiceImpl;
+	
+	@Autowired
+	private MbtwhyDslRepository mbtwhyDslRepository;
 
 	@Test
 	void contextLoads() {
+	}
+	
+	@Test
+	// Mbtwhy 게시글 목록 조회 (MBTI 타입)
+	void selectMbtwhyByMbtiCategoryAndPage() throws Exception {
+		try {
+			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
+			List<Mbtwhy> mbtwhyList = mbtwhyServiceImpl.selectMbtwhyListByMbtiCategoryAndPageAndSearchTypeAndSearchValueAndSortType("ENFP", pageInfo, null, null, null);
+			for(int i = 0;i < mbtwhyList.size();i++) {
+				System.out.println(mbtwhyList);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			return;
+		}
 	}
 	
 	@Test
