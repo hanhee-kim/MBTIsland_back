@@ -63,7 +63,8 @@ class MbtislandApplicationTests {
 		String filter = null; 
 //		filter = "display";
 //		filter = "hidden";
-		Integer cnt = noticeService.noticeCntByCriteria(filter);
+		String sValue = null;
+		Integer cnt = noticeService.noticeCntByCriteria(filter, sValue);
 		System.out.println("결과: " + cnt);
 	}
 
@@ -77,14 +78,22 @@ class MbtislandApplicationTests {
 		String isHided = "Y"; // "Y", "N" 또는 null
 		
 		List<Notice> noticeList = noticeService.noticeListBySearchAndFilterAndPaging(sValue, isHided, pageInfo);
-		Iterator iter = noticeList.iterator();
+		Iterator<Notice> iter = noticeList.iterator();
 		System.out.println("---공지사항 목록 출력---");
 		while (iter.hasNext()) {
 			System.out.println(iter.next());
 		}
 	}
 	
-	
+	// 공지사항 작성
+	@Test
+	@Commit
+	void noticeInsert() throws Exception {
+		// 컨트롤러 (프론트로부터 Notice객체를 받음)
+		Notice notice = Notice.builder().title("테스트코드 공지사항 제목").content("테스트코드 공지사항 내용").writerId("admin01").build();
+		noticeRepository.save(notice);
+		System.out.println("결과: " + notice);
+	}
 	
 	
 	
