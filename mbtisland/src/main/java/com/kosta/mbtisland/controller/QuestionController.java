@@ -42,6 +42,27 @@ public class QuestionController {
 		}
 	}
 	
+	// 특정 유저의 문의글 모아보기
+	@GetMapping("/questionlistofuser")
+	public ResponseEntity<Object> questionListOfUser(@RequestParam String user
+													, @RequestParam(required = false) String answered
+													, @RequestParam(required = false) Integer page) {
+		try {
+			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
+			List<Question> questionList = questionService.questionListByUserAndFilterAndPaging(user, answered, pageInfo);
+			Map<String, Integer> questionCnts = questionService.getQuestionCountsByUser(user, answered);
+			
+			Map<String, Object> res = new HashMap<>();
+	        res.put("pageInfo", pageInfo);
+	        res.put("questionList", questionList);
+	        res.put("questionCnts", questionCnts);
+	        return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 	
 
 }

@@ -1,6 +1,5 @@
 package com.kosta.mbtisland.repository;
 
-//import static com.kosta.mbtisland.entity.QMbtmi.mbtmi;
 import static com.kosta.mbtisland.entity.QMbtmi.mbtmi;
 
 import java.sql.Timestamp;
@@ -65,7 +64,6 @@ public class MbtmiDslRepository {
 	            result.add(maxRecommendMbtmi);
 	        }
 	    }
-
 	    return result;
 	}
 	

@@ -17,6 +17,7 @@ public class QuestionDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryfactory;
 	
+	// 1. 문의글 목록 일반
 	// 문의글 목록 (검색, 필터, 페이징)
 	public List<Question> findQuestionListBySearchAndFilterAndPaging(String searchTerm, String isAnswered, PageRequest pageRequest) {
 		return jpaQueryfactory.selectFrom(question)
@@ -59,6 +60,44 @@ public class QuestionDslRepository {
 				.fetchOne();
 	}
 	
+	
+	// 2. 특정 유저의 문의글 모아보기
+	// 특정 유저의 문의글 목록
+	public List<Question> findQuestionListByUserAndFilterAndPaging(String userId, String isAnswered, PageRequest pageRequest) {
+		return jpaQueryfactory.selectFrom(question)
+						.where(
+								question.writerId.eq(userId),
+								isAnswered!=null? question.isAnswered.eq(isAnswered) : null
+						)
+						.orderBy(question.no.desc())
+						.offset(pageRequest.getOffset()) // 시작행의 위치
+						.limit(pageRequest.getPageSize()) // 페이지당 항목 수
+						.fetch();
+	}
+	// 아이디적용된 totalCnt 조회
+	public Long countByUser(String userId) {
+		return jpaQueryfactory.select(question.count()).from(question)
+								.where(question.writerId.eq(userId))
+								.fetchOne();
+	}
+	// 아이디적용된 answeredCnt 조회
+	public Long countByUserPlusAnswered(String userId) {
+		return jpaQueryfactory.select(question.count()).from(question)
+								.where(
+										question.isAnswered.eq("Y")
+											.and(question.writerId.eq(userId))
+										)
+								.fetchOne();
+	}
+	// 아이디적용된 answeredNotCnt 조회
+	public Long countByUserPlusAnsweredNot(String userId) {
+		return jpaQueryfactory.select(question.count()).from(question)
+				.where(
+						question.isAnswered.eq("N")
+						.and(question.writerId.eq(userId))
+						)
+				.fetchOne();
+	}
 	
 
 }

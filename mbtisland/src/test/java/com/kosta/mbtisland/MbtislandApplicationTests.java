@@ -11,9 +11,11 @@ import org.springframework.test.annotation.Commit;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.Notice;
+import com.kosta.mbtisland.entity.Question;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
+import com.kosta.mbtisland.repository.QuestionRepository;
 import com.kosta.mbtisland.service.NoticeService;
 import com.querydsl.core.Tuple;
 
@@ -28,6 +30,8 @@ class MbtislandApplicationTests {
 	NoticeService noticeService;
 	@Autowired
 	MbtmiDslRepository mbtmiDslRepository;
+	@Autowired
+	QuestionRepository questionRepository;
 
 	@Test
 	void contextLoads() {
@@ -108,6 +112,18 @@ class MbtislandApplicationTests {
 	}
 	
 	
+	/* 문의 */
+	@Test
+	void questionFindByWriterId() {
+		String writerId = "user05";
+		List<Question> questionList = questionRepository.findByWriterId(writerId);
+		Iterator<Question> iter = questionList.iterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
+	
+ 	
 	/* mbtmi */
 	@Test
 	void mbtmiWeeklyHotList() throws Exception {
