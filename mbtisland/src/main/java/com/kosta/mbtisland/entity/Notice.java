@@ -52,7 +52,7 @@ public class Notice {
 	private String writerId;
 	
 	@Column
-	private String isHided;
+	private String isHidden;
 	
 	@Column
 	private String fileIdxs;

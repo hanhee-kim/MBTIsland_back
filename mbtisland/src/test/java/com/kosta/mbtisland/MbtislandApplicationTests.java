@@ -35,9 +35,9 @@ class MbtislandApplicationTests {
 	// 일괄 숨김/해제 처리
 	@Test
 	@Commit
-	void noticeIsHidedUpdateBundle() throws Exception {
+	void noticeIsHiddenUpdateBundle() throws Exception {
 		Integer[] noArr = {1,2,4,5};
-		noticeService.changeIsHided(noArr);
+		noticeService.changeIsHidden(noArr);
 	}
 	// 일괄 삭제 처리
 	@Test
@@ -63,8 +63,8 @@ class MbtislandApplicationTests {
 		String filter = null; 
 //		filter = "display";
 //		filter = "hidden";
-		String sValue = null;
-		Integer cnt = noticeService.noticeCntByCriteria(filter, sValue);
+		String searchTerm = null;
+		Integer cnt = noticeService.noticeCntByCriteria(filter, searchTerm);
 		System.out.println("결과: " + cnt);
 	}
 
@@ -74,10 +74,10 @@ class MbtislandApplicationTests {
 		// 컨트롤러 (프론트로부터 현재페이지, 검색어, 필터값을 받음)
 		Integer page = 1;
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-		String sValue = "더미"; // 문자열 또는 null
-		String isHided = "Y"; // "Y", "N" 또는 null
+		String searchTerm = "더미"; // 문자열 또는 null
+		String isHidden = "Y"; // "Y", "N" 또는 null
 		
-		List<Notice> noticeList = noticeService.noticeListBySearchAndFilterAndPaging(sValue, isHided, pageInfo);
+		List<Notice> noticeList = noticeService.noticeListBySearchAndFilterAndPaging(searchTerm, isHidden, pageInfo);
 		Iterator<Notice> iter = noticeList.iterator();
 		System.out.println("---공지사항 목록 출력---");
 		while (iter.hasNext()) {

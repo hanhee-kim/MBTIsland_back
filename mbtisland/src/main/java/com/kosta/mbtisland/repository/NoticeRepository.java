@@ -8,6 +8,6 @@ import com.kosta.mbtisland.entity.Notice;
 
 public interface NoticeRepository extends JpaRepository<Notice, Integer> {
 	
-	Long countByIsHided(String criteria); // "N" 또는 "Y"
+	Long countByIsHidden(String criteria); // "N" 또는 "Y"
 	
 }

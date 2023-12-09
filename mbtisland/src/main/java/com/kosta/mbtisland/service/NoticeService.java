@@ -9,7 +9,7 @@ import com.kosta.mbtisland.entity.Notice;
 public interface NoticeService {
 	
 	// 공지사항 일괄 숨김/해제
-	void changeIsHided(Integer[] noArr) throws Exception;
+	void changeIsHidden(Integer[] noArr) throws Exception;
 	
 	// 공지사항 일괄 삭제
 	void deleteNotice(Integer[] noArr) throws Exception;
@@ -21,7 +21,7 @@ public interface NoticeService {
 	Notice noticeDetail(Integer no) throws Exception;
 
 	// 공지사항 목록 (검색, 필터, 페이징)
-	List<Notice> noticeListBySearchAndFilterAndPaging(String sValue, String isHided, PageInfo pageInfo) throws Exception;
+	List<Notice> noticeListBySearchAndFilterAndPaging(String sValue, String isHidden, PageInfo pageInfo) throws Exception;
 	
 	// 프론트에 표시하기 위한 전체, 표시, 숨김 게시글수 조회(검색어유무에 따라 달라지도록 함)
 	Map<String, Integer> getNoticeCounts(String searchTerm, String isHidden) throws Exception;

@@ -56,7 +56,7 @@ public class NoticeController {
 	@GetMapping("/hidenotice/{noArr}")
 	public ResponseEntity<Object> hideNoticeBundle(@PathVariable Integer[] noArr) {
 		try {
-			noticeService.changeIsHided(noArr);
+			noticeService.changeIsHidden(noArr);
 			return new ResponseEntity<Object>(Arrays.toString(noArr) + " 의 일괄처리 성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

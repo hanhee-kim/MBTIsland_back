@@ -36,7 +36,7 @@ public class NoticeDslRepository {
 		
 		QNotice notice = QNotice.notice;
 		return jpaQueryfactory.selectFrom(notice)
-				.where(notice.isHided.eq("N"))
+				.where(notice.isHidden.eq("N"))
 				.orderBy(notice.no.desc())
 				.offset(pageRequest.getOffset()) // 시작행의 위치
 				.limit(pageRequest.getPageSize()) // 페이지당 항목수
@@ -45,14 +45,13 @@ public class NoticeDslRepository {
 */	
 	
 	// 공지사항 목록 (검색, 필터, 페이징)
-	public List<Notice> findNoticeListBySearchAndFilterAndPaging(String sValue, String isHided, PageRequest pageRequest) {
+	public List<Notice> findNoticeListBySearchAndFilterAndPaging(String searchTerm, String isHidden, PageRequest pageRequest) {
 		JPAQuery<Notice> query = jpaQueryfactory.selectFrom(notice)
 								.where(
-									isHided!=null? notice.isHided.eq(isHided) : null,
+										isHidden!=null? notice.isHidden.eq(isHidden) : null,
 											
-									sValue!=null?
-										notice.title.containsIgnoreCase(sValue)
-										.or(notice.content.containsIgnoreCase(sValue)) : null
+										searchTerm!=null? notice.title.containsIgnoreCase(searchTerm)
+												.or(notice.content.containsIgnoreCase(searchTerm)) : null
 								)
 								.orderBy(notice.no.desc())
 								.offset(pageRequest.getOffset()) // 시작행의 위치
@@ -72,7 +71,7 @@ public class NoticeDslRepository {
 	public Long countBySearchTermPlusDisplay(String searchTerm) {
 		return jpaQueryfactory.select(notice.count()).from(notice)
 								.where(
-										notice.isHided.eq("N")
+										notice.isHidden.eq("N")
 											.and(notice.title.containsIgnoreCase(searchTerm)
 													.or(notice.content.containsIgnoreCase(searchTerm)))
 										)
@@ -82,7 +81,7 @@ public class NoticeDslRepository {
 	public Long countBySearchTermPlusHidden(String searchTerm) {
 		return jpaQueryfactory.select(notice.count()).from(notice)
 				.where(
-						notice.isHided.eq("Y")
+						notice.isHidden.eq("Y")
 						.and(notice.title.containsIgnoreCase(searchTerm)
 								.or(notice.content.containsIgnoreCase(searchTerm)))
 						)
