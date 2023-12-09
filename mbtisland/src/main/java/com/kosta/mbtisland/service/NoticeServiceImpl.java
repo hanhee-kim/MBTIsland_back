@@ -45,7 +45,7 @@ public class NoticeServiceImpl implements NoticeService {
 	
 	
 
-	// PageInfo계산시 필요한 게시글수 조회 (필터, 검색어 적용) ---> 메서드 필요여부 확인
+	// PageInfo의 allPage값 계산시 필요한 게시글수 조회 (필터, 검색어 적용)
 	@Override
 	public Integer noticeCntByCriteria(String isHidden, String searchTerm) throws Exception {
 		Long totalCnt = 0L;
@@ -118,15 +118,16 @@ public class NoticeServiceImpl implements NoticeService {
 		if(noticeList.size()==0) throw new Exception("해당하는 게시글이 존재하지 않습니다.");
 		
 		Integer allCount = noticeCntByCriteria(isHidden, searchTerm);
-		System.out.println("서비스에서 출력:\n필터유무와 검색어유무를 적용한 데이터 수: " + allCount);
-		Integer allPage = (int) Math.ceil((double) allCount / pageRequest.getPageSize());
-		if(allCount%pageRequest.getPageSize()!=0) allPage += 1;
-		Integer startPage = (int) ((pageInfo.getCurPage() - 1) / pagesPerGroup * pagesPerGroup + 1);
+		System.out.println("***서비스에서 출력:\n필터유무와 검색어유무를 적용한 전체 데이터 수 allCount: " + allCount);
+		Integer allPage = (int) Math.ceil((double) allCount / itemsPerPage);
+		Integer startPage = (int) ((pageInfo.getCurPage() - 1) / pagesPerGroup) * pagesPerGroup + 1;
 		Integer endPage = Math.min(startPage + pagesPerGroup - 1, allPage);
+		if(endPage>allPage) endPage = allPage;
 		
 		pageInfo.setAllPage(allPage);
 		pageInfo.setStartPage(startPage);
 		pageInfo.setEndPage(endPage);
+		if(pageInfo.getCurPage()>allPage) pageInfo.setCurPage(allPage); // 게시글 삭제시 예외처리
 		
 		return noticeList;
 	}
