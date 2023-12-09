@@ -92,6 +92,7 @@ public class UserServiceImpl implements UserService{
 			throw new Exception("아이디 중복");
 		}
 	}
+	
 
 	@Override
 	public UserEntity getUserByUserIdx(Integer userIdx) throws Exception {
@@ -122,6 +123,11 @@ public class UserServiceImpl implements UserService{
 		}else {
 			return null;
 		}
+	}
+
+	@Override
+	public void modifyUser(UserEntity user) throws Exception {
+		userRepository.save(user);	
 	}
 
 }

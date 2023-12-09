@@ -1,6 +1,9 @@
 package com.kosta.mbtisland.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
+
+import javax.mail.MessagingException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,20 +96,55 @@ public class UserController {
 		System.out.println(principalDetails.getUser().getUserPassword());
 		System.out.println(principalDetails.getUser().getUserRole());
 		return new ResponseEntity<UserEntity>(principalDetails.getUser(), HttpStatus.OK);
+		
 	}
 	
 	
 	//아이디찾기
 	@PostMapping("/find")
 	public ResponseEntity<Object> findIdPassword(@RequestBody Map<String,String> param){
-		String email = (String)param.get("userEmil");
+		String email = (String)param.get("userEmail");
 		String type = (String)param.get("type");
-		if(type.equals("ID")) {
-			//id찾기
-		}else {
-			//password찾기
-		}
-		return new ResponseEntity<Object>("",HttpStatus.OK);
+		System.out.println(email+"   "+type);
+		try {
+			UserEntity user =  userService.getUserByUserEmail(email);
+			if(user == null) {
+				return new ResponseEntity<Object>("해당 Email 존재하지 않음.", HttpStatus.OK);
+			}else {
+				if(type.equals("ID")) {
+					//id찾기
+					try {
+						System.out.println("id찾기 진입");
+						// email,id 이메일보내기
+						emailService.sendFindIdMessage(email, user.getUsername());
+						return new ResponseEntity<Object>("ID전송완료", HttpStatus.OK);					
+					} catch (UnsupportedEncodingException | MessagingException e) {
+						e.printStackTrace();
+						return new ResponseEntity<Object>("ID전송에러", HttpStatus.BAD_REQUEST);					
+					} 
+				}else { 
+					//password찾기
+					try {
+						System.out.println("pw찾기 진입");
+						System.out.println("원래 비밀번호 ? : "+user.getUserPassword());
+						String ePw = emailService.createKey();
+						System.out.println(ePw);
+						user.setUserPassword(bCryptPasswordEncoder.encode(ePw)); // ePw 비밀번호 암호화해서 user셋팅
+						userService.modifyUser(user); //modify
+						System.out.println("셋팅한 비밀번호?:"+user.getUserPassword());
+						//email,새로 업뎃한 pw 이메일 보내기
+						emailService.sendFindPasswordMessage(email, ePw);
+						return new ResponseEntity<Object>("PW전송완료", HttpStatus.OK);					
+					} catch (UnsupportedEncodingException | MessagingException e) {
+						e.printStackTrace();
+						return new ResponseEntity<Object>("PW전송에러", HttpStatus.BAD_REQUEST);					
+					}
+				}
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			return new ResponseEntity<Object>("ID,PW찾기 오류",HttpStatus.BAD_REQUEST);
+		}		
 	}
 	
 	

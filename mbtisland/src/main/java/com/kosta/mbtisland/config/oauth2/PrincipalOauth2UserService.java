@@ -53,22 +53,25 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 		Optional<UserEntity> userOptional = 
 				userRepository.findByProviderAndProviderId(oAuth2UserInfo.getProvider(), oAuth2UserInfo.getProviderId());
 		UserEntity user = null;
-		if(userOptional.isPresent()) { //이미 가입되어 있으면 update
+		if(userOptional.isPresent()) { //이미 가입되어 있으면 email,nickname update
 			user = userOptional.get();
 			user.setUserEmail(oAuth2UserInfo.getEmail());
+			user.setUserNickname(oAuth2UserInfo.getNickname());
 			userRepository.save(user);
 		} else {  //가입되어있지 않으면 insert
-			user = UserEntity.builder().username(oAuth2UserInfo.getProvider()+"_"+oAuth2UserInfo.getProviderId())
-				.userEmail(oAuth2UserInfo.getEmail())
-				.userRole("ROLE_GUEST")
-				.provider(oAuth2UserInfo.getProvider())
-				.providerId(oAuth2UserInfo.getProviderId())
-//				.password(bCryptPasswordEncoder.encode(oauthPassword))
-				.build();
+			user = UserEntity
+					.builder()
+						.username(oAuth2UserInfo.getProvider()+"_"+oAuth2UserInfo.getProviderId())
+						.userNickname(oAuth2UserInfo.getNickname())
+						.userEmail(oAuth2UserInfo.getEmail())
+						.userRole("ROLE_GUEST")
+						.provider(oAuth2UserInfo.getProvider())
+						.providerId(oAuth2UserInfo.getProviderId())
+//						.password(bCryptPasswordEncoder.encode(oauthPassword))  //password소셜이라 설정안해줌
+						.build();
 			System.out.println(user);
 			userRepository.save(user);
 		}
-		
 		return new PrincipalDetails(user, oAuth2User.getAttributes());
 	}
 }

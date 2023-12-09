@@ -21,7 +21,8 @@ import com.kosta.mbtisland.config.jwt.JwtProperties;
 
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
-
+//OAuth2인증이 성공했을 때 실행되는 핸들러클래스 AuthenticationSuccessHandler 를 상속받아 구현.
+	
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException {
@@ -34,11 +35,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 				.withClaim("id", principalDetails.getUser().getUserIdx())
 				.withClaim("username", principalDetails.getUser().getUsername())
 				.sign(Algorithm.HMAC512(JwtProperties.SECRET));
-		System.out.println(jwtToken);
+		System.out.println(jwtToken); //생성한 토큰
 			
 		response.setCharacterEncoding("UTF-8");
 		String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/oauth/redirect/"+JwtProperties.TOKEN_PREFIX+jwtToken)
 				.build().toUriString();
-			response.sendRedirect(targetUrl);		
+			response.sendRedirect(targetUrl);	//리다이렉트로 보내줌	
 	}
 }

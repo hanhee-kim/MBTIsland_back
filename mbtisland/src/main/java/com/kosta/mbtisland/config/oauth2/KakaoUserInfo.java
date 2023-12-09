@@ -28,8 +28,8 @@ public class KakaoUserInfo implements OAuth2UserInfo {
 	}
 
 	@Override
-	public String getName() {
-		return (String)attributes.get("email");
+	public String getNickname() {
+		return (String)(((Map<String,Object>)attributes.get("properties")).get("nickname"));
 	}
 
 }

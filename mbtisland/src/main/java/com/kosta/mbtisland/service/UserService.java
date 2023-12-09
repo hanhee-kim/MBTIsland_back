@@ -11,6 +11,7 @@ public interface UserService {
 	UserEntity getUserByUsername(String username) throws Exception;
 	//userEmail로 유저 조회(이메일인증을 받을것이므로 유니크한값이여야함)
 	UserEntity getUserByUserEmail(String userEmail) throws Exception;
-	
+	//업데이트
+	void modifyUser(UserEntity user) throws Exception;
 
 }
