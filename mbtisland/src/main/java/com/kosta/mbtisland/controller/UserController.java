@@ -55,7 +55,7 @@ public class UserController {
 	@GetMapping("/sendmail/{userEmail}")
 	public ResponseEntity<Object> sendmail(@PathVariable String userEmail){
 		try {
-			UserEntity user = userService.getUserByUserEmail(userEmail);
+			UserEntity user = userService.getUserByUserEmailAndProviderNull(userEmail);
 			if(user == null) {
 				//이메일보내고 코드 받아서 날리는 작업
 				String ePw = emailService.sendSimpleMessage(userEmail);
@@ -98,6 +98,19 @@ public class UserController {
 		return new ResponseEntity<UserEntity>(principalDetails.getUser(), HttpStatus.OK);
 		
 	}
+	@GetMapping("/guest/{userMbti}")
+	public ResponseEntity<Object> guest(Authentication authentication,@PathVariable String userMbti) {
+		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
+		System.out.println(principalDetails.getUser().getUserIdx());
+		try {
+			UserEntity user = userService.setAddUser(principalDetails.getUser(), userMbti);
+			return new ResponseEntity<Object>(user, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		
+	}
 	
 	
 	//아이디찾기
@@ -107,7 +120,7 @@ public class UserController {
 		String type = (String)param.get("type");
 		System.out.println(email+"   "+type);
 		try {
-			UserEntity user =  userService.getUserByUserEmail(email);
+			UserEntity user =  userService.getUserByUserEmailAndProviderNull(email);
 			if(user == null) {
 				return new ResponseEntity<Object>("해당 Email 존재하지 않음.", HttpStatus.OK);
 			}else {

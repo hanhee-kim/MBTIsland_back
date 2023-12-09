@@ -116,8 +116,8 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public UserEntity getUserByUserEmail(String userEmail) throws Exception {
-		UserEntity user = userRepository.findByUserEmail(userEmail);
+	public UserEntity getUserByUserEmailAndProviderNull(String userEmail) throws Exception {
+		UserEntity user = userRepository.findByUserEmailAndProviderIsNull(userEmail);
 		if(user != null) {
 			return user;
 		}else {
@@ -128,6 +128,23 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public void modifyUser(UserEntity user) throws Exception {
 		userRepository.save(user);	
+	}
+
+	@Override
+	public UserEntity setAddUser(UserEntity user, String mbti) throws Exception {
+		Optional<UserEntity> oUser = userRepository.findById(user.getUserIdx());
+		if(oUser.isPresent()) {
+			UserEntity modifyUser = oUser.get();
+			modifyUser.setUserMbti(mbti);
+			modifyUser.setUserMbtiColor(getMbtiColor(mbti));
+			modifyUser.setUserMbtiChangeDate(new Timestamp(new Date().getTime()));
+			modifyUser.setUserRole("ROLE_USER");
+			userRepository.save(modifyUser);
+			return modifyUser;
+		}else {
+			throw new Exception("해당 유저 없음");
+		}
+		
 	}
 
 }
