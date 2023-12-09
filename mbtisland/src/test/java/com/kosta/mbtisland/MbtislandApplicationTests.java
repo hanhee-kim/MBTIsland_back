@@ -2,19 +2,20 @@ package com.kosta.mbtisland;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
 
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.Notice;
+import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
 import com.kosta.mbtisland.service.NoticeService;
+import com.querydsl.core.Tuple;
 
 @SpringBootTest
 class MbtislandApplicationTests {
@@ -25,6 +26,8 @@ class MbtislandApplicationTests {
 	NoticeDslRepository noticeDslRepository;
 	@Autowired
 	NoticeService noticeService;
+	@Autowired
+	MbtmiDslRepository mbtmiDslRepository;
 
 	@Test
 	void contextLoads() {
@@ -102,6 +105,26 @@ class MbtislandApplicationTests {
 		String searchTerm = "숨긴";
 		Long totalCnt = noticeDslRepository.countBySearchTerm(searchTerm);
 		System.out.println("결과: " + totalCnt);
+	}
+	
+	
+	/* mbtmi */
+	@Test
+	void mbtmiWeeklyHotList() throws Exception {
+		List<Tuple> maxRecommendCntByCategory = mbtmiDslRepository.findMaxRecommendCntByCategory();
+		System.out.println("카테고리별 최다추천수 조회: ");
+		Iterator<Tuple> iter1 = maxRecommendCntByCategory.iterator();
+		while(iter1.hasNext()) {
+			System.out.println(iter1.next());
+		}
+		
+		List<Mbtmi> weeklyHotList = mbtmiDslRepository.findWeeklyHotMbtmiListByCategoryAndRecommendCnt();
+		System.out.println("카테고리별 최다추천수를 가진 게시글행 조회");
+		Iterator<Mbtmi> iter2 = weeklyHotList.iterator();
+		while(iter2.hasNext()) {
+			System.out.println(iter2.next());
+		}
+		
 	}
 	
 	

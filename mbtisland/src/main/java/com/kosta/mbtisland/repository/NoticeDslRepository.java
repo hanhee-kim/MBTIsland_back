@@ -19,37 +19,12 @@ public class NoticeDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryfactory;
 	
-/*
-	// 공지사항 목록 특정 페이지
-	public List<Notice> findNoticeListByPaging(PageRequest pageRequest) throws Exception { // cf. 호출부인 서비스에서 PageRequest를 세팅
-		
-		QNotice notice = QNotice.notice;
-		return jpaQueryfactory.selectFrom(notice)
-								.orderBy(notice.no.desc())
-								.offset(pageRequest.getOffset()) // 시작행의 위치
-								.limit(pageRequest.getPageSize()) // 페이지당 항목수
-								.fetch();
-	}
-
-	// 공지사항 목록 특정 페이지(숨김항목 제외)
-	public List<Notice> findNotHiddenNoticeListByPaging(PageRequest pageRequest) throws Exception { // cf. 호출부인 서비스에서 PageRequest를 세팅
-		
-		QNotice notice = QNotice.notice;
-		return jpaQueryfactory.selectFrom(notice)
-				.where(notice.isHidden.eq("N"))
-				.orderBy(notice.no.desc())
-				.offset(pageRequest.getOffset()) // 시작행의 위치
-				.limit(pageRequest.getPageSize()) // 페이지당 항목수
-				.fetch();
-	}
-*/	
 	
 	// 공지사항 목록 (검색, 필터, 페이징)
 	public List<Notice> findNoticeListBySearchAndFilterAndPaging(String searchTerm, String isHidden, PageRequest pageRequest) {
 		JPAQuery<Notice> query = jpaQueryfactory.selectFrom(notice)
 								.where(
 										isHidden!=null? notice.isHidden.eq(isHidden) : null,
-											
 										searchTerm!=null? notice.title.containsIgnoreCase(searchTerm)
 												.or(notice.content.containsIgnoreCase(searchTerm)) : null
 								)

@@ -27,8 +27,8 @@ public class NoticeController {
 	// 공지사항 목록
 	@GetMapping("/noticelist")
 	public ResponseEntity<Object> noticeList(@RequestParam(required = false) String search
-														, @RequestParam(required = false) String hidden
-														, @RequestParam(required = false) Integer page) {
+											, @RequestParam(required = false) String hidden
+											, @RequestParam(required = false) Integer page) {
 		
 		System.out.println("***컨트롤러가 받은 파라미터 출력-----");
 		System.out.println("search: " + search);
