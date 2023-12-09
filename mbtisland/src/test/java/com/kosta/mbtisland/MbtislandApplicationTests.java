@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
 
 import com.kosta.mbtisland.dto.PageInfo;
@@ -13,6 +14,7 @@ import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.entity.Question;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
+import com.kosta.mbtisland.repository.MbtmiRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
 import com.kosta.mbtisland.repository.QuestionRepository;
@@ -30,6 +32,8 @@ class MbtislandApplicationTests {
 	NoticeService noticeService;
 	@Autowired
 	MbtmiDslRepository mbtmiDslRepository;
+	@Autowired
+	MbtmiRepository mbtmiRepository;
 	@Autowired
 	QuestionRepository questionRepository;
 
@@ -140,10 +144,36 @@ class MbtislandApplicationTests {
 		while(iter2.hasNext()) {
 			System.out.println(iter2.next());
 		}
-		
 	}
 	
+	@Test
+	void mbtmiNewlyMbtmiList() throws Exception {
+		// 컨트롤러
+		String category = "잡담";
+		String type = "FP";
+		String searchTerm = null;
+		Integer page = 1;
+		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+		// 서비스
+		Integer itemsPerPage = 10;
+		int pagesPerGroup = 10;
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
+		
+		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest);
+		System.out.println("------최신글 목록 출력------");
+		Iterator<Mbtmi> iter = newlyMbtmiList.iterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
 	
+	@Test
+	void mbtmiCntBy() {
+		Long cnt = mbtmiRepository.countByCategory("잡담");
+		cnt = mbtmiDslRepository.countByCategoryPlusWriterMbti("취미", "NF");
+		cnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch("학교", "P", "스타");
+		System.out.println("결과: " + cnt);
+	}
 	
 	
 	

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.mbtisland.entity.Mbtmi;
@@ -33,7 +34,8 @@ public class MbtmiDslRepository {
 		return jpaQueryfactory
                 .select(mbtmi.category, mbtmi.recommendCnt.max())
                 .from(mbtmi)
-                .where(mbtmi.writeDate.after(startDate))
+                .where(mbtmi.writeDate.after(startDate),
+                		mbtmi.isBlocked.eq("N"))
                 .groupBy(mbtmi.category)
                 .orderBy(mbtmi.recommendCnt.max().desc())
                 .fetch();
@@ -55,10 +57,12 @@ public class MbtmiDslRepository {
 	        Integer maxRecommendCnt = tuple.get(mbtmi.recommendCnt.max());
 
 	        Mbtmi maxRecommendMbtmi = jpaQueryfactory
-	                .selectFrom(mbtmi)
-	                .where(mbtmi.category.eq(category)
-	                        .and(mbtmi.recommendCnt.eq(maxRecommendCnt)))
-	                .fetchFirst();
+						                .selectFrom(mbtmi)
+						                .where(mbtmi.category.eq(category),
+						                        mbtmi.recommendCnt.eq(maxRecommendCnt),
+						                        mbtmi.isBlocked.eq("N")
+						                )
+						                .fetchFirst();
 
 	        if (maxRecommendMbtmi != null) {
 	            result.add(maxRecommendMbtmi);
@@ -66,6 +70,48 @@ public class MbtmiDslRepository {
 	    }
 	    return result;
 	}
+	
+	
+	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징) ******* type이 ITJ 와 같은 경우에 문자열 포함으로 쿼리시 결과가 나오지 않게됨 ********
+	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest) {
+		return jpaQueryfactory.selectFrom(mbtmi)
+							.where(
+									category!=null? mbtmi.category.eq(category) : null,
+									type!=null? mbtmi.writerMbti.containsIgnoreCase(type) : null,
+									searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
+											.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+									mbtmi.isBlocked.eq("N")
+							)
+							.orderBy(mbtmi.no.desc())
+							.offset(pageRequest.getOffset())
+							.limit(pageRequest.getPageSize())
+							.fetch();
+	}
+	
+	
+	
+	// 카테고리 && 타입 적용된 게시글수
+	public Long countByCategoryPlusWriterMbti(String category, String type) {
+		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
+				.where(
+						mbtmi.category.eq(category)
+						.and(mbtmi.writerMbti.containsIgnoreCase(type))
+						)
+				.fetchOne();
+	}
+	
+	// 카테고리 && 타입 && 검색어 적용된 게시글수
+	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm) {
+		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
+				.where(
+						mbtmi.category.eq(category)
+						.and(mbtmi.writerMbti.containsIgnoreCase(type))
+						.and(mbtmi.title.containsIgnoreCase(searchTerm)
+								.or(mbtmi.content.containsIgnoreCase(searchTerm)))
+						)
+				.fetchOne();
+	}
+	
 	
 	
 }
