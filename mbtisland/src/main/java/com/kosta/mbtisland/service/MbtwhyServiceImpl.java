@@ -25,13 +25,13 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	@Override
 	public List<Mbtwhy> selectMbtwhyListByMbtiAndPageAndSearchAndSort
 		(String mbti, PageInfo pageInfo, String search, String sort) throws Exception {
-		// 한 페이지에 보여주어야 할 페이지 수
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10);
+		// 페이지 번호, 한 페이지에 보여줄 게시글 수
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5);
 		List<Mbtwhy> mbtwhyList = mbtwhyDslRepository.findMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageRequest, search, sort);
 		
 		// 페이징 계산
 		// MbtwhyController에서 넘겨준 pageInfo를 참조하기에, 반환하지 않아도 됨
-		Long allCount = mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearchAndSort(mbti, search, sort);
+		Long allCount = mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearch(mbti, search);
 		Integer allPage = allCount.intValue() / pageRequest.getPageSize();
 		if(allCount % pageRequest.getPageSize()!=0) allPage += 1;
 		Integer startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
@@ -46,8 +46,8 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값, 정렬 옵션)
 	@Override
-	public Long selectMbtwhyCountByMbtiAndSearchAndSort(String mbti, String search, String sort) throws Exception {
-		return mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearchAndSort(mbti, search, sort);
+	public Long selectMbtwhyCountByMbtiAndSearch(String mbti, String search) throws Exception {
+		return mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearch(mbti, search);
 	}
 	
 	// 게시글 조회 (게시글 번호)

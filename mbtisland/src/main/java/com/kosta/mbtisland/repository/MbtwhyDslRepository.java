@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.mbtisland.entity.Mbtwhy;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -19,14 +20,29 @@ public class MbtwhyDslRepository {
 	// 게시글 목록 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
 	public List<Mbtwhy> findMbtwhyListByMbtiAndPageAndSearchAndSort
 		(String mbti, PageRequest pageRequest, String search, String sort) throws Exception {
+		OrderSpecifier<?> orderSpecifier;
+		
+		// 정렬 조건
+		if(sort.equals("new")) { // 최신순
+			orderSpecifier = mbtwhy.no.desc();
+			System.out.println("정렬조건: new");
+		} else if(sort.equals("view")) { // 조회순
+			orderSpecifier = mbtwhy.viewCnt.desc();
+			System.out.println("정렬조건: view");
+		} else if(sort.equals("recommend")) { // 추천순
+			orderSpecifier = mbtwhy.recommendCnt.desc();
+			System.out.println("정렬조건: recommend");
+		} else { // 기본 최신순
+			orderSpecifier = mbtwhy.no.desc();
+		}
 		
 		return jpaQueryFactory.selectFrom(mbtwhy)
 				.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,
-						sort!=null? mbtwhy.content.containsIgnoreCase(sort) : null,
 						mbtwhy.isBlocked.eq("N"),
 						mbtwhy.mbtiCategory.eq(mbti))
-						.orderBy(mbtwhy.no.desc())
-						.offset(pageRequest.getOffset()).fetch();
+						.orderBy(orderSpecifier) // 정렬
+						.offset(pageRequest.getOffset()) // 인덱스
+						.limit(pageRequest.getPageSize()).fetch();
 		
 //		return jpaQueryFactory.selectFrom(mbtwhy)
 //				.orderBy(mbtwhy.no.desc())
@@ -34,13 +50,12 @@ public class MbtwhyDslRepository {
 //				.where(search!=null && sorType!=null ? qmbtwhy.mbtiCategory.eq(mbtiCategory) : null).fetch();
 	}
 	
-	// 게시글 개수 조회 (MBTI 타입, 검색 값, 정렬 옵션)
-	public Long findMbtwhyCountByMbtiAndSearchAndSort(String mbti, String search, String sort) throws Exception {
-
+	// 게시글 개수 조회 (MBTI 타입, 검색 값)
+	public Long findMbtwhyCountByMbtiAndSearch(String mbti, String search) throws Exception {
+		
 		return jpaQueryFactory.select(mbtwhy.count())
 						.from(mbtwhy)
 						.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,
-								sort!=null? mbtwhy.content.containsIgnoreCase(sort) : null,
 										mbtwhy.isBlocked.eq("N"),
 										mbtwhy.mbtiCategory.eq(mbti)).fetchOne();
 	}

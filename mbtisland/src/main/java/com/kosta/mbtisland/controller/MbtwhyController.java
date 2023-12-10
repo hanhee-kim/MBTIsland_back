@@ -24,18 +24,47 @@ public class MbtwhyController {
 	@GetMapping("/mbtwhy")
 	public ResponseEntity<Object> mbtwhyList(@RequestParam(required = false) String mbti, @RequestParam(required = false) Integer page,
 			@RequestParam(required = false) String search, @RequestParam(required = false) String sort) {
+		Map<String, Object> res = new HashMap<>();
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
 			List<Mbtwhy> mbtwhyList = mbtwhyService.selectMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageInfo, search, sort);
-			Long mbtwhyCnt = mbtwhyService.selectMbtwhyCountByMbtiAndSearchAndSort(mbti, search, sort);
+			Long mbtwhyCnt = mbtwhyService.selectMbtwhyCountByMbtiAndSearch(mbti, search);
 			System.out.println("페이지"+pageInfo);
 			System.out.println("리스트"+mbtwhyList.get(0).getContent());
 			System.out.println("카운트"+mbtwhyCnt);
 			
-			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("mbtwhyList", mbtwhyList);
 			res.put("mbtwhyCnt", mbtwhyCnt);
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	// 게시글 조회 (게시글 번호)
+	@GetMapping("/mbtwhydetail")
+	public ResponseEntity<Object> mbtwhyList(@RequestParam(required = false) Integer no) {
+		Map<String, Object> res = new HashMap<>();
+		try {
+//			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
+//			List<Mbtwhy> mbtwhyList = mbtwhyService.selectMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageInfo, search, sort);
+//			Long mbtwhyCnt = mbtwhyService.selectMbtwhyCountByMbtiAndSearch(mbti, search);
+//			System.out.println("페이지"+pageInfo);
+//			System.out.println("리스트"+mbtwhyList.get(0).getContent());
+//			System.out.println("카운트"+mbtwhyCnt);
+//			
+//			res.put("pageInfo", pageInfo);
+//			res.put("mbtwhyList", mbtwhyList);
+//			res.put("mbtwhyCnt", mbtwhyCnt);
+			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(no);
+			
+			// no에 해당하는 게시글 댓글 수
+			// no에 해당하는 게시글 댓글 리스트
+			
+			res.put("mbtwhy", mbtwhy);
+			System.out.println(mbtwhy.getWriterId());
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();

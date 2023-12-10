@@ -65,7 +65,8 @@ class MbtislandApplicationTests {
 				.writerMbti("ISFP")
 				.writerMbtiColor("#618181").build();
 		
-		mbtwhyServiceImpl.insertMbtwhy(mbtwhy);
+		mbtwhyServiceImpl.insertMbtwhy(mbtwhy);			
+
 	}
 
 }
