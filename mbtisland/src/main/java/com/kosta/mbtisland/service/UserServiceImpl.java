@@ -159,8 +159,10 @@ public class UserServiceImpl implements UserService{
 			String beforeMbti = (String)param.get("beforeMbti");
 			if(user.getProvider() == "" || user.getProvider() == null) {
 				String userEmail = (String)param.get("userEmail");
+				System.out.println("가져온이메일?:"+userEmail);
 				String userPassword = (String)param.get("userPassword");
 				user.setUserEmail(userEmail);
+				System.out.println("셋팅한 이메일에서 가져온 이메일"+user.getUserEmail());
 				user.setUserPassword(bCryptPasswordEncoder.encode(userPassword));
 			}
 			user.setUserNickname(userNickname);
