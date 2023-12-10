@@ -30,7 +30,7 @@ class MbtislandApplicationTests {
 	void selectMbtwhyByMbtiCategoryAndPage() throws Exception {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
-			List<Mbtwhy> mbtwhyList = mbtwhyServiceImpl.selectMbtwhyListByMbtiCategoryAndPageAndSearchTypeAndSearchValueAndSortType("ENFP", pageInfo, null, null, null);
+			List<Mbtwhy> mbtwhyList = mbtwhyServiceImpl.selectMbtwhyListByMbtiAndPageAndSearchAndSort("ENFP", pageInfo, null, null);
 			for(int i = 0;i < mbtwhyList.size();i++) {
 				System.out.println(mbtwhyList);
 			}
@@ -58,7 +58,7 @@ class MbtislandApplicationTests {
 		
 		Mbtwhy mbtwhy = Mbtwhy.builder()
 				.content("ㅎㅇ")
-				.mbtiCategory("ENFP")
+				.mbtiCategory("ISTJ")
 //				.writeDate(stringToTimestamp)
 				.writerId("user01")
 				.writerNickname("닉네임1")
