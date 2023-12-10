@@ -1,6 +1,6 @@
 package com.kosta.mbtisland.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -27,6 +28,7 @@ import lombok.Setter;
 @Builder
 @DynamicInsert
 @DynamicUpdate
+@ToString
 public class Mbtmi {
 	
 	@Id
@@ -48,7 +50,7 @@ public class Mbtmi {
 	
 	@Column
 	@CreationTimestamp
-	private Date writeDate;
+	private Timestamp writeDate;
 	
 	@Column
 	private String isBlocked;
