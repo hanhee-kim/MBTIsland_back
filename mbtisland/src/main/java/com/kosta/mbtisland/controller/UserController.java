@@ -98,6 +98,23 @@ public class UserController {
 		return new ResponseEntity<UserEntity>(principalDetails.getUser(), HttpStatus.OK);
 		
 	}
+	
+	//마이페이지에서 유저정보 수정
+	@PostMapping("/user/modify")
+	public ResponseEntity<Object> userModify(Authentication authentication,@RequestBody Map<String,Object> param){
+		System.out.println("user/modify 진입");
+		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
+		try {
+			UserEntity user = userService.modifyUser(principalDetails.getUser(), param);
+			return new ResponseEntity<Object>(user, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.OK);
+		}
+	}
+	
+	
+	
 	@GetMapping("/guest/{userMbti}")
 	public ResponseEntity<Object> guest(Authentication authentication,@PathVariable String userMbti) {
 		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();

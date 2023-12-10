@@ -1,5 +1,7 @@
 package com.kosta.mbtisland.service;
 
+import java.util.Map;
+
 import com.kosta.mbtisland.entity.UserEntity;
 
 public interface UserService {
@@ -13,6 +15,8 @@ public interface UserService {
 	UserEntity getUserByUserEmailAndProviderNull(String userEmail) throws Exception;
 	//업데이트(중복된 IDX를 가진 유저라면)
 	void modifyUser(UserEntity user) throws Exception;
+	//유저정보 수정
+	UserEntity modifyUser(UserEntity user,Map<String, Object> param) throws Exception;
 	UserEntity setAddUser(UserEntity user,String mbti) throws Exception;
 	
 	

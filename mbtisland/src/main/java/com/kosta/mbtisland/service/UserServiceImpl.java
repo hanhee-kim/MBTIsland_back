@@ -2,9 +2,11 @@ package com.kosta.mbtisland.service;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.kosta.mbtisland.entity.UserEntity;
@@ -15,6 +17,8 @@ public class UserServiceImpl implements UserService{
 	
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder; 
 
 	private String getMbtiColor(String mbti) {
 		String color = "";
@@ -145,6 +149,31 @@ public class UserServiceImpl implements UserService{
 			throw new Exception("해당 유저 없음");
 		}
 		
+	}
+
+	@Override
+	public UserEntity modifyUser(UserEntity user, Map<String, Object> param) throws Exception {
+		if(user != null) {
+			String userNickname = (String)param.get("userNickname");
+			String userMbti = (String)param.get("userMbti");
+			String beforeMbti = (String)param.get("beforeMbti");
+			if(user.getProvider() == "" || user.getProvider() == null) {
+				String userEmail = (String)param.get("userEmail");
+				String userPassword = (String)param.get("userPassword");
+				user.setUserEmail(userEmail);
+				user.setUserPassword(bCryptPasswordEncoder.encode(userPassword));
+			}
+			user.setUserNickname(userNickname);
+			if(!userMbti.equals(beforeMbti)) {
+				user.setUserMbti(userMbti);
+				user.setUserMbtiColor(getMbtiColor(userMbti));
+				user.setUserMbtiChangeDate(new Timestamp(new Date().getTime()));
+			}
+			userRepository.save(user);
+			return user;
+		}else {
+			throw new Exception("해당 유저 없음");
+		}
 	}
 
 }
