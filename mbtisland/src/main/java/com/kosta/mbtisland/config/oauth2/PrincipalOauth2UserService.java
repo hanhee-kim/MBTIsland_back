@@ -3,6 +3,7 @@ package com.kosta.mbtisland.config.oauth2;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -36,6 +37,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 	}
 	
 	private OAuth2User pricessOAuth2User(OAuth2UserRequest userRequest,OAuth2User oAuth2User) {
+
 		OAuth2UserInfo oAuth2UserInfo = null;
 		if(userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
 			System.out.println("네이버 로그인 요청");
@@ -50,25 +52,32 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 		System.out.println(oAuth2UserInfo);
 		System.out.println(oAuth2UserInfo.getProvider());
 		System.out.println(oAuth2UserInfo.getProviderId());
+		
 		Optional<UserEntity> userOptional = 
 				userRepository.findByProviderAndProviderId(oAuth2UserInfo.getProvider(), oAuth2UserInfo.getProviderId());
 		UserEntity user = null;
-		if(userOptional.isPresent()) { //이미 가입되어 있으면 update
+		if(userOptional.isPresent()) { //이미 가입되어 있으면 email,nickname update
+			oAuth2UserInfo.setJoinOrLogin("login");
 			user = userOptional.get();
 			user.setUserEmail(oAuth2UserInfo.getEmail());
+			user.setUserNickname(oAuth2UserInfo.getNickname());
+			user.setVisitCnt(user.getVisitCnt()+1);
 			userRepository.save(user);
 		} else {  //가입되어있지 않으면 insert
-			user = UserEntity.builder().username(oAuth2UserInfo.getProvider()+"_"+oAuth2UserInfo.getProviderId())
-				.userEmail(oAuth2UserInfo.getEmail())
-//				.role("ROLE_USER")
-				.provider(oAuth2UserInfo.getProvider())
-				.providerId(oAuth2UserInfo.getProviderId())
-//				.password(bCryptPasswordEncoder.encode(oauthPassword))
-				.build();
+			oAuth2UserInfo.setJoinOrLogin("join");
+			user = UserEntity
+					.builder()
+						.username(oAuth2UserInfo.getProvider()+"_"+oAuth2UserInfo.getProviderId())
+						.userNickname(oAuth2UserInfo.getNickname())
+						.userEmail(oAuth2UserInfo.getEmail())
+						.userRole("ROLE_GUEST")
+						.provider(oAuth2UserInfo.getProvider())
+						.providerId(oAuth2UserInfo.getProviderId())
+//						.password(bCryptPasswordEncoder.encode(oauthPassword))  //password소셜이라 설정안해줌
+						.build();
 			System.out.println(user);
 			userRepository.save(user);
 		}
-		
 		return new PrincipalDetails(user, oAuth2User.getAttributes());
 	}
 }

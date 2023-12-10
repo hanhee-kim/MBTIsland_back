@@ -11,37 +11,96 @@ import org.springframework.test.annotation.Commit;
 
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
+import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.entity.Question;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
+import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
 import com.kosta.mbtisland.repository.QuestionRepository;
+import com.kosta.mbtisland.service.MbtwhyServiceImpl;
 import com.kosta.mbtisland.service.NoticeService;
 import com.querydsl.core.Tuple;
 
 @SpringBootTest
 class MbtislandApplicationTests {
-	
+
+	// 하영
 	@Autowired
-	NoticeRepository noticeRepository;
+	private NoticeRepository noticeRepository;
 	@Autowired
-	NoticeDslRepository noticeDslRepository;
+	private NoticeDslRepository noticeDslRepository;
 	@Autowired
-	NoticeService noticeService;
+	private NoticeService noticeService;
 	@Autowired
-	MbtmiDslRepository mbtmiDslRepository;
+	private MbtmiDslRepository mbtmiDslRepository;
 	@Autowired
-	MbtmiRepository mbtmiRepository;
+	private MbtmiRepository mbtmiRepository;
 	@Autowired
-	QuestionRepository questionRepository;
+	private QuestionRepository questionRepository;
+
+	// 인수
+	@Autowired
+	private MbtwhyServiceImpl mbtwhyServiceImpl;
+	@Autowired
+	private MbtwhyDslRepository mbtwhyDslRepository;
+
 
 	@Test
 	void contextLoads() {
 	}
+	
+	
+	/* 인수 */
+	@Test
+	// Mbtwhy 게시글 목록 조회 (MBTI 타입)
+	void selectMbtwhyByMbtiCategoryAndPage() throws Exception {
+		try {
+			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
+			List<Mbtwhy> mbtwhyList = mbtwhyServiceImpl.selectMbtwhyListByMbtiAndPageAndSearchAndSort("ENFP", pageInfo, null, null);
+			for(int i = 0;i < mbtwhyList.size();i++) {
+				System.out.println(mbtwhyList);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			return;
+		}
+	}
+	
+	@Test
+	@Commit
+	// Mbtwhy 게시글 작성
+	void insertMbtwhy() throws Exception {
+//		String currentTimestampToString = "2022/12/12 08:03:15";
+//
+//		//  String => Timestamp
+//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+//		
+//		// 날짜 형식이 맞는지 확인하는 함수 setLenient()
+//		// false로 설정해두면, 날짜 형식이 잘못 되었을 경우 해당 행에서 오류를 발생시킴
+//		dateFormat.setLenient(false);
+//		
+//		java.util.Date stringToDate = dateFormat.parse(currentTimestampToString);
+//	    Timestamp stringToTimestamp = new Timestamp(stringToDate.getTime());
+		
+		Mbtwhy mbtwhy = Mbtwhy.builder()
+				.content("ㅎㅇ")
+				.mbtiCategory("ISTJ")
+//				.writeDate(stringToTimestamp)
+				.writerId("user01")
+				.writerNickname("닉네임1")
+				.writerMbti("ISFP")
+				.writerMbtiColor("#618181").build();
+		
+		mbtwhyServiceImpl.insertMbtwhy(mbtwhy);
+	}
 
 	
+	
+	
+	/* 하영 */
 	/* 공지사항 */
 	// 일괄 숨김/해제 처리
 	@Test
