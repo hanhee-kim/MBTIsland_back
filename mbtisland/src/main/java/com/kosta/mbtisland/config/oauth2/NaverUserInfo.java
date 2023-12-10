@@ -5,6 +5,7 @@ import java.util.Map;
 public class NaverUserInfo implements OAuth2UserInfo {
 	
 	private Map<String,Object> attributes;
+	private String joinOrLogin;
 	
 	public NaverUserInfo(Map<String,Object> attributes) {
 		this.attributes = attributes;
@@ -26,7 +27,20 @@ public class NaverUserInfo implements OAuth2UserInfo {
 	}
 
 	@Override
-	public String getName() {
-		return (String)attributes.get("name");
+	public String getNickname() {
+		return (String)attributes.get("nickname");
 	}
+
+	@Override
+	public String getJoinOrLogin() {
+		return joinOrLogin;
+	}
+
+	@Override
+	public void setJoinOrLogin(String joinOrLogin) {
+		this.joinOrLogin = joinOrLogin;
+		
+	}
+
+	
 }

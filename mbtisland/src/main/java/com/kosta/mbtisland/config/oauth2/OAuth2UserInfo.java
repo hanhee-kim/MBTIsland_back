@@ -4,5 +4,7 @@ public interface OAuth2UserInfo {
 	String getProviderId();
 	String getProvider();
 	String getEmail();
-	String getName();
+	String getNickname();
+	String getJoinOrLogin();
+	void setJoinOrLogin(String joinOrLogin);
 }

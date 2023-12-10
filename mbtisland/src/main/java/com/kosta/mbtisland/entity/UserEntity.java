@@ -1,6 +1,7 @@
 package com.kosta.mbtisland.entity;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +16,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,30 +43,30 @@ public class UserEntity {
 	private String userMbtiColor;
 //	@CreationTimestamp
 //	@UpdateTimestamp
-	private Date userMbtiChangeDate;
+	private Timestamp userMbtiChangeDate;
 	private String userEmail;
 	private String userRole;
-	private Integer userWarningCnt;
-	private Integer userBangCnt;
+	private Integer userWarnCnt;
+	private Integer userBanCnt;
 	private String isLeave;
 	private String isBanned;
 	@CreationTimestamp
-	private Date joinDate;
-	private Date leaveDate;
+	private Timestamp joinDate;
+	private Timestamp leaveDate;
 	private Integer visitCnt;
 	//OAuth2 필드
 	private String provider;
 	private String providerId;
 	
 
-//	//유저 권한이 여러개일때?
-//	public List<String> getRoleList() {
-//		if(this.userRole.length()>0) {
-//			return Arrays.asList(this.userRole.split(","));
-//		}
-//		return new ArrayList<>();
-//	}
-//	
+	//
+	public List<String> getRoleList() {
+		if(this.userRole.length()>0) {
+			return Arrays.asList(this.userRole.split(","));
+		}
+		return new ArrayList<>();
+	}
+	
 	
 	
 	
