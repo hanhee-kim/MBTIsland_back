@@ -75,6 +75,21 @@ public class NoticeController {
 		}
 	}
 	
+	// 공지사항 상세
+	@GetMapping("/noticedetail/{no}")
+	public ResponseEntity<Object> noticeDetail(@PathVariable Integer no) {
+		try {
+			Notice notice = noticeService.noticeDetail(no);
+			noticeService.increaseViewCount(no);
+			Map<String, Object> res = new HashMap<>();
+	        res.put("notice", notice);
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 	
 
 }

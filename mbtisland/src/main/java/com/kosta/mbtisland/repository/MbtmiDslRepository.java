@@ -1,6 +1,7 @@
 package com.kosta.mbtisland.repository;
 
 import static com.kosta.mbtisland.entity.QMbtmi.mbtmi;
+import static com.kosta.mbtisland.entity.QMbtmiComment.mbtmiComment;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.mbtisland.entity.Mbtmi;
+import com.kosta.mbtisland.entity.MbtmiComment;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -112,6 +114,15 @@ public class MbtmiDslRepository {
 				.fetchOne();
 	}
 	
-	
+	// 게시글의 댓글 목록
+	public List<MbtmiComment> findMbtmiCommentListByMbtmiNoAndPaging(Integer mbtmiNo, PageRequest pageRequest) {
+		return jpaQueryfactory.selectFrom(mbtmiComment)
+								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo)
+										.or(mbtmiComment.isBlocked.eq("N")))
+								.orderBy(mbtmiComment.writeDate.desc())
+								.offset(pageRequest.getOffset())
+								.limit(pageRequest.getPageSize())
+								.fetch();
+	}
 	
 }

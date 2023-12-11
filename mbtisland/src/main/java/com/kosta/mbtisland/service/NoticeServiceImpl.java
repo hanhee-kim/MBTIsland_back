@@ -132,14 +132,13 @@ public class NoticeServiceImpl implements NoticeService {
 		return notice;
 	}
 
-	
+	// 조회수 증가
+	@Override
+	public void increaseViewCount(Integer no) throws Exception {
+		Notice notice = noticeDetail(no);
+		notice.setViewCnt(notice.getViewCnt()+1);
+		noticeRepository.save(notice);
+	}
 
 	
-	
-	
-	
-	
-	
-	
-
 }

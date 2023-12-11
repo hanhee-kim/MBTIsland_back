@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -26,6 +27,7 @@ import lombok.Setter;
 @Builder
 @DynamicInsert
 @DynamicUpdate
+@ToString
 public class MbtmiComment {
 	
 	@Id

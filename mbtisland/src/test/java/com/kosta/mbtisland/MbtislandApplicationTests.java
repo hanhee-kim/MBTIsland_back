@@ -11,6 +11,7 @@ import org.springframework.test.annotation.Commit;
 
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
+import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.entity.Question;
@@ -234,6 +235,24 @@ class MbtislandApplicationTests {
 		System.out.println("결과: " + cnt);
 	}
 	
+	@Test
+	void mbtmiCommentList() throws Exception {
+		// 컨트롤러
+		Integer mbtmiNo = 1;
+		Integer page = 1;
+		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+		// 서비스
+		Integer itemsPerPage = 10;
+		int pagesPerGroup = 10;
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
+		
+		List<MbtmiComment> mbtmiCommentList = mbtmiDslRepository.findMbtmiCommentListByMbtmiNoAndPaging(mbtmiNo, pageRequest);
+		System.out.println("------댓글 목록 출력------");
+		Iterator<MbtmiComment> iter = mbtmiCommentList.iterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
 	
 	
 	
