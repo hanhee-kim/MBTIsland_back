@@ -9,6 +9,7 @@ import org.springframework.test.annotation.Commit;
 
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtwhy;
+import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.service.MbtwhyServiceImpl;
 
@@ -57,16 +58,29 @@ class MbtislandApplicationTests {
 //	    Timestamp stringToTimestamp = new Timestamp(stringToDate.getTime());
 		
 		Mbtwhy mbtwhy = Mbtwhy.builder()
-				.content("ㅎㅇ")
+				.content("나는 서울시 동작구의 김희찬이다. 꼬우면 찾아와라 현피뜨자!!!!!!!!!!!")
 				.mbtiCategory("ISTJ")
 //				.writeDate(stringToTimestamp)
-				.writerId("user01")
-				.writerNickname("닉네임1")
-				.writerMbti("ISFP")
-				.writerMbtiColor("#618181").build();
+				.writerId("user02")
+				.writerNickname("토큰킴")
+				.writerMbti("ISTP")
+				.writerMbtiColor("#4D6879").build();
 		
 		mbtwhyServiceImpl.insertMbtwhy(mbtwhy);			
 
+	}
+	
+	@Test
+	@Commit
+	void insetMbtwhyComment() throws Exception {
+		MbtwhyComment mbtwhyComment = MbtwhyComment.builder()
+				.commentContent("ㅋㅋ")
+				.mbtwhyNo(12)
+				.writerId("user02")
+				.writerNickname("토큰킴")
+				.writerMbti("ISTP")
+				.writerMbtiColor("#4D6879").build();
+		mbtwhyServiceImpl.insertMbtwhyComment(mbtwhyComment);
 	}
 
 }

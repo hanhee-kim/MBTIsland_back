@@ -1,6 +1,7 @@
 package com.kosta.mbtisland.repository;
 
 import static com.kosta.mbtisland.entity.QMbtwhy.mbtwhy;
+import static com.kosta.mbtisland.entity.QMbtwhyComment.mbtwhyComment;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.mbtisland.entity.Mbtwhy;
+import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -42,12 +44,8 @@ public class MbtwhyDslRepository {
 						mbtwhy.mbtiCategory.eq(mbti))
 						.orderBy(orderSpecifier) // 정렬
 						.offset(pageRequest.getOffset()) // 인덱스
-						.limit(pageRequest.getPageSize()).fetch();
-		
-//		return jpaQueryFactory.selectFrom(mbtwhy)
-//				.orderBy(mbtwhy.no.desc())
-//				.offset(pageRequest.getOffset())
-//				.where(search!=null && sorType!=null ? qmbtwhy.mbtiCategory.eq(mbtiCategory) : null).fetch();
+						.limit(pageRequest.getPageSize()) // 개수 제한
+						.fetch();
 	}
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값)
@@ -60,10 +58,22 @@ public class MbtwhyDslRepository {
 										mbtwhy.mbtiCategory.eq(mbti)).fetchOne();
 	}
 	
-	// 게시글 조회 (게시글 번호)
-	public Mbtwhy findMbtwhyByNo(Integer no) throws Exception {
-		return jpaQueryFactory.selectFrom(mbtwhy)
-						.where(mbtwhy.no.eq(no)).fetchOne();
-	}
 	
+	// 댓글 목록 조회 (게시글 번호)
+	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) {
+		return jpaQueryFactory.selectFrom(mbtwhyComment)
+				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
+				.orderBy(mbtwhyComment.commentNo.desc()) // 정렬
+				.offset(pageRequest.getOffset()) // 인덱스
+				.limit(pageRequest.getPageSize()) // 개수 제한
+				.fetch();
+	}
+
+	// 댓글 개수 조회 (게시글 번호)
+	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) {
+		return jpaQueryFactory.select(mbtwhyComment.count()).from(mbtwhyComment)
+				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
+				.fetchOne();
+	}
+
 }
