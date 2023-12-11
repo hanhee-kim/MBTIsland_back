@@ -2,6 +2,7 @@ package com.kosta.mbtisland.service;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -9,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.repository.MbtwhyRepository;
 import com.kosta.mbtisland.repository.UserRepository;
 
 @Service
@@ -17,6 +21,8 @@ public class UserServiceImpl implements UserService{
 	
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private MbtwhyRepository mbtwhyRepository;
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder; 
 
@@ -177,5 +183,36 @@ public class UserServiceImpl implements UserService{
 			throw new Exception("해당 유저 없음");
 		}
 	}
+
+	//내가 작성한 mbtwhyList불러오기
+	@Override
+	public List<Mbtwhy> getMyMbtwhyListByPage(String username,PageInfo pageInfo) throws Exception {
+		 List<Mbtwhy> myMbtwhyList = mbtwhyRepository.findByWriterId(username);
+		 if(myMbtwhyList.isEmpty()) {
+			throw new Exception("myMbtwhyList 사이즈 0");
+		 }else {
+//			 mbtwhyRepository.count(null)
+			 return myMbtwhyList;
+		 }
+	}
+//	@Override
+//	public List<Board> boardListByPage(PageInfo pageInfo) throws Exception {
+//		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, 10);
+//		List<Board> boardList = boardDslRepository.findBoardListByPaging(pageRequest);
+//		
+//		Long allCount = boardDslRepository.findBoardCount();
+//		Integer allPage = allCount.intValue()/pageRequest.getPageSize();
+//		if(allCount%pageRequest.getPageSize() != 0) {
+//			allPage += 1;
+//		}
+//		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
+//		Integer endPage = Math.min(startPage+10-1, allPage);
+//		
+//		pageInfo.setAllPage(allPage);
+//		pageInfo.setStartPage(startPage);
+//		pageInfo.setEndPage(endPage);
+//		
+//		return boardList;
+//	}
 
 }

@@ -3,6 +3,7 @@ package com.kosta.mbtisland.repository;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.mbtisland.entity.Mbtwhy;
@@ -29,4 +30,18 @@ public class UserDslRepository {
 				.fetch();
 		return mbtwhyList;
 	}
+	
+	//특정 페이지의 내 mbtwhy게시글 목록 가져오기
+		public List<Mbtwhy> findMyMbtwhyListByPaging(PageRequest pageRequest,String username) throws Exception{
+			//옵셋과 리밋이 있다?
+			QMbtwhy mbtwhy = QMbtwhy.mbtwhy;
+			return jpaQueryFactory.selectFrom(mbtwhy)
+					.where(mbtwhy.writerId.eq(username))
+					.orderBy(mbtwhy.no.desc())
+					.offset(pageRequest.getOffset())
+					.limit(pageRequest.getPageSize())
+					.fetch();
+		}
+	
+	
 }

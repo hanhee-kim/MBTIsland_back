@@ -1,6 +1,8 @@
 package com.kosta.mbtisland.controller;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.mail.MessagingException;
@@ -13,9 +15,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.mbtisland.config.auth.PrincipalDetails;
+import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.UserEntity;
 import com.kosta.mbtisland.repository.UserRepository;
 import com.kosta.mbtisland.service.EmailService;
@@ -177,6 +182,24 @@ public class UserController {
 		}		
 	}
 	
-	
+	//Mypage에서 myMbt-Why 최초 로드시
+	@GetMapping("/mymbtwhy/{username}")//@RequestParam usename?
+	public ResponseEntity<Map<String,Object>> myMbtwhyList(@RequestParam String username/*,@RequestParam(required = false) Integer page*/){
+		System.out.println("myYLIstController진입");
+		System.out.println(username);
+//		PageInfo pageInfo = new PageInfo(page);
+//		pageInfo.setCurPage(page==null? 1:page);
+		Map<String, Object> res = new HashMap<String, Object>();
+		try {
+			List<Mbtwhy> myMbtwhyList = userService.getMyMbtwhyListByPage(username, pageInfo);
+			res.put("myMbtwhyList", myMbtwhyList);
+//			res.put("pageInfo", pageInfo);
+			return new ResponseEntity<Map<String,Object>>(res,HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			res.put("errMsg", e.getMessage());
+			return new ResponseEntity<Map<String,Object>>(res,HttpStatus.BAD_REQUEST);
+		}
+	}
 
 }
