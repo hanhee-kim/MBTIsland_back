@@ -11,8 +11,10 @@ import org.springframework.test.annotation.Commit;
 
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
+import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.Notice;
+import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.entity.Question;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
@@ -21,6 +23,7 @@ import com.kosta.mbtisland.repository.MbtwhyRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
 import com.kosta.mbtisland.repository.QuestionRepository;
+import com.kosta.mbtisland.service.MbtmiService;
 import com.kosta.mbtisland.service.MbtwhyServiceImpl;
 import com.kosta.mbtisland.service.NoticeService;
 import com.querydsl.core.Tuple;
@@ -41,6 +44,8 @@ class MbtislandApplicationTests {
 	private MbtmiRepository mbtmiRepository;
 	@Autowired
 	private QuestionRepository questionRepository;
+	@Autowired
+	private MbtmiService mbtmiService;
 
 	// 인수
 	@Autowired
@@ -89,15 +94,29 @@ class MbtislandApplicationTests {
 //	    Timestamp stringToTimestamp = new Timestamp(stringToDate.getTime());
 		
 		Mbtwhy mbtwhy = Mbtwhy.builder()
-				.content("ㅎㅇ")
+				.content("나는 서울시 동작구의 김희찬이다. 꼬우면 찾아와라 현피뜨자!!!!!!!!!!!")
 				.mbtiCategory("ISTJ")
 //				.writeDate(stringToTimestamp)
-				.writerId("user01")
-				.writerNickname("닉네임1")
-				.writerMbti("ISFP")
-				.writerMbtiColor("#618181").build();
+				.writerId("user02")
+				.writerNickname("토큰킴")
+				.writerMbti("ISTP")
+				.writerMbtiColor("#4D6879").build();
 		
-		mbtwhyServiceImpl.insertMbtwhy(mbtwhy);
+		mbtwhyServiceImpl.insertMbtwhy(mbtwhy);			
+
+	}
+	
+	@Test
+	@Commit
+	void insetMbtwhyComment() throws Exception {
+		MbtwhyComment mbtwhyComment = MbtwhyComment.builder()
+				.commentContent("ㅋㅋ")
+				.mbtwhyNo(12)
+				.writerId("user02")
+				.writerNickname("토큰킴")
+				.writerMbti("ISTP")
+				.writerMbtiColor("#4D6879").build();
+		mbtwhyServiceImpl.insertMbtwhyComment(mbtwhyComment);
 	}
 
 	
@@ -212,7 +231,7 @@ class MbtislandApplicationTests {
 	void mbtmiNewlyMbtmiList() throws Exception {
 		// 컨트롤러
 		String category = "잡담";
-		String type = "FP";
+		String type = "SF";
 		String searchTerm = null;
 		Integer page = 1;
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
@@ -246,6 +265,47 @@ class MbtislandApplicationTests {
 			e.printStackTrace();
 		}
 	}
+	@Test
+	void mbtmiCommentList() throws Exception {
+		// 컨트롤러
+		Integer mbtmiNo = 240;
+		Integer page = 1;
+		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+		// 서비스
+		Integer itemsPerPage = 10;
+		int pagesPerGroup = 10;
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
+		
+		List<MbtmiComment> mbtmiCommentList = mbtmiDslRepository.findMbtmiCommentListByMbtmiNoAndPaging(mbtmiNo, pageRequest);
+		System.out.println("------댓글 목록 출력------");
+		Iterator<MbtmiComment> iter = mbtmiCommentList.iterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
+
+/*
+	// 게시글별 댓글 수(리스트에 표기하기 위함)
+	@Test void mbtmiCommentCntOfMbtmiNoArr() throws Exception {
+		List<Integer> mbtmiNoList = new ArrayList<Integer>();
+		mbtmiNoList.add(1);
+		mbtmiNoList.add(240);
+		List<Map<Integer, Integer>> resList = mbtmiService.commentCntByMbtmiNoArr(mbtmiNoList);
+		System.out.println("결과목록: ");
+		Iterator<Map<Integer, Integer>> iter = resList.iterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
+ */	
+	// 특정게시글의 댓글수
+	@Test
+	void mbtmiCommentCntByMbtmiNo() throws Exception {
+		Integer mbtmiNo = 240;
+		Integer commentCnt = mbtmiService.mbtmiCommentCnt(mbtmiNo);
+		System.out.println("결과: " + commentCnt);
+	}
+
 	
 	
 }

@@ -25,6 +25,9 @@ public interface NoticeService {
 	
 	// 공지사항 상세 조회
 	Notice noticeDetail(Integer no) throws Exception;
+	
+	// 조회수 증가
+	void increaseViewCount(Integer no) throws Exception;
 
 	
 	
