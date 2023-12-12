@@ -27,6 +27,7 @@ public class MbtwhyController {
 			@RequestParam(required = false) String search, @RequestParam(required = false) String sort) {
 		Map<String, Object> res = new HashMap<>();
 		try {
+			System.out.println("MBTI 타입은 " + mbti);
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1 : page).build();
 			List<Mbtwhy> mbtwhyList = mbtwhyService.selectMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageInfo, search, sort);
 			Long mbtwhyCnt = mbtwhyService.selectMbtwhyCountByMbtiAndSearch(mbti, search);
@@ -56,7 +57,7 @@ public class MbtwhyController {
 			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo);
 			Long mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
 			System.out.println("페이지"+pageInfo);
-			System.out.println("리스트"+mbtwhyCommentList.get(0).getCommentContent());
+//			System.out.println("리스트"+mbtwhyCommentList.get(0).getCommentContent());
 			System.out.println("카운트"+mbtwhyCommentCnt);
 			
 			res.put("pageInfo", pageInfo);

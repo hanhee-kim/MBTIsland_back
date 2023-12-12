@@ -33,7 +33,7 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		// 페이지 번호, 한 페이지에 보여줄 게시글 수
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5);
 		List<Mbtwhy> mbtwhyList = mbtwhyDslRepository.findMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageRequest, search, sort);
-		
+		System.out.println("리스트"+mbtwhyList.get(0).getContent());
 		// 페이징 계산
 		// MbtwhyController에서 넘겨준 pageInfo를 참조하기에, 반환하지 않아도 됨
 		Long allCount = mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearch(mbti, search);
