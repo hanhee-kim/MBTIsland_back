@@ -182,24 +182,25 @@ public class UserController {
 		}		
 	}
 	
-	//Mypage에서 myMbt-Why 최초 로드시
-	@GetMapping("/mymbtwhy/{username}")//@RequestParam usename?
-	public ResponseEntity<Map<String,Object>> myMbtwhyList(@RequestParam String username/*,@RequestParam(required = false) Integer page*/){
-		System.out.println("myYLIstController진입");
-		System.out.println(username);
+//	//Mypage에서 myMbt-Why 최초 로드시
+//	@GetMapping("/mymbtwhy/{username}")//@RequestParam usename?
+//	public ResponseEntity<Map<String,Object>> myMbtwhyList(@RequestParam String username,@RequestParam(required = false) Integer page){
+//		System.out.println("myYLIstController진입");
+//		System.out.println(username);
 //		PageInfo pageInfo = new PageInfo(page);
 //		pageInfo.setCurPage(page==null? 1:page);
-		Map<String, Object> res = new HashMap<String, Object>();
-		try {
-			List<Mbtwhy> myMbtwhyList = userService.getMyMbtwhyListByPage(username, pageInfo);
-			res.put("myMbtwhyList", myMbtwhyList);
+//		Map<String, Object> res = new HashMap<String, Object>();
+//		try {
+//			List<Mbtwhy> myMbtwhyList = userService.getMyMbtwhyListByPage(username, pageInfo);
+//			res.put("myMbtwhyList", myMbtwhyList);
 //			res.put("pageInfo", pageInfo);
-			return new ResponseEntity<Map<String,Object>>(res,HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			res.put("errMsg", e.getMessage());
-			return new ResponseEntity<Map<String,Object>>(res,HttpStatus.BAD_REQUEST);
-		}
-	}
+//			return new ResponseEntity<Map<String,Object>>(res,HttpStatus.OK);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			res.put("errMsg", e.getMessage());
+//			return new ResponseEntity<Map<String,Object>>(res,HttpStatus.BAD_REQUEST);
+//		}
+//	}
+	
 
 }

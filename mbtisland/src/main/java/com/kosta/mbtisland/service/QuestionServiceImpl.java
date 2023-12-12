@@ -149,4 +149,12 @@ public class QuestionServiceImpl implements QuestionService {
 		}
 	}
 
+	//문의글 등록
+	@Override
+	public void questionWrite(Question question) throws Exception {
+		questionRepository.save(question);
+	}
+
+	
+
 }
