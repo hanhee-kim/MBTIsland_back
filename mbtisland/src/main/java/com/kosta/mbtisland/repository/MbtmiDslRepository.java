@@ -6,7 +6,9 @@ import static com.kosta.mbtisland.entity.QMbtmiComment.mbtmiComment;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -114,7 +116,7 @@ public class MbtmiDslRepository {
 				.fetchOne();
 	}
 	
-	// 게시글의 댓글 목록
+	// 특정 게시글의 댓글 목록
 	public List<MbtmiComment> findMbtmiCommentListByMbtmiNoAndPaging(Integer mbtmiNo, PageRequest pageRequest) {
 		return jpaQueryfactory.selectFrom(mbtmiComment)
 								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo)
@@ -124,5 +126,6 @@ public class MbtmiDslRepository {
 								.limit(pageRequest.getPageSize())
 								.fetch();
 	}
+
 	
 }

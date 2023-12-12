@@ -7,5 +7,5 @@ import com.kosta.mbtisland.entity.Mbtmi;
 public interface MbtmiRepository extends JpaRepository<Mbtmi, Integer> {
 	
 	Long countByCategory(String category);
-
+	
 }

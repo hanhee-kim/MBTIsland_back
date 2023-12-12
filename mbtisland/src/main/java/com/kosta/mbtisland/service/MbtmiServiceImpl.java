@@ -1,19 +1,24 @@
 package com.kosta.mbtisland.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
-import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
+import com.querydsl.core.Tuple;
 
 @Service
 public class MbtmiServiceImpl implements MbtmiService {
@@ -28,15 +33,27 @@ public class MbtmiServiceImpl implements MbtmiService {
 	
 	// 주간인기글 목록
 	@Override
-	public List<Mbtmi> weeklyHotMbtmiList() throws Exception {
+	public List<MbtmiDto> weeklyHotMbtmiList() throws Exception {
 		List<Mbtmi> weeklyHotMbtmiList = mbtmiDslRepository.findWeeklyHotMbtmiListByCategoryAndRecommendCnt();
 		if(weeklyHotMbtmiList.size()==0) throw new Exception("해당하는 게시글이 존재하지 않습니다.");
-		return weeklyHotMbtmiList;
+		
+		List<MbtmiDto> dtoList = new ArrayList<MbtmiDto>();
+		// Entity->Dto로 변경하며 각 게시글마다 댓글수 넣기
+		for (Mbtmi mbtmi : weeklyHotMbtmiList) {
+			Integer commentCnt = mbtmiCommentCnt(mbtmi.getNo());
+			MbtmiDto dto = MbtmiDto.builder().no(mbtmi.getNo()).title(mbtmi.getTitle()).content(mbtmi.getContent()).category(mbtmi.getCategory())
+								.viewCnt(mbtmi.getViewCnt()).recommendCnt(mbtmi.getRecommendCnt()).writeDate(mbtmi.getWriteDate())
+								.isBlocked(mbtmi.getIsBlocked()).writerId(mbtmi.getWriterId()).writerNickname(mbtmi.getWriterNickname())
+								.writerMbti(mbtmi.getWriterMbti()).writerMbtiColor(mbtmi.getWriterMbtiColor()).fileIdxs(mbtmi.getFileIdxs())
+								.commentCnt(commentCnt).build();
+			dtoList.add(dto);
+		}
+		return dtoList;
 	}
 
 	// 최신글 목록
 	@Override
-	public List<Mbtmi> mbtmiListByCategoryAndTypeAndSearch(String category, String type, String searchTerm, PageInfo pageInfo) throws Exception {
+	public List<MbtmiDto> mbtmiListByCategoryAndTypeAndSearch(String category, String type, String searchTerm, PageInfo pageInfo) throws Exception {
 		// PageInfo를 PageRequest로 가공하여 Repository의 메서드를 호출
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
@@ -44,6 +61,18 @@ public class MbtmiServiceImpl implements MbtmiService {
 		List<Mbtmi> mbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest);
 		
 		if(mbtmiList.size()==0) throw new Exception("해당하는 게시글이 존재하지 않습니다.");
+		
+		List<MbtmiDto> dtoList = new ArrayList<MbtmiDto>();
+		// Entity->Dto로 변경하며 각 게시글마다 댓글수 넣기
+		for (Mbtmi mbtmi : mbtmiList) {
+			Integer commentCnt = mbtmiCommentCnt(mbtmi.getNo());
+			MbtmiDto dto = MbtmiDto.builder().no(mbtmi.getNo()).title(mbtmi.getTitle()).content(mbtmi.getContent()).category(mbtmi.getCategory())
+								.viewCnt(mbtmi.getViewCnt()).recommendCnt(mbtmi.getRecommendCnt()).writeDate(mbtmi.getWriteDate())
+								.isBlocked(mbtmi.getIsBlocked()).writerId(mbtmi.getWriterId()).writerNickname(mbtmi.getWriterNickname())
+								.writerMbti(mbtmi.getWriterMbti()).writerMbtiColor(mbtmi.getWriterMbtiColor()).fileIdxs(mbtmi.getFileIdxs())
+								.commentCnt(commentCnt).build();
+			dtoList.add(dto);
+		}
 		
 		Integer allCount = mbtmiCntByCriteria(category, type, searchTerm);
 		Integer allPage = (int) Math.ceil((double) allCount / itemsPerPage);
@@ -56,7 +85,8 @@ public class MbtmiServiceImpl implements MbtmiService {
 		pageInfo.setEndPage(endPage);
 		if(pageInfo.getCurPage()>allPage) pageInfo.setCurPage(allPage); // 게시글 삭제시 예외처리
 		
-		return mbtmiList;
+//		return mbtmiList;
+		return dtoList;
 	}
 
 	// 최신글수 조회 (PageInfo의 allPage값 계산시 필요)
@@ -118,7 +148,7 @@ public class MbtmiServiceImpl implements MbtmiService {
 		return mbtmiCommentList;
 	}
 	
-	// 댓글수 조회 (PageInfo의 allPage값 계산시 필요)
+	// 특정 게시글의 댓글수 조회 (PageInfo의 allPage값 계산시 필요)
 	@Override
 	public Integer mbtmiCommentCnt(Integer mbtmiNo) throws Exception {
 		Long mbtmiCommentCnt = mbtmiCommentRepository.countByMbtmiNo(mbtmiNo);
@@ -132,6 +162,7 @@ public class MbtmiServiceImpl implements MbtmiService {
 		if(mbtmi==null) throw new Exception("게시글이 존재하지 않습니다.");
 		mbtmiRepository.deleteById(no);
 	}
+
 
 	
 

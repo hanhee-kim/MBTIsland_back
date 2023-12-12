@@ -21,6 +21,7 @@ import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
 import com.kosta.mbtisland.repository.QuestionRepository;
+import com.kosta.mbtisland.service.MbtmiService;
 import com.kosta.mbtisland.service.MbtwhyServiceImpl;
 import com.kosta.mbtisland.service.NoticeService;
 import com.querydsl.core.Tuple;
@@ -41,6 +42,8 @@ class MbtislandApplicationTests {
 	private MbtmiRepository mbtmiRepository;
 	@Autowired
 	private QuestionRepository questionRepository;
+	@Autowired
+	private MbtmiService mbtmiService;
 
 	// 인수
 	@Autowired
@@ -253,6 +256,29 @@ class MbtislandApplicationTests {
 			System.out.println(iter.next());
 		}
 	}
+
+/*
+	// 게시글별 댓글 수(리스트에 표기하기 위함)
+	@Test void mbtmiCommentCntOfMbtmiNoArr() throws Exception {
+		List<Integer> mbtmiNoList = new ArrayList<Integer>();
+		mbtmiNoList.add(1);
+		mbtmiNoList.add(240);
+		List<Map<Integer, Integer>> resList = mbtmiService.commentCntByMbtmiNoArr(mbtmiNoList);
+		System.out.println("결과목록: ");
+		Iterator<Map<Integer, Integer>> iter = resList.iterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+	}
+ */	
+	// 특정게시글의 댓글수
+	@Test
+	void mbtmiCommentCntByMbtmiNo() throws Exception {
+		Integer mbtmiNo = 240;
+		Integer commentCnt = mbtmiService.mbtmiCommentCnt(mbtmiNo);
+		System.out.println("결과: " + commentCnt);
+	}
+
 	
 	
 	
