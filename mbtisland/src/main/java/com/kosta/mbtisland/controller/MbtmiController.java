@@ -58,17 +58,18 @@ public class MbtmiController {
 	
 	// 게시글 상세
 	@GetMapping("/mbtmidetail/{no}")
-	public ResponseEntity<Object> noticeDetail(@PathVariable Integer no, @RequestParam(required = false) Integer commentPage) {
+//	public ResponseEntity<Object> noticeDetail(@PathVariable Integer no, @RequestParam(required = false) Integer commentPage) {
+	public ResponseEntity<Object> noticeDetail(@PathVariable Integer no) {
 		try {
-			Mbtmi mbtmi = mbtmiService.mbtmiDetail(no);
-			mbtmiService.increaseViewCount(no);
-			PageInfo pageInfo = PageInfo.builder().curPage(commentPage==null? 1: commentPage).build();
-			List<MbtmiComment> mbtmiCommentList = mbtmiService.mbtmiCommentListByMbtmiNo(no, pageInfo);
-			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no);
+			Mbtmi mbtmi = mbtmiService.mbtmiDetail(no); // 게시글
+			mbtmiService.increaseViewCount(no); // 조회수 증가
+			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no); // 댓글수
+//			PageInfo pageInfo = PageInfo.builder().curPage(commentPage==null? 1: commentPage).build();
+//			List<MbtmiComment> mbtmiCommentList = mbtmiService.mbtmiCommentListByMbtmiNo(no, pageInfo); // 댓글목록
 			Map<String, Object> res = new HashMap<>();
 	        res.put("mbtmi", mbtmi);
-	        res.put("mbtmiCommentList", mbtmiCommentList);
 	        res.put("mbtmiCommentCnt", mbtmiCommentCnt);
+//	        res.put("mbtmiCommentList", mbtmiCommentList);
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -88,6 +89,22 @@ public class MbtmiController {
 		}
 	}
 	
+	// 댓글 목록
+	@GetMapping("/mbtmicommentlist/{no}")
+	public ResponseEntity<Object> noticeDetail(@PathVariable Integer no, @RequestParam(required = false) Integer commentPage) {
+		try {
+			System.out.println("댓글목록 컨트롤러에서 출력한 게시글번호: " + no);
+			PageInfo pageInfo = PageInfo.builder().curPage(commentPage==null? 1: commentPage).build();
+			List<MbtmiComment> mbtmiCommentList = mbtmiService.mbtmiCommentListByMbtmiNo(no, pageInfo); // 댓글목록
+			System.out.println("댓글목록: " + mbtmiCommentList);
+//			Map<String, Object> res = new HashMap<>();
+//	        res.put("mbtmiCommentList", mbtmiCommentList);
+			return new ResponseEntity<Object>(mbtmiCommentList, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
 	
 
 }

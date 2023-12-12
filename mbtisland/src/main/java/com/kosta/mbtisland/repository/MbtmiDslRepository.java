@@ -118,8 +118,8 @@ public class MbtmiDslRepository {
 	public List<MbtmiComment> findMbtmiCommentListByMbtmiNoAndPaging(Integer mbtmiNo, PageRequest pageRequest) {
 		return jpaQueryfactory.selectFrom(mbtmiComment)
 								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo)
-										.or(mbtmiComment.isBlocked.eq("N")))
-								.orderBy(mbtmiComment.writeDate.desc())
+										.and(mbtmiComment.isBlocked.eq("N")))
+								.orderBy(mbtmiComment.writeDate.asc())
 								.offset(pageRequest.getOffset())
 								.limit(pageRequest.getPageSize())
 								.fetch();

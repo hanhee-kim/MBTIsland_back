@@ -238,7 +238,7 @@ class MbtislandApplicationTests {
 	@Test
 	void mbtmiCommentList() throws Exception {
 		// 컨트롤러
-		Integer mbtmiNo = 1;
+		Integer mbtmiNo = 240;
 		Integer page = 1;
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 		// 서비스
