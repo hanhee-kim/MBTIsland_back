@@ -213,7 +213,7 @@ class MbtislandApplicationTests {
 	void mbtmiNewlyMbtmiList() throws Exception {
 		// 컨트롤러
 		String category = "잡담";
-		String type = "FP";
+		String type = "SF";
 		String searchTerm = null;
 		Integer page = 1;
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
