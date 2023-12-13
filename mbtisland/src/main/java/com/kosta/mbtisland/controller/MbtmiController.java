@@ -45,6 +45,10 @@ public class MbtmiController {
 											  , @RequestParam(required = false) String type
 											  , @RequestParam(required = false) String search
 											  , @RequestParam(required = false) Integer page) {
+		
+		
+		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지): " + category + ", " + type + ", " + search + ", " + page);
+		
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
 			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo);

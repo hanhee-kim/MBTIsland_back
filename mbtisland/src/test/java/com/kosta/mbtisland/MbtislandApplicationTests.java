@@ -227,8 +227,8 @@ class MbtislandApplicationTests {
 	@Test
 	void mbtmiNewlyMbtmiList() throws Exception {
 		// 컨트롤러
-		String category = "잡담";
-		String type = "SF";
+		String category = null;
+		String type = "PI";
 		String searchTerm = null;
 		Integer page = 1;
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
@@ -272,20 +272,7 @@ class MbtislandApplicationTests {
 		}
 	}
 
-/*
-	// 게시글별 댓글 수(리스트에 표기하기 위함)
-	@Test void mbtmiCommentCntOfMbtmiNoArr() throws Exception {
-		List<Integer> mbtmiNoList = new ArrayList<Integer>();
-		mbtmiNoList.add(1);
-		mbtmiNoList.add(240);
-		List<Map<Integer, Integer>> resList = mbtmiService.commentCntByMbtmiNoArr(mbtmiNoList);
-		System.out.println("결과목록: ");
-		Iterator<Map<Integer, Integer>> iter = resList.iterator();
-		while(iter.hasNext()) {
-			System.out.println(iter.next());
-		}
-	}
- */	
+
 	// 특정게시글의 댓글수
 	@Test
 	void mbtmiCommentCntByMbtmiNo() throws Exception {

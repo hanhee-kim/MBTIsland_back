@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -75,12 +76,12 @@ public class MbtmiDslRepository {
 	}
 	
 	
-	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징) ******* type이 ITJ 와 같은 경우에 문자열 포함으로 쿼리시 결과가 나오지 않게됨 ********
+	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징)
 	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest) {
 		return jpaQueryfactory.selectFrom(mbtmi)
 							.where(
 									category!=null? mbtmi.category.eq(category) : null,
-									type!=null? mbtmi.writerMbti.containsIgnoreCase(type) : null,
+									type!=null? isContainMbtiStr(type) : null,
 									searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
 											.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
 									mbtmi.isBlocked.eq("N")
@@ -90,6 +91,43 @@ public class MbtmiDslRepository {
 							.limit(pageRequest.getPageSize())
 							.fetch();
 	}
+	
+	// where메서드의 매개변수로 BooleanExpression를 사용하여 검색조건 분리
+	private BooleanExpression isContainMbtiStr(String type) {		
+
+/*
+		// 전달인자로 받은 type(예시 "I-P")을 구분자로 잘라 문자열배열에 담는다
+		StringTokenizer st = new StringTokenizer(type, "-");
+		String[] sArr = new String[st.countTokens()];
+		int i=0;
+		while(st.hasMoreTokens()) {
+			sArr[i++] = st.nextToken();
+		}
+*/
+		
+		// ex. String type = "ISFJ";
+		String[] sArr = new String[type.length()];
+
+		for (int i=0; i<type.length(); i++) {
+		    sArr[i] = String.valueOf(type.charAt(i));
+		}
+		
+		
+		// 배열에 담긴 문자열이 모두 포함되는 경우에만 true를 반환한다
+		BooleanExpression isContain = null;		
+		for (int j=0; j+1<sArr.length; j++) {
+			isContain = mbtmi.writerMbti.containsIgnoreCase(sArr[j]).and(mbtmi.writerMbti.containsIgnoreCase(sArr[j+1]));
+		}
+		return isContain;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
