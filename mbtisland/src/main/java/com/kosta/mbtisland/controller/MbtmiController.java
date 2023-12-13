@@ -44,14 +44,15 @@ public class MbtmiController {
 	public ResponseEntity<Object> mbtmiList(@RequestParam(required = false) String category
 											  , @RequestParam(required = false) String type
 											  , @RequestParam(required = false) String search
-											  , @RequestParam(required = false) Integer page) {
+											  , @RequestParam(required = false) Integer page
+											  , @RequestParam(required = false) String sort) {
 		
 		
-		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지): " + category + ", " + type + ", " + search + ", " + page);
+		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지, 정렬): " + category + ", " + type + ", " + search + ", " + page + ", " + sort);
 		
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
-			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo);
+			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo, sort);
 			Map<String, Object> res = new HashMap<>();
 	        res.put("pageInfo", pageInfo);
 	        res.put("mbtmiList", mbtmiList);

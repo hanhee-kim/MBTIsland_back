@@ -53,12 +53,12 @@ public class MbtmiServiceImpl implements MbtmiService {
 
 	// 최신글 목록
 	@Override
-	public List<MbtmiDto> mbtmiListByCategoryAndTypeAndSearch(String category, String type, String searchTerm, PageInfo pageInfo) throws Exception {
+	public List<MbtmiDto> mbtmiListByCategoryAndTypeAndSearch(String category, String type, String searchTerm, PageInfo pageInfo, String sort) throws Exception {
 		// PageInfo를 PageRequest로 가공하여 Repository의 메서드를 호출
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
-		List<Mbtmi> mbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest);
+		List<Mbtmi> mbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort);
 		
 		if(mbtmiList.size()==0) throw new Exception("해당하는 게시글이 존재하지 않습니다.");
 		
@@ -83,7 +83,7 @@ public class MbtmiServiceImpl implements MbtmiService {
 		pageInfo.setAllPage(allPage);
 		pageInfo.setStartPage(startPage);
 		pageInfo.setEndPage(endPage);
-//		if(pageInfo.getCurPage()>allPage) pageInfo.setCurPage(allPage); // 게시글 삭제시 예외처리
+		if(pageInfo.getCurPage()>allPage) pageInfo.setCurPage(allPage); // 게시글 삭제시 예외처리
 		
 		return dtoList;
 	}
@@ -91,7 +91,6 @@ public class MbtmiServiceImpl implements MbtmiService {
 	// 최신글수 조회 (PageInfo의 allPage값 계산시 필요)
 	@Override
 	public Integer mbtmiCntByCriteria(String category, String type, String searchTerm) throws Exception {
-		
 		// 경우의 수 2^3=8
 		Long mbtmiCnt = 0L;
 		if (category == null && type == null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, null, null);
@@ -153,7 +152,8 @@ public class MbtmiServiceImpl implements MbtmiService {
 	// 특정 게시글의 댓글수 조회 (PageInfo의 allPage값 계산시 필요)
 	@Override
 	public Integer mbtmiCommentCnt(Integer mbtmiNo) throws Exception {
-		Long mbtmiCommentCnt = mbtmiCommentRepository.countByMbtmiNo(mbtmiNo);
+//		Long mbtmiCommentCnt = mbtmiCommentRepository.countByMbtmiNo(mbtmiNo);
+		Long mbtmiCommentCnt = mbtmiDslRepository.countCommentByMbtmiNo(mbtmiNo);
 		return mbtmiCommentCnt.intValue();
 	}
 

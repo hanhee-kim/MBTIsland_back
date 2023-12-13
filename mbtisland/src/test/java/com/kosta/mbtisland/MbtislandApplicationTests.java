@@ -231,13 +231,14 @@ class MbtislandApplicationTests {
 		String type = "PI";
 		String searchTerm = null;
 		Integer page = 1;
+		String sort = null;
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 		// 서비스
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
 		
-		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest);
+		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort);
 		System.out.println("------최신글 목록 출력------");
 		Iterator<Mbtmi> iter = newlyMbtmiList.iterator();
 		while(iter.hasNext()) {
