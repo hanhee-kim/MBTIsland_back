@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +15,9 @@ import org.springframework.stereotype.Repository;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -81,7 +82,7 @@ public class MbtmiDslRepository {
 		return jpaQueryfactory.selectFrom(mbtmi)
 							.where(
 									category!=null? mbtmi.category.eq(category) : null,
-									type!=null? isContainMbtiStr(type) : null,
+									type!=null? isWriterMbtiContainsStr(type) : null,
 									searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
 											.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
 									mbtmi.isBlocked.eq("N")
@@ -92,43 +93,23 @@ public class MbtmiDslRepository {
 							.fetch();
 	}
 	
-	// where메서드의 매개변수로 BooleanExpression를 사용하여 검색조건 분리
-	private BooleanExpression isContainMbtiStr(String type) {		
-
-/*
-		// 전달인자로 받은 type(예시 "I-P")을 구분자로 잘라 문자열배열에 담는다
-		StringTokenizer st = new StringTokenizer(type, "-");
-		String[] sArr = new String[st.countTokens()];
-		int i=0;
-		while(st.hasMoreTokens()) {
-			sArr[i++] = st.nextToken();
-		}
-*/
-		
-		// ex. String type = "ISFJ";
-		String[] sArr = new String[type.length()];
-
-		for (int i=0; i<type.length(); i++) {
-		    sArr[i] = String.valueOf(type.charAt(i));
-		}
-		
-		
-		// 배열에 담긴 문자열이 모두 포함되는 경우에만 true를 반환한다
-		BooleanExpression isContain = null;		
-		for (int j=0; j+1<sArr.length; j++) {
-			isContain = mbtmi.writerMbti.containsIgnoreCase(sArr[j]).and(mbtmi.writerMbti.containsIgnoreCase(sArr[j+1]));
-		}
-		return isContain;
+	// 2-1. where절에서 사용할 검색조건의 일부를 BooleanExpression로 반환하는 메서드 선언
+	private BooleanExpression isWriterMbtiContainsStr(String type) {						
+		BooleanExpression strCondition = null;
+	    
+	    for (int j=0; j<type.length(); j++) { // 문자열type의 길이만큼 반복
+	        BooleanExpression charCondition  = mbtmi.writerMbti.containsIgnoreCase(String.valueOf(type.charAt(j)));
+	        strCondition = (strCondition == null)? charCondition : strCondition.and(charCondition); // 1회차(0인덱스)는 한번비교, 2회차부터는 &&로 비교
+	        
+	        System.out.println("===> " + strCondition); 
+	        /* 출력예시 type="IST"인 경우
+	         ===> containsIc(mbtmi.writerMbti,I)
+			 ===> containsIc(mbtmi.writerMbti,I) && containsIc(mbtmi.writerMbti,S)
+			 ===> containsIc(mbtmi.writerMbti,I) && containsIc(mbtmi.writerMbti,S) && containsIc(mbtmi.writerMbti,T)
+	        */
+	    }
+	    return strCondition;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	// 카테고리 && 타입 적용된 게시글수
