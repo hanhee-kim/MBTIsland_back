@@ -245,13 +245,6 @@ class MbtislandApplicationTests {
 		}
 	}
 	
-	@Test
-	void mbtmiCntBy() {
-		Long cnt = mbtmiRepository.countByCategory("잡담");
-		cnt = mbtmiDslRepository.countByCategoryPlusWriterMbti("취미", "NF");
-		cnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch("학교", "P", "스타");
-		System.out.println("결과: " + cnt);
-	}
 	
 	@Test
 	void mbtmiCommentList() throws Exception {

@@ -94,15 +94,15 @@ public class MbtmiServiceImpl implements MbtmiService {
 		
 		// 경우의 수 2^3=8
 		Long mbtmiCnt = 0L;
-		if (category == null && type == null && searchTerm == null) mbtmiCnt = mbtmiRepository.count();
+		if (category == null && type == null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, null, null);
 		
-		else if (category != null && type == null && searchTerm == null) mbtmiCnt = mbtmiRepository.countByCategory(category);
-		else if (category == null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByWriterMbtiContainingStr(type);
-		else if (category == null && type == null && searchTerm != null) mbtmiCnt = mbtmiRepository.countByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(searchTerm, searchTerm);
+		else if (category != null && type == null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, null, null);
+		else if (category == null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, type, null);
+		else if (category == null && type == null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, null, searchTerm);
 		
-		else if (category != null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbti(category, type);
-		else if (category != null && type == null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusSearch(category, searchTerm);
-		else if (category == null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByWriterMbtiPlusSearch(type, searchTerm);
+		else if (category != null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, null);
+		else if (category != null && type == null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, null, searchTerm);
+		else if (category == null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, type, searchTerm);
 		
 		else if (category != null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, searchTerm);
 		

@@ -111,10 +111,26 @@ public class MbtmiDslRepository {
 	    return strCondition;
 	}
 	
+	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm) {
+
+	    return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
+	    		.where(
+	    				category!=null? mbtmi.category.eq(category) : null,
+	    				type!=null? isWriterMbtiContainsStr(type) : null,
+	    				searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
+				    					.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+				    	mbtmi.isBlocked.eq("N")
+	    				)
+	    		.fetchOne();
+	}
+
+/*
 	// 타입 적용된 게시글 수 
 	public Long countByWriterMbtiContainingStr(String type) {
 		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
-				.where(isWriterMbtiContainsStr(type))
+				.where(isWriterMbtiContainsStr(type)
+						.and(mbtmi.isBlocked.eq("N"))
+						)
 				.fetchOne();
 	}
 	// 타입 && 검색어 적용된 게시글 수
@@ -124,6 +140,7 @@ public class MbtmiDslRepository {
 						isWriterMbtiContainsStr(type)
 						.and(mbtmi.title.containsIgnoreCase(searchTerm)
 								.or(mbtmi.content.containsIgnoreCase(searchTerm)))
+						.and(mbtmi.isBlocked.eq("N"))
 						)
 				.fetchOne();
 	}
@@ -134,6 +151,7 @@ public class MbtmiDslRepository {
 						mbtmi.category.eq(category)
 						.and(mbtmi.title.containsIgnoreCase(searchTerm)
 								.or(mbtmi.content.containsIgnoreCase(searchTerm)))
+						.and(mbtmi.isBlocked.eq("N"))
 						)
 				.fetchOne();
 	}
@@ -143,6 +161,7 @@ public class MbtmiDslRepository {
 				.where(
 						mbtmi.category.eq(category)
 						.and(isWriterMbtiContainsStr(type))
+						.and(mbtmi.isBlocked.eq("N"))
 						)
 				.fetchOne();
 	}
@@ -155,10 +174,11 @@ public class MbtmiDslRepository {
 						.and(isWriterMbtiContainsStr(type))
 						.and(mbtmi.title.containsIgnoreCase(searchTerm)
 								.or(mbtmi.content.containsIgnoreCase(searchTerm)))
+						.and(mbtmi.isBlocked.eq("N"))
 						)
 				.fetchOne();
 	}
-	
+*/	
 	
 	
 	
