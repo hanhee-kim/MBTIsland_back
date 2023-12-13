@@ -101,7 +101,7 @@ public class MbtmiDslRepository {
 	        BooleanExpression charCondition  = mbtmi.writerMbti.containsIgnoreCase(String.valueOf(type.charAt(j)));
 	        strCondition = (strCondition == null)? charCondition : strCondition.and(charCondition); // 1회차(0인덱스)는 한번비교, 2회차부터는 &&로 비교
 	        
-	        System.out.println("===> " + strCondition); 
+//	        System.out.println("===> " + strCondition); 
 	        /* 출력예시 type="IST"인 경우
 	         ===> containsIc(mbtmi.writerMbti,I)
 			 ===> containsIc(mbtmi.writerMbti,I) && containsIc(mbtmi.writerMbti,S)
@@ -111,28 +111,56 @@ public class MbtmiDslRepository {
 	    return strCondition;
 	}
 	
-	
-	// 카테고리 && 타입 적용된 게시글수
-	public Long countByCategoryPlusWriterMbti(String category, String type) {
+	// 타입 적용된 게시글 수 
+	public Long countByWriterMbtiContainingStr(String type) {
 		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
-				.where(
-						mbtmi.category.eq(category)
-						.and(mbtmi.writerMbti.containsIgnoreCase(type))
-						)
+				.where(isWriterMbtiContainsStr(type))
 				.fetchOne();
 	}
-	
-	// 카테고리 && 타입 && 검색어 적용된 게시글수
-	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm) {
+	// 타입 && 검색어 적용된 게시글 수
+	public Long countByWriterMbtiPlusSearch(String type, String searchTerm) {
 		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
 				.where(
-						mbtmi.category.eq(category)
-						.and(mbtmi.writerMbti.containsIgnoreCase(type))
+						isWriterMbtiContainsStr(type)
 						.and(mbtmi.title.containsIgnoreCase(searchTerm)
 								.or(mbtmi.content.containsIgnoreCase(searchTerm)))
 						)
 				.fetchOne();
 	}
+	// 카테고리 && 검색어 적용된 게시글 수
+	public Long countByCategoryPlusSearch(String category, String searchTerm) {
+		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
+				.where(
+						mbtmi.category.eq(category)
+						.and(mbtmi.title.containsIgnoreCase(searchTerm)
+								.or(mbtmi.content.containsIgnoreCase(searchTerm)))
+						)
+				.fetchOne();
+	}
+	// 카테고리 && 타입 적용된 게시글 수
+	public Long countByCategoryPlusWriterMbti(String category, String type) {
+		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
+				.where(
+						mbtmi.category.eq(category)
+						.and(isWriterMbtiContainsStr(type))
+						)
+				.fetchOne();
+	}
+	
+	// 카테고리 && 타입 && 검색어 적용된 게시글 수
+	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm) {
+		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
+				.where(
+						mbtmi.category.eq(category)
+						.and(isWriterMbtiContainsStr(type))
+						.and(mbtmi.title.containsIgnoreCase(searchTerm)
+								.or(mbtmi.content.containsIgnoreCase(searchTerm)))
+						)
+				.fetchOne();
+	}
+	
+	
+	
 	
 	// 특정 게시글의 댓글 목록
 	public List<MbtmiComment> findMbtmiCommentListByMbtmiNoAndPaging(Integer mbtmiNo, PageRequest pageRequest) {

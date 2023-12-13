@@ -83,26 +83,28 @@ public class MbtmiServiceImpl implements MbtmiService {
 		pageInfo.setAllPage(allPage);
 		pageInfo.setStartPage(startPage);
 		pageInfo.setEndPage(endPage);
-		if(pageInfo.getCurPage()>allPage) pageInfo.setCurPage(allPage); // 게시글 삭제시 예외처리
+//		if(pageInfo.getCurPage()>allPage) pageInfo.setCurPage(allPage); // 게시글 삭제시 예외처리
 		
-//		return mbtmiList;
 		return dtoList;
 	}
 
 	// 최신글수 조회 (PageInfo의 allPage값 계산시 필요)
 	@Override
 	public Integer mbtmiCntByCriteria(String category, String type, String searchTerm) throws Exception {
-		Long mbtmiCnt = mbtmiRepository.count();
 		
-		if(category!=null) {
-			mbtmiCnt = mbtmiRepository.countByCategory(category); // 카테고리o 타입x 검색어x
-			if(type!=null) {
-				mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbti(category, type); // 카테고리o 타입o 검색어x
-				if(searchTerm!=null) {
-					mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, searchTerm); // 카테고리o 타입o 검색어o
-				}
-			}
-		}
+		// 경우의 수 2^3=8
+		Long mbtmiCnt = 0L;
+		if (category == null && type == null && searchTerm == null) mbtmiCnt = mbtmiRepository.count();
+		
+		else if (category != null && type == null && searchTerm == null) mbtmiCnt = mbtmiRepository.countByCategory(category);
+		else if (category == null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByWriterMbtiContainingStr(type);
+		else if (category == null && type == null && searchTerm != null) mbtmiCnt = mbtmiRepository.countByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(searchTerm, searchTerm);
+		
+		else if (category != null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbti(category, type);
+		else if (category != null && type == null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusSearch(category, searchTerm);
+		else if (category == null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByWriterMbtiPlusSearch(type, searchTerm);
+		
+		else if (category != null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, searchTerm);
 		
 		return mbtmiCnt.intValue();
 	}

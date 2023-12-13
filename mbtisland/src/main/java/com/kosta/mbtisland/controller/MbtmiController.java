@@ -64,8 +64,8 @@ public class MbtmiController {
 	
 	// 게시글 상세
 	@GetMapping("/mbtmidetail/{no}")
-//	public ResponseEntity<Object> noticeDetail(@PathVariable Integer no, @RequestParam(required = false) Integer commentPage) {
-	public ResponseEntity<Object> noticeDetail(@PathVariable Integer no) {
+//	public ResponseEntity<Object> mbtmiDetail(@PathVariable Integer no, @RequestParam(required = false) Integer commentPage) {
+	public ResponseEntity<Object> mbtmiDetail(@PathVariable Integer no) {
 		try {
 			Mbtmi mbtmi = mbtmiService.mbtmiDetail(no); // 게시글
 			mbtmiService.increaseViewCount(no); // 조회수 증가
@@ -94,7 +94,7 @@ public class MbtmiController {
 	
 	// 댓글 목록
 	@GetMapping("/mbtmicommentlist/{no}")
-	public ResponseEntity<Object> noticeDetail(@PathVariable Integer no, @RequestParam(required = false) Integer commentpage) {
+	public ResponseEntity<Object> mbtmiCommentList(@PathVariable Integer no, @RequestParam(required = false) Integer commentpage) {
 		try {
 //			System.out.println("댓글목록 컨트롤러가 받은 파라미터: " + no + ", " + commentpage);
 			PageInfo pageInfo = PageInfo.builder().curPage(commentpage==null? 1: commentpage).build();
