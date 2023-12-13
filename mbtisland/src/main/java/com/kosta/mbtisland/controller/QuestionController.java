@@ -21,15 +21,21 @@ public class QuestionController {
 	@Autowired
 	private QuestionService questionService;
 	
+	/* 관리자페이지 */
+
 	// 문의글 목록
 	@GetMapping("/questionlist")
 	public ResponseEntity<Object> questionList(@RequestParam(required = false) String search
 											 , @RequestParam(required = false) String answered
-											 , @RequestParam(required = false) Integer page) {
+											 , @RequestParam(required = false) Integer page
+											 , @RequestParam(required = false) String username) {
+		
+//		System.out.println("문의글목록 컨트롤러가 받은 파라미터 search, answered, page, username : " + search + ", " + answered + ", " + page + ", " + username);
+		
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
-			List<Question> questionList = questionService.questionListBySearchAndFilterAndPaging(search, answered, pageInfo);
-			Map<String, Integer> questionCnts = questionService.getQuestionCounts(search, answered);
+			List<Question> questionList = questionService.questionListBySearchAndFilterAndPaging(search, answered, pageInfo, username);
+			Map<String, Integer> questionCnts = questionService.getQuestionCounts(search, username);
 			
 			Map<String, Object> res = new HashMap<>();
 	        res.put("pageInfo", pageInfo);
@@ -41,28 +47,10 @@ public class QuestionController {
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
-	
-	// 특정 유저의 문의글 모아보기
-	@GetMapping("/questionlistofuser")
-	public ResponseEntity<Object> questionListOfUser(@RequestParam String user
-													, @RequestParam(required = false) String answered
-													, @RequestParam(required = false) Integer page) {
-		try {
-			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
-			List<Question> questionList = questionService.questionListByUserAndFilterAndPaging(user, answered, pageInfo);
-			Map<String, Integer> questionCnts = questionService.getQuestionCountsByUser(user, answered);
-			
-			Map<String, Object> res = new HashMap<>();
-	        res.put("pageInfo", pageInfo);
-	        res.put("questionList", questionList);
-	        res.put("questionCnts", questionCnts);
-	        return new ResponseEntity<Object>(res, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-	}
-	
 	
 
+		
+	/* 마이페이지 */
+		
+		
 }
