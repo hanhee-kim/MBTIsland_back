@@ -3,6 +3,7 @@ package com.kosta.mbtisland.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Answer;
 import com.kosta.mbtisland.entity.Question;
+import com.kosta.mbtisland.service.AnswerService;
 import com.kosta.mbtisland.service.QuestionService;
 
 @RestController
@@ -23,6 +26,9 @@ public class QuestionController {
 	
 	@Autowired
 	private QuestionService questionService;
+	
+	@Autowired
+	private AnswerService answerService;
 	
 	// 문의글 목록
 	@GetMapping("/questionlist")
@@ -84,6 +90,24 @@ public class QuestionController {
 		}
 	}
 	
+	//문의글 상세보기
+	@GetMapping("/questiondetail/{no}")
+	public ResponseEntity<Object> questionDetailByNo(@PathVariable Integer no){
+		System.out.println("문의디테일넘버컨트롤러");
+		Map<String, Object> res = new HashMap<>();
+		try {
+			Question question = questionService.questionDetailByNo(no);
+			Optional<Answer> answer = answerService.findByQuestionNo(no);
+			res.put("question", question);
+			if(answer.isPresent()) {
+				res.put("answer", answer.get());
+			}
+			return new ResponseEntity<Object>(res,HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+	}
 	
 	
 
