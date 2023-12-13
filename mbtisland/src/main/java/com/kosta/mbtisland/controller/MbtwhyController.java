@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
@@ -21,23 +22,21 @@ public class MbtwhyController {
 	@Autowired
 	private MbtwhyService mbtwhyService;
 	
-	// 게시글 페이징, 목록, 개수 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
+	// 게시글 페이징, 게시글 목록, 인기 게시글, 개수 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
 	@GetMapping("/mbtwhy")
 	public ResponseEntity<Object> mbtwhyList(@RequestParam(required = false) String mbti, @RequestParam(required = false) Integer page,
 			@RequestParam(required = false) String search, @RequestParam(required = false) String sort) {
 		Map<String, Object> res = new HashMap<>();
 		try {
-			System.out.println("MBTI 타입은 " + mbti);
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1 : page).build();
-			List<Mbtwhy> mbtwhyList = mbtwhyService.selectMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageInfo, search, sort);
-			Long mbtwhyCnt = mbtwhyService.selectMbtwhyCountByMbtiAndSearch(mbti, search);
-			System.out.println("페이지"+pageInfo);
-			System.out.println("리스트"+mbtwhyList.get(0).getContent());
-			System.out.println("카운트"+mbtwhyCnt);
+			List<MbtwhyDto> mbtwhyList = mbtwhyService.selectMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageInfo, search, sort);
+			MbtwhyDto mbtwhyHot = mbtwhyService.selectDailyHotMbtwhy(mbti);
+//			Long mbtwhyCnt = mbtwhyService.selectMbtwhyCountByMbtiAndSearch(mbti, search);
 			
 			res.put("pageInfo", pageInfo);
 			res.put("mbtwhyList", mbtwhyList);
-			res.put("mbtwhyCnt", mbtwhyCnt);
+			res.put("mbtwhyHot", mbtwhyHot);
+//			res.put("mbtwhyCnt", mbtwhyCnt);
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -53,12 +52,9 @@ public class MbtwhyController {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(commentPage==null? 1 : commentPage).build();
 			
-			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(no);
+			MbtwhyDto mbtwhy = mbtwhyService.selectMbtwhyByNo(no);
 			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo);
-			Long mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
-			System.out.println("페이지"+pageInfo);
-//			System.out.println("리스트"+mbtwhyCommentList.get(0).getCommentContent());
-			System.out.println("카운트"+mbtwhyCommentCnt);
+			Integer mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
 			
 			res.put("pageInfo", pageInfo);
 			res.put("mbtwhy", mbtwhy);

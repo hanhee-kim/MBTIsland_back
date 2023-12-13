@@ -3,6 +3,9 @@ package com.kosta.mbtisland.repository;
 import static com.kosta.mbtisland.entity.QMbtwhy.mbtwhy;
 import static com.kosta.mbtisland.entity.QMbtwhyComment.mbtwhyComment;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,20 @@ public class MbtwhyDslRepository {
 										mbtwhy.mbtiCategory.eq(mbti)).fetchOne();
 	}
 	
+	// 일간 인기 게시글 조회 (MBTI)
+	public Mbtwhy findDailyHotMbtwhy(String mbti) throws Exception {
+		// 현재 날짜
+		LocalDate currentDate = LocalDate.now();
+		Timestamp startDate = Timestamp.valueOf(currentDate.atStartOfDay());
+		
+		return jpaQueryFactory.select(mbtwhy)
+				.from(mbtwhy)
+				.where(mbtwhy.writeDate.after(startDate),
+						mbtwhy.mbtiCategory.eq(mbti),
+						mbtwhy.isBlocked.eq("N"))
+				.orderBy(mbtwhy.recommendCnt.desc())
+				.limit(1).fetchOne();
+	}
 	
 	// 댓글 목록 조회 (게시글 번호)
 	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) {

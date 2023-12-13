@@ -1,11 +1,13 @@
 package com.kosta.mbtisland.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
@@ -27,26 +29,45 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	private MbtwhyCommentRepository mbtwhyCommentRepository;
 	
 	// 게시글 목록 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
+	// 댓글수 포함
 	@Override
-	public List<Mbtwhy> selectMbtwhyListByMbtiAndPageAndSearchAndSort
+	public List<MbtwhyDto> selectMbtwhyListByMbtiAndPageAndSearchAndSort
 		(String mbti, PageInfo pageInfo, String search, String sort) throws Exception {
 		// 페이지 번호, 한 페이지에 보여줄 게시글 수
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5);
 		List<Mbtwhy> mbtwhyList = mbtwhyDslRepository.findMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageRequest, search, sort);
-		System.out.println("리스트"+mbtwhyList.get(0).getContent());
-		// 페이징 계산
-		// MbtwhyController에서 넘겨준 pageInfo를 참조하기에, 반환하지 않아도 됨
-		Long allCount = mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearch(mbti, search);
-		Integer allPage = allCount.intValue() / pageRequest.getPageSize();
-		if(allCount % pageRequest.getPageSize()!=0) allPage += 1;
-		Integer startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
-		Integer endPage = Math.min(startPage + 10 - 1, allPage);
+
+		if(mbtwhyList.size()!=0) {
+			List<MbtwhyDto> dtoList = new ArrayList<>();
+			// Entity => Dto
+			// 각 Mbtwhy 객체 변수마다 댓글 개수 추가
+			for(Mbtwhy mbtwhy : mbtwhyList) {
+				Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
 				
-		pageInfo.setAllPage(allPage);
-		pageInfo.setStartPage(startPage);
-		pageInfo.setEndPage(endPage);
-						
-		return mbtwhyList;
+				MbtwhyDto dto = MbtwhyDto.builder().no(mbtwhy.getNo()).content(mbtwhy.getContent()).mbtiCategory(mbtwhy.getMbtiCategory())
+						.viewCnt(mbtwhy.getViewCnt()).recommendCnt(mbtwhy.getRecommendCnt()).writeDate(mbtwhy.getWriteDate())
+						.isBlocked(mbtwhy.getIsBlocked()).writerId(mbtwhy.getWriterId()).writerNickname(mbtwhy.getWriterNickname())
+						.writerMbti(mbtwhy.getWriterMbti()).writerMbtiColor(mbtwhy.getWriterMbtiColor()).commentCnt(commentCnt).build();
+				
+				dtoList.add(dto);
+			}
+			
+			// 페이징 계산
+			// MbtwhyController에서 넘겨준 pageInfo를 참조하기에, 반환하지 않아도 됨
+			Long allCount = mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearch(mbti, search);
+			Integer allPage = allCount.intValue() / pageRequest.getPageSize();
+			if(allCount % pageRequest.getPageSize()!=0) allPage += 1;
+			Integer startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
+			Integer endPage = Math.min(startPage + 10 - 1, allPage);
+			
+			pageInfo.setAllPage(allPage);
+			pageInfo.setStartPage(startPage);
+			pageInfo.setEndPage(endPage);
+			
+			return dtoList;
+		}
+		
+		return null;		
 	}
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값, 정렬 옵션)
@@ -57,8 +78,35 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	
 	// 게시글 조회 (게시글 번호)
 	@Override
-	public Mbtwhy selectMbtwhyByNo(Integer no) throws Exception {
-		return mbtwhyRepository.findByNo(no);
+	public MbtwhyDto selectMbtwhyByNo(Integer no) throws Exception {
+		Mbtwhy mbtwhy = mbtwhyRepository.findByNo(no);
+		
+		if(mbtwhy!=null) {
+			Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
+			MbtwhyDto dto = MbtwhyDto.builder().no(mbtwhy.getNo()).content(mbtwhy.getContent()).mbtiCategory(mbtwhy.getMbtiCategory())
+					.viewCnt(mbtwhy.getViewCnt()).recommendCnt(mbtwhy.getRecommendCnt()).writeDate(mbtwhy.getWriteDate())
+					.isBlocked(mbtwhy.getIsBlocked()).writerId(mbtwhy.getWriterId()).writerNickname(mbtwhy.getWriterNickname())
+					.writerMbti(mbtwhy.getWriterMbti()).writerMbtiColor(mbtwhy.getWriterMbtiColor()).commentCnt(commentCnt).build();
+			return dto;
+		}
+		return null;
+	}
+	
+	// 일간 인기 게시글 조회 (MBTI)
+	// 댓글수 포함
+	@Override
+	public MbtwhyDto selectDailyHotMbtwhy(String mbti) throws Exception {
+		Mbtwhy mbtwhy = mbtwhyDslRepository.findDailyHotMbtwhy(mbti);
+		
+		if(mbtwhy!=null) {
+			Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
+			MbtwhyDto dto = MbtwhyDto.builder().no(mbtwhy.getNo()).content(mbtwhy.getContent()).mbtiCategory(mbtwhy.getMbtiCategory())
+					.viewCnt(mbtwhy.getViewCnt()).recommendCnt(mbtwhy.getRecommendCnt()).writeDate(mbtwhy.getWriteDate())
+					.isBlocked(mbtwhy.getIsBlocked()).writerId(mbtwhy.getWriterId()).writerNickname(mbtwhy.getWriterNickname())
+					.writerMbti(mbtwhy.getWriterMbti()).writerMbtiColor(mbtwhy.getWriterMbtiColor()).commentCnt(commentCnt).build();
+			return dto;
+		}
+		return null;
 	}
 	
 	// 게시글 작성
@@ -92,10 +140,11 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 
 	// 댓글 개수 조회 (게시글 번호)
 	@Override
-	public Long selectMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception {
-		return mbtwhyDslRepository.findMbtwhyCommentCountByMbtwhyNo(no);
+	public Integer selectMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception {
+		return mbtwhyDslRepository.findMbtwhyCommentCountByMbtwhyNo(no).intValue();
 	}
-	
+
+	// 댓글 작성
 	@Override
 	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception {
 		mbtwhyCommentRepository.save(mbtwhyComment);
