@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.kosta.mbtisland.dto.NoteDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Note;
+import com.kosta.mbtisland.repository.AlarmRepository;
 import com.kosta.mbtisland.repository.NoteDslRepository;
 import com.kosta.mbtisland.repository.NoteRepository;
 import com.kosta.mbtisland.repository.UserRepository;
@@ -25,6 +27,8 @@ public class NoteServiceImpl implements NoteService{
 	private NoteDslRepository noteDslRepository;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private AlarmRepository alarmRepository;
 	
 
 	//쪽지작성
@@ -36,7 +40,20 @@ public class NoteServiceImpl implements NoteService{
 						.receiveUsername(noteDto.getReceiveUsername())
 						.build();
 		noteRepository.save(note);
-				
+		//노트 작성하면 알림테이블에 추가
+//		System.out.println(note.getNoteNo());
+//		Alarm alarm = Alarm.builder()
+//				.username(note.getReceiveUsername())
+//				.alarmType("쪽지")
+//				.alarmTargetNo(note.getNoteNo())
+//				.alarmTargetFrom("Note")
+//				.alarmReadDate(null)
+//				.alarmUpdateDtae(null)
+//				.build();
+//		alarmRepository.save(alarm);
+	//readDate랑 updateDate 왜 NOT NULL	?		
+	
+		
 	}
 	
 	//쪽지 불러오기(유저ID,noteType,readType,page)
@@ -85,6 +102,7 @@ public class NoteServiceImpl implements NoteService{
 	@Override
 	public NoteDto getNoteDtoByNoteNo(Integer noteNo) throws Exception {
 		Optional<Note> opiontalNote = noteRepository.findById(noteNo);
+		//읽음 여부 변경
 		opiontalNote.get().setNoteIsRead("Y");
 		noteRepository.save(opiontalNote.get());
 		if(opiontalNote.isEmpty()) throw new Exception("해당번호의 Note없음");
