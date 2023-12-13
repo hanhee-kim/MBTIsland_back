@@ -30,7 +30,7 @@ public class Answer {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer no;
+	private Integer answerNo;
 	
 	@Column
 	private String title;
