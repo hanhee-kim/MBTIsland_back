@@ -110,5 +110,11 @@ public class MbtmiController {
 		}
 	}
 	
+	// 댓글 삭제(컬럼값 업데이트)
+//	@DeleteMapping("/deletembtmicomment/{no}")
+//	public ResponseEntity<Object> deleteMbtmiComment(@PathVariable Integer commentNo) {
+//		
+//	}
+	
 
 }
