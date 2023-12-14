@@ -30,7 +30,7 @@ public class NoteDslRepository {
 			Note noteClass = tuple.get(0, Note.class);
 			String sentNick = tuple.get(1,String.class);
 			String receiveNick = tuple.get(2,String.class);
-			System.out.println("sentNick : "+sentNick);
+//			System.out.println("sentNick : "+sentNick);
 		    noteDtoList.add(NoteDto.builder()
 		            .noteNo(noteClass.getNoteNo())
 		            .sentUsername(noteClass.getSentUsername())

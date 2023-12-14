@@ -100,23 +100,26 @@ public class NoteServiceImpl implements NoteService{
 
 	//note자세히
 	@Override
-	public NoteDto getNoteDtoByNoteNo(Integer noteNo) throws Exception {
-		Optional<Note> opiontalNote = noteRepository.findById(noteNo);
-		//읽음 여부 변경
-		opiontalNote.get().setNoteIsRead("Y");
-		noteRepository.save(opiontalNote.get());
-		if(opiontalNote.isEmpty()) throw new Exception("해당번호의 Note없음");
-		String sentNick = userRepository.findByUsername(opiontalNote.get().getSentUsername()).getUserNickname();
-		String receiveNick = userRepository.findByUsername(opiontalNote.get().getReceiveUsername()).getUserNickname();
+	public NoteDto getNoteDtoByNoteNo(Integer noteNo ,String userType) throws Exception {
+		Optional<Note> optionalNote = noteRepository.findById(noteNo);
+		if(userType != null && userType.equals("receive")) {
+			System.out.println("yes로 온다 리시브다 받는경우");
+			//userType이 receive라면 읽음 여부 변경
+			optionalNote.get().setNoteIsRead("Y");
+			noteRepository.save(optionalNote.get());
+		}
+		if(optionalNote.isEmpty()) throw new Exception("해당번호의 Note없음");
+		String sentNick = userRepository.findByUsername(optionalNote.get().getSentUsername()).getUserNickname();
+		String receiveNick = userRepository.findByUsername(optionalNote.get().getReceiveUsername()).getUserNickname();
 		NoteDto note = NoteDto.builder()
-						.noteNo(opiontalNote.get().getNoteNo())
-						.sentUsername(opiontalNote.get().getSentUsername())
+						.noteNo(optionalNote.get().getNoteNo())
+						.sentUsername(optionalNote.get().getSentUsername())
 			            .sentUserNick(sentNick)
-			            .noteContent(opiontalNote.get().getNoteContent())
-			            .receiveUsername(opiontalNote.get().getReceiveUsername())
+			            .noteContent(optionalNote.get().getNoteContent())
+			            .receiveUsername(optionalNote.get().getReceiveUsername())
 			            .receiveUserNick(receiveNick)
-			            .sentDate(opiontalNote.get().getSentDate())
-			            .noteIsRead(opiontalNote.get().getNoteIsRead())
+			            .sentDate(optionalNote.get().getSentDate())
+			            .noteIsRead(optionalNote.get().getNoteIsRead())
 			            .build();
 		return note;
 	}

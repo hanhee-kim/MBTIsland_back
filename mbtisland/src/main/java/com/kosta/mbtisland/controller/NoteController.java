@@ -62,11 +62,14 @@ public class NoteController {
 		
 	}
 	//notedetail
-	@GetMapping("/notedetail/{noteNo}")
-	public ResponseEntity<Object> noteDetail(@PathVariable Integer noteNo){
+	@GetMapping("/notedetail/{noteNo}/{userType}")
+	public ResponseEntity<Object> noteDetail(@PathVariable Integer noteNo,@PathVariable(required = false) String userType){
 		System.out.println("노트 자세히 컨트롤러");
+		if(userType != null) {
+			System.out.println("userType : "+userType);
+		}
 		try {
-			NoteDto note = noteService.getNoteDtoByNoteNo(noteNo);
+			NoteDto note = noteService.getNoteDtoByNoteNo(noteNo , userType);
 			return new ResponseEntity<Object>(note,HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

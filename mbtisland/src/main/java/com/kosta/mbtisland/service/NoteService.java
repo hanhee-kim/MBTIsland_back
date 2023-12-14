@@ -12,5 +12,5 @@ public interface NoteService {
 	//쪽지 불러오기(유저ID,noteType,readType,page)
 	List<NoteDto> getNoteListByUsernameAndNoteTypeAndReadTypeAndPage(String username,String noteType,String readType,PageInfo page) throws Exception;
 	//쪽지 자세히
-	NoteDto getNoteDtoByNoteNo(Integer noteNo)throws Exception;
+	NoteDto getNoteDtoByNoteNo(Integer noteNo , String userType)throws Exception;
 }
