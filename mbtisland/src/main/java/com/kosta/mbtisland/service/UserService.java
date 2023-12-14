@@ -1,7 +1,10 @@
 package com.kosta.mbtisland.service;
 
+import java.util.List;
 import java.util.Map;
 
+import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.UserEntity;
 
 public interface UserService {
@@ -19,6 +22,8 @@ public interface UserService {
 	UserEntity modifyUser(UserEntity user,Map<String, Object> param) throws Exception;
 	UserEntity setAddUser(UserEntity user,String mbti) throws Exception;
 	
+	//마이페이지에서 내가 작성한 게시글 불러오기
+	List<Mbtwhy> getMyMbtwhyListByPage(String username,PageInfo pageInfo) throws Exception;
 	
 
 }

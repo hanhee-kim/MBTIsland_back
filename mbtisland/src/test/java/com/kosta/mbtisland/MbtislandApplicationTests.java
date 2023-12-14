@@ -19,6 +19,7 @@ import com.kosta.mbtisland.entity.Question;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
+import com.kosta.mbtisland.repository.MbtwhyRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
 import com.kosta.mbtisland.repository.QuestionRepository;
@@ -49,6 +50,8 @@ class MbtislandApplicationTests {
 	// 인수
 	@Autowired
 	private MbtwhyServiceImpl mbtwhyServiceImpl;
+	@Autowired
+	private MbtwhyRepository mbtwhyRepository;
 	@Autowired
 	private MbtwhyDslRepository mbtwhyDslRepository;
 
@@ -248,6 +251,15 @@ class MbtislandApplicationTests {
 	
 	
 	@Test
+	void mbtwhyCntBy() {
+		try {
+			Integer cnt = mbtwhyRepository.countByWriterId("121212");
+			System.out.println("결과 : "+ cnt);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@Test
 	void mbtmiCommentList() throws Exception {
 		// 컨트롤러
 		Integer mbtmiNo = 240;
@@ -275,7 +287,6 @@ class MbtislandApplicationTests {
 		System.out.println("결과: " + commentCnt);
 	}
 
-	
 	
 	
 }

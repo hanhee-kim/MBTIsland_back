@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		// UserDetails(DB값)의 getPassword() 함수로 비교해서 동일하면
 		// Authentication 객체를 만들어서 필터체인으로 리턴해준다.
 		Authentication authentication = authenticationManager.authenticate(authenticationToken);
-		PrincipalDetails principalDetails= (PrincipalDetails)authentication.getPrincipal();
+//		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
 		
 		return authentication;
 	}
@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		PrincipalDetails principalDetails= (PrincipalDetails)authResult.getPrincipal();
-		
+		ObjectMapper om = new ObjectMapper();
 		String jwtToken = JWT.create()
 							.withSubject(principalDetails.getUsername())
 							.withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
@@ -68,8 +68,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		
 //		response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
 //		response.setStatus(HttpServletResponse.SC_OK);
-		System.out.println(jwtToken);
+		System.out.println("토큰:"+jwtToken);
 		response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
+		om.writeValue(response.getOutputStream(), principalDetails.getUser());
 		response.setContentType("application/json; charset=utf-8");
 	}
 }
