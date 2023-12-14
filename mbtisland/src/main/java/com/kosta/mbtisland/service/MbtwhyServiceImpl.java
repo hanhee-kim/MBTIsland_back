@@ -147,7 +147,7 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 
 	// 댓글 작성
 	@Override
-	public String insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception {
-		return mbtwhyCommentRepository.save(mbtwhyComment).getWriterId();
+	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception {
+		mbtwhyCommentRepository.save(mbtwhyComment);
 	}
 }

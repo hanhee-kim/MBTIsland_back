@@ -41,7 +41,7 @@ public class MbtwhyComment {
 	private String isBlocked;
 	
 	@Column
-	private Integer parentCommentNo;
+	private Integer parentcommentNo;
 	
 	@Column
 	private String writerId;

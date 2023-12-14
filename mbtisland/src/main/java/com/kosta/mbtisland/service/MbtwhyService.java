@@ -17,5 +17,5 @@ public interface MbtwhyService {
 	
 	public List<MbtwhyComment> selectMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageInfo pageInfo) throws Exception; // 댓글 목록 조회
 	public Integer selectMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception; // 댓글 개수 조회
-	public String insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception; // 댓글 작성
+	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception; // 댓글 작성
 }
