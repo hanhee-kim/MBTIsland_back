@@ -13,9 +13,9 @@ public interface MbtwhyService {
 	public Long selectMbtwhyCountByMbtiAndSearch(String mbti, String search) throws Exception; // 게시글 개수 조회
 	public MbtwhyDto selectMbtwhyByNo(Integer no) throws Exception; // 게시글 조회
 	public MbtwhyDto selectDailyHotMbtwhy(String mbti) throws Exception; // 일간 인기 게시글 조회
-	public void insertMbtwhy(Mbtwhy mbtwhy) throws Exception;	// 게시글 작성
+	public Integer insertMbtwhy(Mbtwhy mbtwhy) throws Exception;	// 게시글 작성
 	
 	public List<MbtwhyComment> selectMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageInfo pageInfo) throws Exception; // 댓글 목록 조회
 	public Integer selectMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception; // 댓글 개수 조회
-	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception; // 댓글 작성
+	public String insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception; // 댓글 작성
 }

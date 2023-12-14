@@ -1,5 +1,7 @@
 package com.kosta.mbtisland.controller;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +18,7 @@ import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
+import com.kosta.mbtisland.entity.UserEntity;
 import com.kosta.mbtisland.service.MbtwhyService;
 
 @RestController
@@ -46,14 +50,16 @@ public class MbtwhyController {
 	
 	// 게시글 조회 (게시글 번호)
 	@GetMapping("/mbtwhydetail")
-	public ResponseEntity<Object> mbtwhyList(@RequestParam(required = false) Integer no, @RequestParam(required = false) Integer commentPage) {
-		System.out.println(no + ", " + commentPage);
+	public ResponseEntity<Object> mbtwhyDetail(@RequestParam(required = false) Integer no, @RequestParam(required = false) Integer commentPage) {
 		Map<String, Object> res = new HashMap<>();
 		try {
+			// 페이지 정보
 			PageInfo pageInfo = PageInfo.builder().curPage(commentPage==null? 1 : commentPage).build();
-			
+			// Mbtwhy 게시글
 			MbtwhyDto mbtwhy = mbtwhyService.selectMbtwhyByNo(no);
+			// 게시글 댓글 목록
 			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo);
+			// 게시글 댓글 수
 			Integer mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
 			
 			res.put("pageInfo", pageInfo);
@@ -61,11 +67,66 @@ public class MbtwhyController {
 			res.put("mbtwhyCommentList", mbtwhyCommentList);
 			res.put("mbtwhyCommentCnt", mbtwhyCommentCnt);
 			
-			System.out.println(mbtwhy.getWriterId());
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+	
+	// 게시글 작성
+	@PostMapping("/mbtwhywrite")
+	public ResponseEntity<Object> mbtwhyWrite(@RequestParam(required = false) String mbti, @RequestParam(required = false) String content) {
+		Map<String, Object> res = new HashMap<>();
+		LocalDate currentDate = LocalDate.now();
+		Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+		
+		try {
+			Mbtwhy mbtwhy = Mbtwhy.builder()
+					.content(content)
+					.mbtiCategory(mbti)
+					.writerId("user01")
+					.writerNickname("닉네임1")
+					.writerMbti("INFP")
+					.writerMbtiColor("#648181")
+					.writeDate(writeDate).build();
+			
+			// 게시글 삽입과 동시에 해당 컬럼에서 auto increment로 생성되는 id인 no 반환받음
+			Integer no = mbtwhyService.insertMbtwhy(mbtwhy);
+			res.put("no", no);
+			
+			return new ResponseEntity<Object>(res, HttpStatus.OK);		
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	// 댓글 작성
+	@PostMapping("/mbtwhydetail")
+	public ResponseEntity<Object> mbtwhyDetailComment(@RequestParam(required = false) Integer no, @RequestParam(required = false) UserEntity user,
+	@RequestParam(required = false) String comment, @RequestParam(required = false) Integer parentCommentNo) {
+		Map<String, Object> res = new HashMap<>();
+		LocalDate currentDate = LocalDate.now();
+		Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+	
+		try {
+			MbtwhyComment mbtwhyComment = MbtwhyComment.builder()
+					.commentContent(comment)
+					.mbtwhyNo(no)
+					.parentCommentNo(parentCommentNo)
+					.writerId(user.getUsername())
+					.writerNickname(user.getUserNickname())
+					.writerMbti(user.getUserMbti())
+					.writerMbtiColor(user.getUserMbtiColor())
+					.writeDate(writeDate)
+					.build();
+			mbtwhyService.insertMbtwhyComment(mbtwhyComment);
+					
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 		return null;
 	}
 }

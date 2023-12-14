@@ -102,8 +102,8 @@ class MbtislandApplicationTests {
 				.content("하이요!!!!!!!!!!!")
 				.mbtiCategory("ISTJ")
 //				.writeDate(stringToTimestamp)
-				.writerId("user03")
-				.writerNickname("하이")
+				.writerId("asdf")
+				.writerNickname("asdf")
 				.writerMbti("ISTP")
 				.writerMbtiColor("#4D6879").build();
 		

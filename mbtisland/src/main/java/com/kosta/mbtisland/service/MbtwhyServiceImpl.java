@@ -111,8 +111,8 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	
 	// 게시글 작성
 	@Override
-	public void insertMbtwhy(Mbtwhy mbtwhy) throws Exception {
-		mbtwhyRepository.save(mbtwhy);
+	public Integer insertMbtwhy(Mbtwhy mbtwhy) throws Exception {
+		return mbtwhyRepository.save(mbtwhy).getNo();
 	}
 	
 	// 댓글 목록 조회 (게시글 번호)
@@ -125,7 +125,7 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 					
 		// 페이징 계산
 		// MbtwhyCommentController에서 넘겨준 pageInfo를 참조하기에, 반환하지 않아도 됨
-		Long allCount = mbtwhyDslRepository.findMbtwhyCommentCountByMbtwhyNo(no);
+		Integer allCount = mbtwhyCommentRepository.countByMbtwhyNo(no);
 		Integer allPage = allCount.intValue() / pageRequest.getPageSize();
 		if(allCount % pageRequest.getPageSize()!=0) allPage += 1;
 		Integer startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
@@ -141,12 +141,13 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	// 댓글 개수 조회 (게시글 번호)
 	@Override
 	public Integer selectMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception {
-		return mbtwhyDslRepository.findMbtwhyCommentCountByMbtwhyNo(no).intValue();
+		//return mbtwhyDslRepository.findMbtwhyCommentCountByMbtwhyNo(no).intValue();
+		return mbtwhyCommentRepository.countByMbtwhyNo(no);
 	}
 
 	// 댓글 작성
 	@Override
-	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception {
-		mbtwhyCommentRepository.save(mbtwhyComment);
+	public String insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception {
+		return mbtwhyCommentRepository.save(mbtwhyComment).getWriterId();
 	}
 }
