@@ -165,6 +165,15 @@ public class MbtmiServiceImpl implements MbtmiService {
 		mbtmiRepository.deleteById(no);
 	}
 
+	// 댓글 삭제(IS_REMOVED 컬럼값 업데이트)
+	@Override
+	public void deleteMbtmiComment(Integer commentNo) throws Exception {
+		Optional<MbtmiComment> targetComment = mbtmiCommentRepository.findById(commentNo);
+		if(targetComment.isEmpty()) throw new Exception("댓글이 존재하지 않습니다");
+		targetComment.get().setIsRemoved("Y");
+		mbtmiCommentRepository.save(targetComment.get());
+	}
+
 
 	
 

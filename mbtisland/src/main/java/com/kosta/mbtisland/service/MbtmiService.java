@@ -33,7 +33,7 @@ public interface MbtmiService {
 	// 게시글 삭제
 	void deleteMbtmi(Integer no) throws Exception;
 
-
-	
+	// 댓글 삭제(IS_REMOVED 컬럼값 업데이트)
+	void deleteMbtmiComment(Integer commentNo) throws Exception;
 
 }

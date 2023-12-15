@@ -158,8 +158,7 @@ public class MbtmiDslRepository {
 	// 4. 특정 게시글의 댓글 목록
 	public List<MbtmiComment> findMbtmiCommentListByMbtmiNoAndPaging(Integer mbtmiNo, PageRequest pageRequest) {
 		return jpaQueryfactory.selectFrom(mbtmiComment)
-								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo)
-										.and(mbtmiComment.isBlocked.eq("N")))
+								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo))
 								.orderBy(mbtmiComment.writeDate.asc())
 								.offset(pageRequest.getOffset())
 								.limit(pageRequest.getPageSize())
@@ -173,8 +172,8 @@ public class MbtmiDslRepository {
 	            .from(mbtmiComment)
 	            .where(
 	                    mbtmiComment.mbtmiNo.eq(mbtmiNo)
-	                        .and(mbtmiComment.isBlocked.eq("N"))
-	                        .and(mbtmiComment.isRemoved.eq("N"))
+//	                        .and(mbtmiComment.isBlocked.eq("N"))
+//	                        .and(mbtmiComment.isRemoved.eq("N"))
 	            )
 	            .fetchOne();
 	}

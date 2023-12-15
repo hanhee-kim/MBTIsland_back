@@ -110,11 +110,18 @@ public class MbtmiController {
 		}
 	}
 	
-	// 댓글 삭제(컬럼값 업데이트)
-//	@DeleteMapping("/deletembtmicomment/{no}")
-//	public ResponseEntity<Object> deleteMbtmiComment(@PathVariable Integer commentNo) {
-//		
-//	}
+	// 댓글 삭제(IS_REMOVED 컬럼값 업데이트)
+	@GetMapping("/deletembtmicomment/{commentNo}")
+	public ResponseEntity<String> deleteMbtmiComment(@PathVariable Integer commentNo) {
+		System.out.println("댓글삭제 컨트롤러 호출");
+		try {
+			mbtmiService.deleteMbtmiComment(commentNo);
+			return new ResponseEntity<String>("삭제된 댓글입니다", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
 	
 
 }
