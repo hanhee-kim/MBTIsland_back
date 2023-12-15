@@ -1,13 +1,19 @@
 package com.kosta.mbtisland.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,4 +78,59 @@ public class MbtwhyController {
 		}
 		return null;
 	}
+	
+	
+	
+	
+	
+	
+	
+	//Mypage에서 myMbt-Why 최초 로드시
+	@GetMapping("/mymbtwhy/{username}/{page}")//@RequestParam usename?
+	public ResponseEntity<Map<String,Object>> myMbtwhyList(@PathVariable String username,@PathVariable(required = false) Integer page){
+		System.out.println("myYLIstController진입");
+		System.out.println(page);
+		System.out.println(username);
+		PageInfo pageInfo = new PageInfo(page);
+		pageInfo.setCurPage(page==null? 1:page);
+		Map<String, Object> res = new HashMap<String, Object>();
+		try {
+			List<Mbtwhy> myMbtwhyList = mbtwhyService.getMyMbtwhyListByPage(username, pageInfo);
+			res.put("myMbtwhyList", myMbtwhyList);
+			res.put("pageInfo", pageInfo);
+			return new ResponseEntity<Map<String,Object>>(res,HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			res.put("errMsg", e.getMessage());
+			return new ResponseEntity<Map<String,Object>>(res,HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	//배열의 No 삭제
+	@DeleteMapping("/deletembtwhy")				//@RequestBody Map<String,String> param
+	public ResponseEntity<Object> deleteMbtwhyList(@RequestParam String sendArrayItems){
+		System.out.println("delete컨트롤러 진입");
+		System.out.println(sendArrayItems);
+		//숫자 형태의 리스트로 변환
+		List<Integer> noList = Arrays.stream(sendArrayItems.split(","))
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+//		for(Integer no : noList) {
+//			System.out.println(no);
+//		}
+		try {
+			mbtwhyService.updateIsRemoved(noList);
+			return new ResponseEntity<Object>("삭제컬럼 변경 성공",HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>("삭제 변경 실패",HttpStatus.OK);
+		}
+		
+	}
+	
+	
+	
+	
+	
+	
 }

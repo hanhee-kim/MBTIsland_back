@@ -22,8 +22,6 @@ public interface UserService {
 	UserEntity modifyUser(UserEntity user,Map<String, Object> param) throws Exception;
 	UserEntity setAddUser(UserEntity user,String mbti) throws Exception;
 	
-	//마이페이지에서 내가 작성한 게시글 불러오기
-	List<Mbtwhy> getMyMbtwhyListByPage(String username,PageInfo pageInfo) throws Exception;
 	
 
 }

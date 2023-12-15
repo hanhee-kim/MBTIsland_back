@@ -1,6 +1,7 @@
 package com.kosta.mbtisland.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -100,4 +101,58 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception {
 		mbtwhyCommentRepository.save(mbtwhyComment);
 	}
+	
+	
+	
+	
+	
+	
+	//마이페이지에서 내가 작성한 mbtwhyList불러오기 ( 회원ID,page로 mbtwhyList )
+		@Override
+		public List<Mbtwhy> getMyMbtwhyListByPage(String username,PageInfo pageInfo) throws Exception {
+			System.out.println(pageInfo.getCurPage());
+			 List<Mbtwhy> myMbtwhyAllList = mbtwhyRepository.findByWriterId(username);
+			 Integer itemsPerPage = 10;
+			 int pagesPerGroup = 10;
+			 PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, 10);
+			 if(myMbtwhyAllList.isEmpty()) {
+				throw new Exception("myMbtwhyList 사이즈 0");
+			 }else {
+//				 mbtwhyRepository.count(null)
+				 List<Mbtwhy> myMbtwhyList = mbtwhyDslRepository.findMbtwhyListUserAndPaging(username,pageRequest);
+		 
+				Integer allCount = myMbtwhyAllList.size();
+				Integer allPage = (int) Math.ceil((double) allCount / itemsPerPage);
+				Integer startPage = (int) ((pageInfo.getCurPage() - 1) / pagesPerGroup) * pagesPerGroup + 1;
+				Integer endPage = Math.min(startPage + pagesPerGroup - 1, allPage);
+				if(endPage>allPage) endPage = allPage;
+				pageInfo.setAllPage(allPage);
+				pageInfo.setStartPage(startPage);
+				pageInfo.setEndPage(endPage);
+			
+				 return myMbtwhyList;
+			 }
+		}
+
+		//삭제로 변경
+		@Override
+		public void updateIsRemoved(List<Integer> noList) throws Exception {
+			for(Integer no : noList) {
+				Optional<Mbtwhy> optionalMbtwhy = mbtwhyRepository.findById(no);
+				if(optionalMbtwhy.isPresent()) {
+//					optionalMbtwhy.get().setIsRemoved("Y");
+					mbtwhyRepository.save(optionalMbtwhy.get());
+				}else {
+					throw new Exception("해당 번호 Mbtwhy게시글 없음");
+				}
+			}
+		}
+
+	
+	
+	
+	
+	
+	
+	
 }

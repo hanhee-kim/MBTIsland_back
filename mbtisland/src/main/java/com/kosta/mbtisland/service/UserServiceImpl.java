@@ -184,35 +184,6 @@ public class UserServiceImpl implements UserService{
 		}
 	}
 
-	//내가 작성한 mbtwhyList불러오기
-	@Override
-	public List<Mbtwhy> getMyMbtwhyListByPage(String username,PageInfo pageInfo) throws Exception {
-		 List<Mbtwhy> myMbtwhyList = mbtwhyRepository.findByWriterId(username);
-		 if(myMbtwhyList.isEmpty()) {
-			throw new Exception("myMbtwhyList 사이즈 0");
-		 }else {
-//			 mbtwhyRepository.count(null)
-			 return myMbtwhyList;
-		 }
-	}
-//	@Override
-//	public List<Board> boardListByPage(PageInfo pageInfo) throws Exception {
-//		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, 10);
-//		List<Board> boardList = boardDslRepository.findBoardListByPaging(pageRequest);
-//		
-//		Long allCount = boardDslRepository.findBoardCount();
-//		Integer allPage = allCount.intValue()/pageRequest.getPageSize();
-//		if(allCount%pageRequest.getPageSize() != 0) {
-//			allPage += 1;
-//		}
-//		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
-//		Integer endPage = Math.min(startPage+10-1, allPage);
-//		
-//		pageInfo.setAllPage(allPage);
-//		pageInfo.setStartPage(startPage);
-//		pageInfo.setEndPage(endPage);
-//		
-//		return boardList;
-//	}
+	
 
 }
