@@ -11,9 +11,11 @@ import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
+import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.repository.MbtwhyRepository;
+import com.kosta.mbtisland.repository.RecommendRepository;
 
 @Service
 public class MbtwhyServiceImpl implements MbtwhyService {
@@ -27,6 +29,9 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	
 	@Autowired
 	private MbtwhyCommentRepository mbtwhyCommentRepository;
+	
+	@Autowired
+	private RecommendRepository recommendRepository;
 	
 	// 게시글 목록 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
 	// 댓글수 포함
@@ -149,5 +154,29 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	@Override
 	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception {
 		mbtwhyCommentRepository.save(mbtwhyComment);
+	}
+	
+	// 게시글 추천 여부 조회
+	@Override
+	public Boolean selectMbtwhyRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) {
+		return recommendRepository.existsByUsernameAndPostNoAndBoardType(username, postNo, boardType);
+	}
+	
+	// 게시글 추천 개수 조회
+	@Override
+	public Integer selectMbtwhyRecommendCountByPostNoAndBoardType(Integer postNo, String boardType) throws Exception {
+		return recommendRepository.countByPostNoAndBoardType(postNo, boardType);
+	}
+	
+	// 게시글 추천
+	@Override
+	public void insertMbtwhyRecommend(Recommend recommend) throws Exception {
+		recommendRepository.save(recommend);
+	}
+
+	// 게시글 추천 취소
+	@Override
+	public void deleteMbtwhyRecommend(Recommend Recommend) throws Exception {
+		recommendRepository.delete(Recommend);
 	}
 }

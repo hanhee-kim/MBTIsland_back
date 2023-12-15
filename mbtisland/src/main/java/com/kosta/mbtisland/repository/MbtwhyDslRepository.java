@@ -25,6 +25,7 @@ public class MbtwhyDslRepository {
 	public List<Mbtwhy> findMbtwhyListByMbtiAndPageAndSearchAndSort
 		(String mbti, PageRequest pageRequest, String search, String sort) throws Exception {
 		OrderSpecifier<?> orderSpecifier;
+		System.out.println(sort);
 		
 		// 정렬 조건
 		if(sort.equals("최신순")) { // 최신순

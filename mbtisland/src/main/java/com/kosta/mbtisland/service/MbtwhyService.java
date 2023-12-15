@@ -6,6 +6,7 @@ import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
+import com.kosta.mbtisland.entity.Recommend;
 
 public interface MbtwhyService {
 	public List<MbtwhyDto> selectMbtwhyListByMbtiAndPageAndSearchAndSort
@@ -18,4 +19,9 @@ public interface MbtwhyService {
 	public List<MbtwhyComment> selectMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageInfo pageInfo) throws Exception; // 댓글 목록 조회
 	public Integer selectMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception; // 댓글 개수 조회
 	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception; // 댓글 작성
+	
+	public Boolean selectMbtwhyRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 추천 여부 조회
+	public Integer selectMbtwhyRecommendCountByPostNoAndBoardType(Integer postNo, String boardType) throws Exception;
+	public void insertMbtwhyRecommend(Recommend recommend) throws Exception; // 게시글 추천
+	public void deleteMbtwhyRecommend(Recommend recommend) throws Exception; // 게시글 추천 취소
 }
