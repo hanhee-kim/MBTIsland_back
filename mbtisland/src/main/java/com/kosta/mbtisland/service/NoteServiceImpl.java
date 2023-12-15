@@ -40,18 +40,17 @@ public class NoteServiceImpl implements NoteService{
 						.receiveUsername(noteDto.getReceiveUsername())
 						.build();
 		noteRepository.save(note);
-		//노트 작성하면 알림테이블에 추가
-//		System.out.println(note.getNoteNo());
-//		Alarm alarm = Alarm.builder()
-//				.username(note.getReceiveUsername())
-//				.alarmType("쪽지")
-//				.alarmTargetNo(note.getNoteNo())
-//				.alarmTargetFrom("Note")
-//				.alarmReadDate(null)
-//				.alarmUpdateDtae(null)
-//				.build();
-//		alarmRepository.save(alarm);
-	//readDate랑 updateDate 왜 NOT NULL	?		
+//		노트 작성하면 알림테이블에 추가
+		System.out.println(note.getNoteNo());
+		Alarm alarm = Alarm.builder()
+				.username(note.getReceiveUsername())
+				.alarmType("쪽지")
+				.alarmTargetNo(note.getNoteNo())
+				.alarmTargetFrom("Note")
+				.alarmReadDate(null)
+				.build();
+		alarmRepository.save(alarm);
+//	readDate랑 updateDate 왜 NOT NULL	?		
 	
 		
 	}
@@ -59,39 +58,44 @@ public class NoteServiceImpl implements NoteService{
 	//쪽지 불러오기(유저ID,noteType,readType,page)
 	@Override
 	public List<NoteDto> getNoteListByUsernameAndNoteTypeAndReadTypeAndPage(String username, String noteType,
-			String readType, PageInfo pageInfo) throws Exception {
+		String readType, PageInfo pageInfo) throws Exception {
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
+		
 		List<NoteDto> noteDtoList = new ArrayList<>();
-		if(noteType.equals("sent")) {
-			System.out.println("readType : "+readType);
-			if(readType == null ||readType.equals("") || readType.equals("null")) {
-				System.out.println("all");
-				noteDtoList = noteDslRepository.findNoteListByUserAndNoteTypeAndPaging(username,"sent",pageRequest);
-			}else { //N
-				noteDtoList = noteDslRepository.findNoteListByUserAndReadTypeAndPaging(username,"sent",readType,pageRequest);
-			}
-		}else { //receive
-			System.out.println("receive쪽지 ");
-			System.out.println("readType : "+readType);
-			if(readType == null ||readType.equals("") || readType.equals("null")) {
-				noteDtoList = noteDslRepository.findNoteListByUserAndNoteTypeAndPaging(username,"receive",pageRequest);
-			}else { //N
-				noteDtoList = noteDslRepository.findNoteListByUserAndReadTypeAndPaging(username,"receive","N",pageRequest);
-			}
+		String sendRead;
+		if(readType == null ||readType.equals("") || readType.equals("null")) {
+			 sendRead = null;
+		}else {
+			 sendRead = readType;
 		}
-		Integer allCount = noteDtoList.size();
+		Long allCnt = noteDslRepository.findNoteCntByUserAndNoteTypeAndReadType(username, noteType, sendRead);
+		Long allCount = allCnt;
 		Integer allPage = (int) Math.ceil((double) allCount / itemsPerPage);
 		Integer startPage = (int) ((pageInfo.getCurPage() - 1) / pagesPerGroup) * pagesPerGroup + 1;
 		Integer endPage = Math.min(startPage + pagesPerGroup - 1, allPage);
+		//필터로 적용한 페이지의 내용이 현재 페이지보다 낮을떄 현재 페이지를 1페이지로 세팅해줌
+		if(allPage < pageInfo.getCurPage()) {
+			pageInfo.setCurPage(1);
+		}
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
 		if(endPage>allPage) endPage = allPage;
 		
 		pageInfo.setAllPage(allPage);
 		pageInfo.setStartPage(startPage);
 		pageInfo.setEndPage(endPage);
+		System.out.println(allCnt);
+		if(noteType.equals("sent")) {
+			System.out.println("readType : "+readType);
+			noteDtoList = noteDslRepository.findNoteListByUserAndReadTypeAndPaging(username,"sent",sendRead,pageRequest);
+		}else { //receive
+			System.out.println("receive쪽지 ");
+			System.out.println("readType : "+readType);
+			noteDtoList = noteDslRepository.findNoteListByUserAndReadTypeAndPaging(username,"receive",sendRead,pageRequest);
+		}
+		
 		//데이터 있는지 없는지 체크
-		if(noteDtoList.isEmpty()) {
+		if(noteDtoList.isEmpty()) {			
 			throw new Exception("해당 noteList없음");
 		}else {
 			return noteDtoList;

@@ -50,7 +50,7 @@ public class Alarm {
 	private Timestamp alarmReadDate;
 	@Column
 	@CreationTimestamp
-	private Timestamp alarmUpdateDtae;
+	private Timestamp alarmUpdateDate;
 	
 	
 	

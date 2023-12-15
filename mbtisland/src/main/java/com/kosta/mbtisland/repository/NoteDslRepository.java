@@ -59,10 +59,10 @@ public class NoteDslRepository {
 					.leftJoin(sentUser).on(note.sentUsername.eq(sentUser.username))
 					.leftJoin(receiveUser).on(note.receiveUsername.eq(receiveUser.username))
 					.where(note.sentUsername.eq(username).and(
-							note.noteIsRead.eq(noteIsRead))
+							noteIsRead!=null?note.noteIsRead.eq(noteIsRead):null)
 							)
 					.orderBy(note.noteIsRead.asc())
-//					.orderBy(note.noteNo.desc())	//번호로 정렬하려면
+//					.orderBy(note.noteNo.asc())	//번호로 정렬하려면
 					.offset(pageRequest.getOffset()) // 시작행의 위치
 					.limit(pageRequest.getPageSize()) // 페이지당 항목 수
 					.fetch();
@@ -73,8 +73,8 @@ public class NoteDslRepository {
 			        .leftJoin(sentUser).on(note.sentUsername.eq(sentUser.username))
 			        .leftJoin(receiveUser).on(note.receiveUsername.eq(receiveUser.username))
 			        .where(note.receiveUsername.eq(username).and(
-			        	   note.noteIsRead.eq(noteIsRead)
-			        		))
+			        		noteIsRead!=null?note.noteIsRead.eq(noteIsRead):null)
+			        		)
 			        .orderBy(note.noteIsRead.asc())
 			        .offset(pageRequest.getOffset()) // 시작행의 위치
 					.limit(pageRequest.getPageSize()) // 페이지당 항목 수
@@ -118,5 +118,22 @@ public class NoteDslRepository {
 		return changeNoteDto(result);
 	}
 
+	public Long findNoteCntByUserAndNoteTypeAndReadType(String username,String noteType,String readType) {
+		System.out.println("dsl:"+username+noteType+readType);
+		if(noteType.equals("sent")) {
+			return jpaQueryfactory
+					.select(note.count())
+					.from(note)
+					.where(note.sentUsername.eq(username).and(readType!=null?note.noteIsRead.eq(readType):null))
+					.fetchOne();
+		}
+		else {
+			return jpaQueryfactory
+					.select(note.count())
+					.from(note)
+					.where(note.receiveUsername.eq(username).and(readType!=null?note.noteIsRead.eq(readType):null))
+					.fetchOne();
+		}
+	}
 	
 }
