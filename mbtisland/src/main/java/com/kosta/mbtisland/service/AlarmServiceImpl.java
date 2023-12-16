@@ -2,7 +2,9 @@ package com.kosta.mbtisland.service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -96,6 +98,39 @@ public class AlarmServiceImpl implements AlarmService{
 			return alarmDtoList;
 		}
 	}
+
+
+	@Override
+	public void updateAlarmRead(List<Integer> noList) throws Exception {
+		for(Integer no : noList) {
+			Optional<Alarm> optionalAlarm = alarmRepository.findById(no);
+			if(optionalAlarm.isPresent()) {
+				Alarm alarm = optionalAlarm.get();
+				alarm.setAlarmIsRead("Y");
+				alarm.setAlarmReadDate(new Timestamp(new Date().getTime()));
+				alarmRepository.save(alarm);
+			}else {
+				throw new Exception("해당 번호 알람 없음");
+			}
+		}		
+	}
+
+
+	@Override
+	public void updateAlarmReadAll(String username) throws Exception {
+		List<Alarm> alarmList = alarmRepository.findByUsername(username);
+		if(alarmList.isEmpty()) {
+			throw new Exception("해당 유저에 대한 알람없음.");
+		} else {
+			for(Alarm alarm : alarmList) {
+				alarm.setAlarmIsRead("Y");
+				alarm.setAlarmReadDate(new Timestamp(new Date().getTime()));
+				alarmRepository.save(alarm);
+			}
+		}
+	}
+	
+	
 	
 	
 
