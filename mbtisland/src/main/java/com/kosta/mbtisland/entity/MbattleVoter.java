@@ -1,6 +1,5 @@
 package com.kosta.mbtisland.entity;
 
-import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

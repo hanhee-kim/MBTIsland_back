@@ -40,15 +40,18 @@ public class NoteServiceImpl implements NoteService{
 						.receiveUsername(noteDto.getReceiveUsername())
 						.build();
 		noteRepository.save(note);
+		//alarmTargetNo,alarmTargetFrom,alarmType이 같으면?
+		//alarmNo찾아서 업데이트해야하는건가?
 //		노트 작성하면 알림테이블에 추가
 		System.out.println(note.getNoteNo());
 		Alarm alarm = Alarm.builder()
 				.username(note.getReceiveUsername())
 				.alarmType("쪽지")
 				.alarmTargetNo(note.getNoteNo())
-				.alarmTargetFrom("Note")
+				.alarmTargetFrom("NOTE")
 				.alarmReadDate(null)
 				.build();
+		
 		alarmRepository.save(alarm);
 //	readDate랑 updateDate 왜 NOT NULL	?		
 	

@@ -67,9 +67,9 @@ public class QuestionController {
 	        res.put("pageInfo", pageInfo);
 	        res.put("questionList", questionList);
 	        res.put("questionCnts", questionCnts);
-	        Question a = questionList.get(0);
-	        System.out.println("---------------------------------------------");
-	        System.out.println(a.getWriteDate());
+//	        Question a = questionList.get(0);
+//	        System.out.println("---------------------------------------------");
+//	        System.out.println(a.getWriteDate());
 	        return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

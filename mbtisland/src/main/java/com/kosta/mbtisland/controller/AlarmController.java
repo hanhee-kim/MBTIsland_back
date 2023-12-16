@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kosta.mbtisland.dto.AlarmDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.service.AlarmService;
@@ -29,7 +30,7 @@ public class AlarmController {
 		Map<String, Object> res = new HashMap<>();
 		PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
 		try {
-			List<Alarm> alarmList = alarmService.getAlarmListByUserAndTypeAndPaging(username, type, pageInfo);
+			List<AlarmDto> alarmList = alarmService.getAlarmListByUserAndTypeAndPaging(username, type, pageInfo);
 			res.put("alarmList", alarmList);
 			res.put("pageInfo", pageInfo);
 			return new ResponseEntity<Object>(res,HttpStatus.OK);

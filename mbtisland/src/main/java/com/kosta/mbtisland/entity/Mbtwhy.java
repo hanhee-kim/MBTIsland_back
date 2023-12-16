@@ -1,5 +1,6 @@
 package com.kosta.mbtisland.entity;
 
+
 import java.sql.Timestamp;
 
 //import java.sql.Date;
@@ -68,9 +69,6 @@ public class Mbtwhy {
 	
 	@Column
 	private String writerMbtiColor;
-	
-//	@Column
-//	private String isRemoved;
 	
 	@Override
 	public String toString() {

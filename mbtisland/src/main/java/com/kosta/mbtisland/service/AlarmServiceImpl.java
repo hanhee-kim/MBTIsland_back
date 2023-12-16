@@ -1,5 +1,6 @@
 package com.kosta.mbtisland.service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.kosta.mbtisland.dto.AlarmDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.repository.AlarmDslRepository;
@@ -18,9 +20,47 @@ public class AlarmServiceImpl implements AlarmService{
 	private AlarmRepository alarmRepository;
 	@Autowired
 	private AlarmDslRepository alarmDslRepository;
+	
+	public List<AlarmDto> alarmToAlarmDto(List<Alarm> alarmList){
+//		private Integer alarmNo;
+//		private String username;
+//		private String alarmType;
+//		private String alarmContent;
+//		private Integer alarmTargetNo;
+//		private String alarmTargetFrom;
+//		private String alarmIsRead;
+//		private Timestamp alarmReadDate;
+//		private Timestamp alarmUpdateDate;
+		List<AlarmDto> alarmDtoList = new ArrayList<AlarmDto>();
+		for(Alarm alarm : alarmList) {
+			String myContent = null;
+			if(alarm.getAlarmTargetFrom().toUpperCase().contains("COMMENT")) {
+				myContent = "내 댓글";
+			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("NOTE")) {
+				myContent = "내 쪽지";
+			} else {
+				myContent = "내 게시글";
+			}
+		alarmDtoList.add(AlarmDto.builder()
+				.alarmNo(alarm.getAlarmNo())
+				.username(alarm.getUsername())
+				.alarmType(alarm.getAlarmType())
+				.alarmContent("["+myContent+"] 에 "+alarm.getAlarmType()+"(이)/가 도착했습니다.")
+				.alarmTargetNo(alarm.getAlarmTargetNo())
+				.alarmTargetFrom(alarm.getAlarmTargetFrom())
+				.alarmIsRead(alarm.getAlarmIsRead())
+				.alarmReadDate(alarm.getAlarmReadDate())
+				.alarmUpdateDate(alarm.getAlarmUpdateDate())
+				.build()
+				);
+		
+		}
+		return alarmDtoList;
+	}
+
 
 	@Override
-	public List<Alarm> getAlarmListByUserAndTypeAndPaging(String username, String type, PageInfo pageInfo)
+	public List<AlarmDto> getAlarmListByUserAndTypeAndPaging(String username, String type, PageInfo pageInfo)
 			throws Exception {
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
@@ -49,11 +89,14 @@ public class AlarmServiceImpl implements AlarmService{
 		System.out.println(allCnt);
 		
 		alarmList = alarmDslRepository.findAlarmListByUserAndTypeAndPaging(username, sendType, pageRequest);
-		if(alarmList.isEmpty()) {
+		List<AlarmDto> alarmDtoList =  alarmToAlarmDto(alarmList);
+		if(alarmDtoList.isEmpty()) {
 			throw new Exception("해당 알림없음.");
 		}else {
-			return alarmList;
+			return alarmDtoList;
 		}
 	}
+	
+	
 
 }

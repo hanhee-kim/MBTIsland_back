@@ -141,7 +141,8 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 				Optional<Mbtwhy> optionalMbtwhy = mbtwhyRepository.findById(no);
 				if(optionalMbtwhy.isPresent()) {
 //					optionalMbtwhy.get().setIsRemoved("Y");
-					mbtwhyRepository.save(optionalMbtwhy.get());
+//					mbtwhyRepository.save(optionalMbtwhy.get());
+					mbtwhyRepository.deleteById(no);
 				}else {
 					throw new Exception("해당 번호 Mbtwhy게시글 없음");
 				}
