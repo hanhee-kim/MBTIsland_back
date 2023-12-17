@@ -13,8 +13,14 @@ import org.springframework.stereotype.Service;
 import com.kosta.mbtisland.dto.AlarmDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
+import com.kosta.mbtisland.entity.MbattleComment;
+import com.kosta.mbtisland.entity.MbtmiComment;
+import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.repository.AlarmDslRepository;
 import com.kosta.mbtisland.repository.AlarmRepository;
+import com.kosta.mbtisland.repository.MbattleCommentRepository;
+import com.kosta.mbtisland.repository.MbtmiCommentRepository;
+import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
 @Service
 public class AlarmServiceImpl implements AlarmService{
 	
@@ -22,31 +28,78 @@ public class AlarmServiceImpl implements AlarmService{
 	private AlarmRepository alarmRepository;
 	@Autowired
 	private AlarmDslRepository alarmDslRepository;
+	@Autowired
+	private MbtwhyCommentRepository mbtwhyCommentRepository;
+	@Autowired
+	private MbtmiCommentRepository mbtmiCommentRepository;
+	@Autowired
+	private MbattleCommentRepository mbattleCommentRepository;
 	
-	public List<AlarmDto> alarmToAlarmDto(List<Alarm> alarmList){
-//		private Integer alarmNo;
-//		private String username;
-//		private String alarmType;
-//		private String alarmContent;
-//		private Integer alarmTargetNo;
-//		private String alarmTargetFrom;
-//		private String alarmIsRead;
-//		private Timestamp alarmReadDate;
-//		private Timestamp alarmUpdateDate;
+	public List<AlarmDto> alarmToAlarmDto(List<Alarm> alarmList) throws Exception{
+
 		List<AlarmDto> alarmDtoList = new ArrayList<AlarmDto>();
 		for(Alarm alarm : alarmList) {
 			String myContent = null;
+			String type = null;
+			Integer no = null;
+			//myContent 정할때
 			if(alarm.getAlarmTargetFrom().toUpperCase().contains("COMMENT")) {
 				myContent = "내 댓글";
+				
 			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("NOTE")) {
 				myContent = "내 쪽지";
 			} else {
 				myContent = "내 게시글";
 			}
+			//detailType정할떄
+			if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBTMI")) {
+				type = "MBTMI";
+			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBTWHY")) {
+				type = "MBTWHY";
+			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBATTLE")) {
+				type = "MBATTLE";
+			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("QUESTION")) {
+				type ="QUESTION";
+			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("NOTE")) {
+				type = "NOTE";
+			} else {
+				type = "SWAL";
+			}
+			
+			//detailNo정할떄		
+			if(alarm.getAlarmTargetFrom().toUpperCase().contains("COMMENT")) {
+				if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBTMI")) {
+					Optional<MbtmiComment> tmiComm = mbtmiCommentRepository.findById(alarm.getAlarmTargetNo());
+					if(tmiComm.isPresent()) {
+						no = tmiComm.get().getMbtmiNo();
+					} else {
+						throw new Exception("알림에 대한 해당 댓글이 존재하지 않음");
+					}
+				} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBTWHY")) {
+					Optional<MbtwhyComment> whyComm = mbtwhyCommentRepository.findById(alarm.getAlarmTargetNo());
+					if(whyComm.isPresent()) {
+						no = whyComm.get().getMbtwhyNo();
+					} else {
+						throw new Exception("알림에 대한 해당 댓글이 존재하지 않음");
+					}
+				} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBATTLE")) {
+					Optional<MbattleComment> battleComm = mbattleCommentRepository.findById(alarm.getAlarmTargetNo());
+					if(battleComm.isPresent()) {
+						no = battleComm.get().getMbattleNo();
+					} else {
+						throw new Exception("알림에 대한 해당 댓글이 존재하지 않음");
+					}
+				}
+			} else {
+				no = alarm.getAlarmTargetNo();
+			}
+			
 		alarmDtoList.add(AlarmDto.builder()
 				.alarmNo(alarm.getAlarmNo())
 				.username(alarm.getUsername())
 				.alarmType(alarm.getAlarmType())
+				.detailType(type)
+				.detailNo(no)
 				.alarmContent("["+myContent+"] 에 "+alarm.getAlarmType()+"(이)/가 도착했습니다.")
 				.alarmTargetNo(alarm.getAlarmTargetNo())
 				.alarmTargetFrom(alarm.getAlarmTargetFrom())

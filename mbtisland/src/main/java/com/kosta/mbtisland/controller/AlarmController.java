@@ -31,6 +31,9 @@ public class AlarmController {
 	@GetMapping("/alarmList")
 	public ResponseEntity<Object> getAlarmList(@RequestParam String username,@RequestParam(required = false)String type,@RequestParam(required = false)Integer page){
 		Map<String, Object> res = new HashMap<>();
+		if(username!=null)System.out.println(username);
+		if(type!=null)System.out.println(type);
+		if(page!=null)System.out.println(page);
 		PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
 		try {
 			List<AlarmDto> alarmList = alarmService.getAlarmListByUserAndTypeAndPaging(username, type, pageInfo);
@@ -39,11 +42,13 @@ public class AlarmController {
 			return new ResponseEntity<Object>(res,HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
+			res.put("err", e.getMessage());
+			res.put("alarmList", null);
+			return new ResponseEntity<Object>(res,HttpStatus.BAD_REQUEST);
 		}
 	}
 	
-	@PutMapping("/updateAlarmIsRead")
+	@PutMapping("/updatealarmisread")
 	public ResponseEntity<Object> updateAlarmRead(@RequestParam String arrayItems){
 		System.out.println("알람 선택 배열 읽기 컨트롤러");
 		List<Integer> noList = Arrays.stream(arrayItems.split(","))
@@ -59,7 +64,7 @@ public class AlarmController {
 		}
 	}
 	
-	@PutMapping("/updateAlarmIsReadAll")
+	@PutMapping("/updatealarmisreadall")
 	public ResponseEntity<Object> updateAlarmIsReadAll(@RequestParam String username){
 		try {
 			alarmService.updateAlarmReadAll(username);

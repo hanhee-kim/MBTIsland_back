@@ -41,8 +41,9 @@ public class NoteServiceImpl implements NoteService{
 						.build();
 		noteRepository.save(note);
 		//alarmTargetNo,alarmTargetFrom,alarmType이 같으면?
-		//alarmNo찾아서 업데이트해야하는건가?
-//		노트 작성하면 알림테이블에 추가
+		//alarmNo찾아서 업데이트(isRead => N )
+//		노트 작성하면 알림테이블에 추가 ( 위의 검색조건에 맞는 알림이 없다면)
+		//쪽지는 같은 타겟넘버일 수없음. 쪽지가 발송될때마다 다른 쪽지이기 때문
 		System.out.println(note.getNoteNo());
 		Alarm alarm = Alarm.builder()
 				.username(note.getReceiveUsername())

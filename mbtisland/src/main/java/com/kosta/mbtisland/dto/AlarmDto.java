@@ -25,6 +25,8 @@ public class AlarmDto {
 	private Integer alarmNo;
 	private String username;
 	private String alarmType;
+	private String detailType;
+	private Integer detailNo;
 	private String alarmContent;
 	private Integer alarmTargetNo;
 	private String alarmTargetFrom;
