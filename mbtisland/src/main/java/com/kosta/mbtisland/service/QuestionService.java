@@ -24,7 +24,9 @@ public interface QuestionService {
 	Map<String, Integer> getQuestionCountsByUser(String userId, String isAnswered) throws Exception;
 	Integer questionCntByUser(String isAnswered, String userId) throws Exception;
 	
-	
-	
+	// 문의글 등록하기
+	void questionWrite(Question question)throws Exception;
+	//문의글 번호로 가져오기
+	Question questionDetailByNo(Integer no) throws Exception;
 
 }

@@ -9,17 +9,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
 
+import com.kosta.mbtisland.dto.NoteDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.entity.MbtwhyComment;
+import com.kosta.mbtisland.entity.Note;
 import com.kosta.mbtisland.entity.Question;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.repository.MbtwhyRepository;
+import com.kosta.mbtisland.repository.NoteDslRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
 import com.kosta.mbtisland.repository.QuestionRepository;
@@ -56,6 +59,9 @@ class MbtislandApplicationTests {
 	private MbtwhyDslRepository mbtwhyDslRepository;
 
 
+	//
+	@Autowired
+	private NoteDslRepository noteDslRepository;
 	@Test
 	void contextLoads() {
 	}
@@ -306,6 +312,26 @@ class MbtislandApplicationTests {
 		System.out.println("결과: " + commentCnt);
 	}
 
+	
+	
+	//-----------------------
+	void tupleList() throws Exception{
+		System.out.println("test중");
+		Integer page = 1;
+		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+		
+		Integer itemsPerPage = 10;
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
+//		List<Tuple> noteDtoList = noteDslRepository.test("Kakao_3152074495", "N", pageRequest);
+//		List<Tuple> noteDtoList = noteDslRepository.test("Kakao_3152074495", "N");
+//		List<Note> noteDtoList = noteDslRepository.test2("Kakao_3152074495", "N");
+//		List<Note> noteDtoList = noteDslRepository.test3("Kakao_3152074495");
+//		List<NoteDto> noteDtoList = noteDslRepository.findNoteListBySentUserAndAndReadTypeAndPaging("Kakao_3152074495", "N", pageRequest);
+//		System.out.println(noteDtoList.size());
+//		for(NoteDto note : noteDtoList) {	
+//			System.out.println(note);
+//		}
+	}
 	
 	
 }

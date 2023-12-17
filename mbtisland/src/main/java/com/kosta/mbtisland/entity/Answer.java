@@ -1,5 +1,6 @@
 package com.kosta.mbtisland.entity;
 
+
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -30,7 +31,7 @@ public class Answer {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer no;
+	private Integer answerNo;
 	
 	@Column
 	private String title;

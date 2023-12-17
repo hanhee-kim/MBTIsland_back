@@ -75,5 +75,17 @@ public class MbtwhyDslRepository {
 				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
 				.fetchOne();
 	}
+	
+	
+	//
+	public List<Mbtwhy> findMbtwhyListUserAndPaging(String username, PageRequest pageRequest){
+		return jpaQueryFactory.selectFrom(mbtwhy)
+//			.where(mbtwhy.writerId.eq(username).and(mbtwhy.isRemoved.eq("N"))
+			.orderBy(mbtwhy.no.desc())
+			.offset(pageRequest.getOffset())
+			.limit(pageRequest.getPageSize())
+			.fetch();
+	}
+	
 
 }

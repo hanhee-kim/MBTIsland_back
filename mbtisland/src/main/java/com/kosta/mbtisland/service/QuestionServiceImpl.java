@@ -3,6 +3,7 @@ package com.kosta.mbtisland.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -148,5 +149,24 @@ public class QuestionServiceImpl implements QuestionService {
 			return answeredNotCnt.intValue();
 		}
 	}
+
+	//문의글 등록
+	@Override
+	public void questionWrite(Question question) throws Exception {
+		questionRepository.save(question);
+	}
+
+	//문의글 불러오기
+	@Override
+	public Question questionDetailByNo(Integer no) throws Exception {
+		Optional<Question> question = questionRepository.findById(no);
+		if(question.isPresent()) {
+			return question.get();
+		}else {
+			throw new Exception("해당 게시글 존재하지 않음.");
+		}
+	}
+
+	
 
 }

@@ -3,8 +3,6 @@ package com.kosta.mbtisland.entity;
 
 import java.sql.Timestamp;
 
-//import java.sql.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,12 +13,14 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -30,48 +30,46 @@ import lombok.Setter;
 @Builder
 @DynamicInsert
 @DynamicUpdate
-public class Mbtwhy {
-	// PK, AutoIncrement Value
+@ToString
+public class Alarm {
+	
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer no;
-	
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer alarmNo;
 	@Column
-	private String content;
-	
+	private String username;
 	@Column
-	private String mbtiCategory;
-	
+	private String alarmType;
 	@Column
-//	@ColumnDefault("0")
-	private Integer viewCnt;
-	
+	private Integer alarmTargetNo;
 	@Column
-//	@ColumnDefault("0")
-	private Integer recommendCnt;
-	
+	private String alarmTargetFrom;
+	@Column
+	@ColumnDefault("N")
+	private String alarmIsRead;
+	@Column
+	private Timestamp alarmReadDate;
 	@Column
 	@CreationTimestamp
-	private Timestamp writeDate;
+	private Timestamp alarmUpdateDate;
 	
-	@Column
-//	@ColumnDefault("N")
-	private String isBlocked;
 	
-	@Column
-	private String writerId;
 	
-	@Column
-	private String writerNickname;
 	
-	@Column
-	private String writerMbti;
 	
-	@Column
-	private String writerMbtiColor;
 	
-	@Override
-	public String toString() {
-		return super.toString();
-	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

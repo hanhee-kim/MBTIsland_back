@@ -162,6 +162,9 @@ public class MbtmiServiceImpl implements MbtmiService {
 		if(mbtmi==null) throw new Exception("게시글이 존재하지 않습니다.");
 		mbtmiRepository.deleteById(no);
 	}
+	
+	
+	
 
 
 	
