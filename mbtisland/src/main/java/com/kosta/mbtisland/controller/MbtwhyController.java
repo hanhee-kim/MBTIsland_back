@@ -122,6 +122,7 @@ public class MbtwhyController {
 	@DeleteMapping("/deletembtwhy/{no}")
 	public ResponseEntity<Object> deleteMbtmi(@PathVariable Integer no) {
 		try {
+			System.out.println("게시글 번호: " + no);
 			mbtwhyService.deleteMbtwhy(no);
 			return new ResponseEntity<Object>(no + " 삭제 성공", HttpStatus.OK);
 		} catch (Exception e) {
@@ -169,6 +170,7 @@ public class MbtwhyController {
 					.writerMbtiColor(sendUser.getUserMbtiColor())
 					.writeDate(writeDate)
 					.build();
+
 			// 댓글 삽입
 			mbtwhyService.insertMbtwhyComment(mbtwhyComment);
 			
