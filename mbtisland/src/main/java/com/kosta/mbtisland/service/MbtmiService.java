@@ -35,5 +35,11 @@ public interface MbtmiService {
 
 	// 댓글 삭제(IS_REMOVED 컬럼값 업데이트)
 	void deleteMbtmiComment(Integer commentNo) throws Exception;
+	
+	// 댓글 작성
+	void addMbtmiComment(MbtmiComment mbtmiComment) throws Exception;
+	
+	// 게시글 작성
+	Mbtmi addMbtmi(MbtmiDto mbtmiDto) throws Exception;
 
 }

@@ -1,5 +1,7 @@
 package com.kosta.mbtisland.service;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -173,6 +175,35 @@ public class MbtmiServiceImpl implements MbtmiService {
 		targetComment.get().setIsRemoved("Y");
 		mbtmiCommentRepository.save(targetComment.get());
 	}
+
+	// 댓글 작성
+	@Override
+	public void addMbtmiComment(MbtmiComment mbtmiComment) throws Exception {
+		mbtmiCommentRepository.save(mbtmiComment);
+	}
+
+	// 게시글 작성
+	@Override
+	public Mbtmi addMbtmi(MbtmiDto mbtmiDto) throws Exception {
+		LocalDate currentDate = LocalDate.now();
+		Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+		Mbtmi mbtmi = Mbtmi.builder()
+						.title(mbtmiDto.getTitle())
+						.content(mbtmiDto.getContent())
+						.category(mbtmiDto.getCategory())
+						.writeDate(writeDate)
+						.writerId(mbtmiDto.getWriterId())
+						.writerNickname(mbtmiDto.getWriterNickname())
+						.writerMbti(mbtmiDto.getWriterMbti())
+						.writerMbtiColor(mbtmiDto.getWriterMbtiColor())
+						.build();
+		mbtmiRepository.save(mbtmi);
+		Optional<Mbtmi> ombtmi = mbtmiRepository.findById(mbtmi.getNo());
+		if(ombtmi.isPresent()) return ombtmi.get(); 
+		return null;
+	}
+	
+	
 
 
 	

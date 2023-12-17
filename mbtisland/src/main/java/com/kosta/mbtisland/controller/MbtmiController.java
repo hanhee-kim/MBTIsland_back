@@ -1,5 +1,7 @@
 package com.kosta.mbtisland.controller;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +21,7 @@ import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
+import com.kosta.mbtisland.entity.UserEntity;
 import com.kosta.mbtisland.service.MbtmiService;
 
 @RestController
@@ -120,6 +125,65 @@ public class MbtmiController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 댓글 작성
+	@PostMapping("/mbtmicomment")
+	public ResponseEntity<Object> mbtmiDetailComment(@RequestBody UserEntity sendUser
+													  , @RequestParam(required = false) Integer no
+													  , @RequestParam(required = false) String comment
+													  , @RequestParam(required = false) Integer parentcommentNo
+													  , @RequestParam(required = false) Integer commentpage) {
+		
+		try {
+			LocalDate currentDate = LocalDate.now();
+			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+			MbtmiComment mbtmiComment = MbtmiComment.builder()
+										.commentContent(comment)
+										.mbtmiNo(no)
+										.parentcommentNo(parentcommentNo)
+										.writerId(sendUser.getUsername())
+										.writerNickname(sendUser.getUserNickname())
+										.writerMbti(sendUser.getUserMbti())
+										.writerMbtiColor(sendUser.getUserMbtiColor())
+										.writeDate(writeDate)
+										.build();
+			
+			mbtmiService.addMbtmiComment(mbtmiComment);
+			
+			PageInfo pageInfo = PageInfo.builder().curPage(commentpage==null? 1: commentpage).build();
+			List<MbtmiComment> mbtmiCommentList = mbtmiService.mbtmiCommentListByMbtmiNo(no, pageInfo);
+			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no);
+			
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("mbtmiCommentList", mbtmiCommentList);
+			res.put("mbtmiCommentCnt", mbtmiCommentCnt);
+			
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	
+	// 게시글 작성
+	@PostMapping("/mbtmiwrite")
+	public ResponseEntity<Object> addPost(@RequestBody MbtmiDto mbtmiDto) {
+//		System.out.println("게시글작성 컨트롤러가 받은 파라미터 mbtmiDto: " + mbtmiDto);
+		
+		try {
+			Mbtmi mbtmi = mbtmiService.addMbtmi(mbtmiDto);
+			
+			Map<String, Object> res = new HashMap<>();
+			res.put("mbtmi", mbtmi);
+			
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 	
