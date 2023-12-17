@@ -30,13 +30,10 @@ public class MbtwhyDslRepository {
 		// 정렬 조건
 		if(sort.equals("최신순")) { // 최신순
 			orderSpecifier = mbtwhy.no.desc();
-			System.out.println("정렬조건: new");
 		} else if(sort.equals("조회순")) { // 조회순
 			orderSpecifier = mbtwhy.viewCnt.desc();
-			System.out.println("정렬조건: view");
 		} else if(sort.equals("추천순")) { // 추천순
 			orderSpecifier = mbtwhy.recommendCnt.desc();
-			System.out.println("정렬조건: recommend");
 		} else { // 기본 최신순
 			orderSpecifier = mbtwhy.no.desc();
 		}
@@ -80,7 +77,7 @@ public class MbtwhyDslRepository {
 	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) {
 		return jpaQueryFactory.selectFrom(mbtwhyComment)
 				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
-				.orderBy(mbtwhyComment.commentNo.desc()) // 정렬
+				.orderBy(mbtwhyComment.commentNo.asc()) // 정렬
 				.offset(pageRequest.getOffset()) // 인덱스
 				.limit(pageRequest.getPageSize()) // 개수 제한
 				.fetch();

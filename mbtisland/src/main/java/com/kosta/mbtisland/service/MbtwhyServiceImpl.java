@@ -2,6 +2,7 @@ package com.kosta.mbtisland.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -9,9 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.entity.Recommend;
+import com.kosta.mbtisland.repository.BookmarkRepository;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.repository.MbtwhyRepository;
@@ -32,6 +35,9 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	
 	@Autowired
 	private RecommendRepository recommendRepository;
+	
+	@Autowired
+	private BookmarkRepository bookmarkRepository;
 	
 	// 게시글 목록 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
 	// 댓글수 포함
@@ -81,10 +87,10 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		return mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearch(mbti, search);
 	}
 	
-	// 게시글 조회 (게시글 번호)
+	// DTO 게시글 조회 (게시글 번호)
 	@Override
-	public MbtwhyDto selectMbtwhyByNo(Integer no) throws Exception {
-		Mbtwhy mbtwhy = mbtwhyRepository.findByNo(no);
+	public MbtwhyDto selectMbtwhyDtoByNo(Integer no) throws Exception {
+		Mbtwhy mbtwhy = mbtwhyRepository.findById(no).get();
 		
 		if(mbtwhy!=null) {
 			Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
@@ -95,6 +101,12 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 			return dto;
 		}
 		return null;
+	}
+	
+	// Entity 게시글 조회 (게시글 번호)
+	@Override
+	public Mbtwhy selectMbtwhyByNo(Integer no) throws Exception {
+		return mbtwhyRepository.findById(no).get();
 	}
 	
 	// 일간 인기 게시글 조회 (MBTI)
@@ -120,7 +132,15 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		return mbtwhyRepository.save(mbtwhy).getNo();
 	}
 	
-	// 댓글 목록 조회 (게시글 번호)
+	// 게시글 삭제
+	@Override
+	public void deleteMbtwhy(Integer no) throws Exception {
+		Mbtwhy mbtwhy = mbtwhyRepository.findById(no).get();
+		if(mbtwhy==null) throw new Exception("게시글이 존재하지 않습니다.");
+		mbtwhyRepository.deleteById(no);
+	}
+	
+	// 댓글 목록 조회 (게시글 번호, 페이지 정보)
 	@Override
 	public List<MbtwhyComment> selectMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageInfo pageInfo)
 			throws Exception {
@@ -139,6 +159,9 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		pageInfo.setAllPage(allPage);
 		pageInfo.setStartPage(startPage);
 		pageInfo.setEndPage(endPage);
+		
+		// 게시글 삭제 시 예외처리?
+//		if(pageInfo.getCurPage() > allPage) pageInfo.setCurPage(allPage);
 									
 		return mbtwhyCommentList;
 	}
@@ -156,27 +179,66 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		mbtwhyCommentRepository.save(mbtwhyComment);
 	}
 	
+	// 댓글 삭제
+	@Override
+	public void deleteMbtwhyComment(Integer commentNo) throws Exception {
+		Optional<MbtwhyComment> targetComment = mbtwhyCommentRepository.findById(commentNo);
+		if(targetComment.isEmpty()) throw new Exception("댓글이 존재하지 않습니다");
+		targetComment.get().setIsRemoved("Y");
+		mbtwhyCommentRepository.save(targetComment.get());
+	}
+	
+	// 게시글 추천 데이터 조회
+	@Override
+	public Recommend selectRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
+		return recommendRepository.findByUsernameAndPostNoAndBoardType(username, postNo, boardType);
+	}
+	
 	// 게시글 추천 여부 조회
 	@Override
-	public Boolean selectMbtwhyRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) {
+	public Boolean selectIsRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
 		return recommendRepository.existsByUsernameAndPostNoAndBoardType(username, postNo, boardType);
 	}
 	
 	// 게시글 추천 개수 조회
 	@Override
-	public Integer selectMbtwhyRecommendCountByPostNoAndBoardType(Integer postNo, String boardType) throws Exception {
+	public Integer selectRecommendCountByPostNoAndBoardType(Integer postNo, String boardType) throws Exception {
 		return recommendRepository.countByPostNoAndBoardType(postNo, boardType);
 	}
 	
 	// 게시글 추천
 	@Override
-	public void insertMbtwhyRecommend(Recommend recommend) throws Exception {
+	public void insertRecommend(Recommend recommend) throws Exception {
 		recommendRepository.save(recommend);
 	}
 
 	// 게시글 추천 취소
 	@Override
-	public void deleteMbtwhyRecommend(Recommend Recommend) throws Exception {
-		recommendRepository.delete(Recommend);
+	public void deleteRecommend(Integer no) throws Exception {
+		recommendRepository.deleteById(no);
+	}
+	
+	// 게시글 북마크 데이터 조회
+	@Override
+	public Bookmark selectBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
+		return bookmarkRepository.findByUsernameAndPostNoAndBoardType(username, postNo, boardType);
+	}
+	
+	// 게시글 북마크 여부 조회
+	@Override
+	public Boolean selectIsBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
+		return bookmarkRepository.existsByUsernameAndPostNoAndBoardType(username, postNo, boardType);
+	}
+	
+	// 게시글 북마크
+	@Override
+	public void insertBookmark(Bookmark bookmark) throws Exception {
+		bookmarkRepository.save(bookmark);
+	}
+	
+	// 게시글 북마크 취소
+	@Override
+	public void deleteBookmark(Integer no) throws Exception {
+		bookmarkRepository.deleteById(no);
 	}
 }
