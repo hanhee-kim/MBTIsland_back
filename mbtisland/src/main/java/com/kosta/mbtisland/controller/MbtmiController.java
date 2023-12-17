@@ -186,6 +186,42 @@ public class MbtmiController {
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
-	
 
+/*
+	// 추천
+	@PostMapping("/mbtmirecommend")
+	public ResponseEntity<Object> mbtmiDetailRecommend(@RequestBody Recommend recommend) {
+		try {
+			// 게시글 및 추천수 조회
+			Mbtmi mbtmi = mbtmiService.selectMbtmiByNo(recommend.getPostNo());
+			Integer recommendCnt = mbtmi.getRecommendCnt();
+			
+			// 추천 데이터 조회
+			Recommend mbtmiRecommend = mbtmiService.selectRecommendByUsernameAndPostNoAndBoardType(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
+			
+			if(mbtmiRecommend == null) { // 추천되지 않은 상태라면
+				mbtmiService.insertRecommend(recommend); // 추천
+				mbtmi.setRecommendCnt(recommendCnt + 1); // 추천수 + 1
+				mbtmiService.insertMbtmi(mbtmi); // update
+			} else { // 이미 추천된 상태라면
+				mbtmiService.deleteRecommend(mbtmiRecommend.getNo()); // 추천 해제 (Recommend 테이블 PK로 delete)
+				mbtmi.setRecommendCnt(recommendCnt - 1); // 추천수 - 1
+				mbtmiService.insertMbtmi(mbtmi); // update
+			}
+			
+			// 업데이트된 추천수 조회
+			Integer mbtmiRecommendCount = mbtmiService.selectRecommendCountByPostNoAndBoardType(recommend.getPostNo(), recommend.getBoardType());
+			
+			// 추천수 반환
+			Map<String, Object> res = new HashMap<>();
+			res.put("mbtmiRecommendCount", mbtmiRecommendCount);
+			
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+*/
+	
 }
