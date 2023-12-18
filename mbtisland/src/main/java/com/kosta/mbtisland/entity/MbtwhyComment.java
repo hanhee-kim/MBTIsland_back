@@ -1,5 +1,6 @@
 package com.kosta.mbtisland.entity;
 
+
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -41,7 +42,7 @@ public class MbtwhyComment {
 	private String isBlocked;
 	
 	@Column
-	private Integer parentCommentNo;
+	private Integer parentcommentNo;
 	
 	@Column
 	private String writerId;

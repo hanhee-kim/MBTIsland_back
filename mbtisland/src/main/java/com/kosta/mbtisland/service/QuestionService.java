@@ -22,7 +22,9 @@ public interface QuestionService {
 	
 	/* 마이페이지 */
 	
-	
-	
+	// 문의글 등록하기
+	void questionWrite(Question question)throws Exception;
+	//문의글 번호로 가져오기
+	Question questionDetailByNo(Integer no) throws Exception;
 
 }

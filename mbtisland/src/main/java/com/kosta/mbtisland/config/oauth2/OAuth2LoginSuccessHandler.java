@@ -17,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.mbtisland.config.auth.PrincipalDetails;
 import com.kosta.mbtisland.config.jwt.JwtProperties;
 
@@ -28,7 +29,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException {
-
+		ObjectMapper om = new ObjectMapper();
 		System.out.println("OAuth2LoginSuccessHandler 진입");
 		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
 		String jwtToken = JWT.create()

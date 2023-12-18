@@ -1,15 +1,11 @@
 package com.kosta.mbtisland.entity;
 
-
-import java.sql.Timestamp;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -27,18 +23,17 @@ import lombok.Setter;
 @Builder
 @DynamicInsert
 @DynamicUpdate
-public class Ban {
+public class Bookmark {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer banIdx;
+	private Integer no;
 	
 	@Column
 	private String username;
 	
 	@Column
-	@CreationTimestamp
-	private Timestamp banStartDate;
+	private Integer postNo;
 	
 	@Column
-	private Timestamp banEndDate;
+	private String boardType;
 }

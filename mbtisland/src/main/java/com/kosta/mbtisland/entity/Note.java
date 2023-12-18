@@ -3,8 +3,6 @@ package com.kosta.mbtisland.entity;
 
 import java.sql.Timestamp;
 
-//import java.sql.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -30,48 +29,22 @@ import lombok.Setter;
 @Builder
 @DynamicInsert
 @DynamicUpdate
-public class Mbtwhy {
-	// PK, AutoIncrement Value
+@ToString
+public class Note {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer no;
-	
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer noteNo;
 	@Column
-	private String content;
-	
+	private String sentUsername;
 	@Column
-	private String mbtiCategory;
-	
+	private String noteContent;
 	@Column
-//	@ColumnDefault("0")
-	private Integer viewCnt;
-	
-	@Column
-//	@ColumnDefault("0")
-	private Integer recommendCnt;
-	
+	private String receiveUsername;
 	@Column
 	@CreationTimestamp
-	private Timestamp writeDate;
-	
+	private Timestamp sentDate;
 	@Column
-//	@ColumnDefault("N")
-	private String isBlocked;
-	
-	@Column
-	private String writerId;
-	
-	@Column
-	private String writerNickname;
-	
-	@Column
-	private String writerMbti;
-	
-	@Column
-	private String writerMbtiColor;
-	
-	@Override
-	public String toString() {
-		return super.toString();
-	}
+	@ColumnDefault("N")
+	private String noteIsRead;
+
 }

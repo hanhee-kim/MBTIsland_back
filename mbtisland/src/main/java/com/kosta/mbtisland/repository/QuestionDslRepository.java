@@ -76,17 +76,11 @@ public class QuestionDslRepository {
 				.fetchOne();
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	
 	/* 마이페이지 */
 	
+
 
 }
