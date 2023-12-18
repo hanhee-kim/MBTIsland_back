@@ -111,10 +111,11 @@ public class UserController {
 		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
 		try {
 			UserEntity user = userService.modifyUser(principalDetails.getUser(), param);
+			System.out.println("비번"+principalDetails.getUser().getUserPassword());
 			return new ResponseEntity<Object>(user, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.OK);
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 	
