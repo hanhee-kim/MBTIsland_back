@@ -41,5 +41,7 @@ public interface MbtmiService {
 	
 	// 게시글 작성
 	Mbtmi addMbtmi(MbtmiDto mbtmiDto) throws Exception;
+	
+	
 
 }

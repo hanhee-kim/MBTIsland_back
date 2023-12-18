@@ -21,6 +21,7 @@ import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
+import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
 import com.kosta.mbtisland.service.MbtmiService;
 
@@ -193,11 +194,11 @@ public class MbtmiController {
 	public ResponseEntity<Object> mbtmiDetailRecommend(@RequestBody Recommend recommend) {
 		try {
 			// 게시글 및 추천수 조회
-			Mbtmi mbtmi = mbtmiService.selectMbtmiByNo(recommend.getPostNo());
+			Mbtmi mbtmi = mbtmiService.mbtmiDetail(recommend.getPostNo());
 			Integer recommendCnt = mbtmi.getRecommendCnt();
 			
 			// 추천 데이터 조회
-			Recommend mbtmiRecommend = mbtmiService.selectRecommendByUsernameAndPostNoAndBoardType(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
+//			Recommend mbtmiRecommend = mbtmiService.selectRecommendByUsernameAndPostNoAndBoardType(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
 			
 			if(mbtmiRecommend == null) { // 추천되지 않은 상태라면
 				mbtmiService.insertRecommend(recommend); // 추천
