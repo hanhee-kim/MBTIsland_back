@@ -253,17 +253,18 @@ class MbtislandApplicationTests {
 	void mbtmiNewlyMbtmiList() throws Exception {
 		// 컨트롤러
 		String category = null;
-		String type = "PI";
+		String type = null;
 		String searchTerm = null;
 		Integer page = 1;
 		String sort = null;
+		String username = "react03"; // 마이페이지 리스트 조회를 위해 파라미터 추가
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 		// 서비스
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
 		
-		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort);
+		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort, username);
 		System.out.println("------최신글 목록 출력------");
 		Iterator<Mbtmi> iter = newlyMbtmiList.iterator();
 		while(iter.hasNext()) {
@@ -330,18 +331,5 @@ class MbtislandApplicationTests {
 //		}
 	}
 	
-	// 알림타겟넘버와 알림타겟프롬으로 알림데이터 조회
-//	@Test
-//	void alarmSelect() throws Exception {
-//		Integer alarmTargetNo = 276;
-//		String alarmTargetFrom = "mbtmi";
-//		List<Alarm> alarms = alarmRepository.findByAlarmTargetNoAndAlarmTargetFrom(alarmTargetNo, alarmTargetFrom);
-//		if(alarms!=null) {
-//			System.out.println("결과: " );
-//			for (Alarm alarm : alarms) {
-//				System.out.println(alarm);
-//			}
-//		}
-//	}
-	
+
 }

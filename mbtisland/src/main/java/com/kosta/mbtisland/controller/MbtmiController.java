@@ -62,14 +62,16 @@ public class MbtmiController {
 											  , @RequestParam(required = false) String type
 											  , @RequestParam(required = false) String search
 											  , @RequestParam(required = false) Integer page
-											  , @RequestParam(required = false) String sort) {
+											  , @RequestParam(required = false) String sort
+											  , @RequestParam(required = false) String username) {
 		
 		
-		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지, 정렬): " + category + ", " + type + ", " + search + ", " + page + ", " + sort);
+		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지, 정렬, 작성자): " + category + ", " + type + ", " + search + ", " + page + ", " + sort + ", " + username);
 		
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
-			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo, sort);
+//			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo, sort);
+			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo, sort, username);
 			Map<String, Object> res = new HashMap<>();
 	        res.put("pageInfo", pageInfo);
 	        res.put("mbtmiList", mbtmiList);
