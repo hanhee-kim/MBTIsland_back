@@ -62,12 +62,14 @@ public class MbtwhyController {
 		try {
 			// 페이지 정보
 //			PageInfo pageInfo = PageInfo.builder().curPage(commentPage==null? 1 : commentPage).build();
+			// 조회수 증가
+			mbtwhyService.increaseViewCount(no);
 			// Mbtwhy 게시글 (추천 수 포함하므로, 게시글 처음 보여질 때는 해당 GetMapping에서 추천수 가져와서 사용)
-			MbtwhyDto mbtwhy = mbtwhyService.selectMbtwhyDtoByNo(no);			
+			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(no);			
 			// 게시글 댓글 목록
 //			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo);
 			// 게시글 댓글 수
-			Integer mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
+//			Integer mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
 			// 추천 여부
 			Boolean isMbtwhyRecommend = mbtwhyService.selectIsRecommendByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
 			// 북마크 여부 조회
@@ -77,7 +79,7 @@ public class MbtwhyController {
 //			res.put("pageInfo", pageInfo);
 			res.put("mbtwhy", mbtwhy);
 //			res.put("mbtwhyCommentList", mbtwhyCommentList);
-			res.put("mbtwhyCommentCnt", mbtwhyCommentCnt);
+//			res.put("mbtwhyCommentCnt", mbtwhyCommentCnt);
 			res.put("isMbtwhyRecommend", isMbtwhyRecommend);
 			res.put("isMbtwhyBookmark", isMbtwhyBookmark);
 			
@@ -134,15 +136,20 @@ public class MbtwhyController {
 	// 댓글 목록 조회 (게시글 번호, 댓글 페이지)
 	@GetMapping("mbtwhycommentlist/{no}")
 	public ResponseEntity<Object> mbtwhyCommentList(@PathVariable Integer no,
-			@RequestParam(required = false) Integer commentpage) {
+			@RequestParam(required = false) Integer commentPage) {
 
 		try {
-			PageInfo pageInfo = PageInfo.builder().curPage(commentpage == null ? 1 : commentpage).build();
-			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo); // 댓글목록
+			// 페이징 정보
+			PageInfo pageInfo = PageInfo.builder().curPage(commentPage == null ? 1 : commentPage).build();
+			// 댓글목록
+			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo);
+			// 댓글 개수
+			Integer mbtwhyCommentCount = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
 			Map<String, Object> res = new HashMap<>();
 
 			res.put("mbtwhyCommentList", mbtwhyCommentList);
 			res.put("pageInfo", pageInfo);
+			res.put("mbtwhyCommentCount", mbtwhyCommentCount);
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -154,7 +161,7 @@ public class MbtwhyController {
 	@PostMapping("/mbtwhycomment")
 	public ResponseEntity<Object> mbtwhyDetailComment(@RequestBody UserEntity sendUser,
 			@RequestParam(required = false) Integer no, @RequestParam(required = false) String comment,
-			@RequestParam(required = false) Integer parentcommentNo, @RequestParam(required = false) Integer commentPage) {
+			@RequestParam(required = false) Integer parentcommentNo) {
 		
 		try {
 			LocalDate currentDate = LocalDate.now();
@@ -175,18 +182,18 @@ public class MbtwhyController {
 			mbtwhyService.insertMbtwhyComment(mbtwhyComment);
 			
 			// 페이지 정보
-			PageInfo pageInfo = PageInfo.builder().curPage(commentPage==null? 1 : commentPage).build();
+//			PageInfo pageInfo = PageInfo.builder().curPage(commentPage==null? 1 : commentPage).build();
 			// 게시글 댓글 목록
-			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo);
+//			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo);
 			// 게시글 댓글 수
-			Integer mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
+//			Integer mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
 			
-			Map<String, Object> res = new HashMap<>();
-			res.put("pageInfo", pageInfo);
-			res.put("mbtwhyCommentList", mbtwhyCommentList);
-			res.put("mbtwhyCommentCnt", mbtwhyCommentCnt);
+//			Map<String, Object> res = new HashMap<>();
+//			res.put("pageInfo", pageInfo);
+//			res.put("mbtwhyCommentList", mbtwhyCommentList);
+//			res.put("mbtwhyCommentCnt", mbtwhyCommentCnt);
 			
-			return new ResponseEntity<Object>(res, HttpStatus.OK);
+			return new ResponseEntity<Object>(HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -245,6 +252,10 @@ public class MbtwhyController {
 	// 매개변수로 가져온 Bookmark와 동일한 컬럼이 있다면 delete, 없다면 insert
 	@PostMapping("mbtwhybookmark")
 	public void mbtwhyDetailBookmark(@RequestBody Bookmark bookmark) {
+		
+		System.out.println(bookmark.getBoardType());
+		System.out.println(bookmark.getPostNo());
+		System.out.println(bookmark.getUsername());
 		try {
 			// 북마크 데이터 조회
 			Bookmark mbtwhyBookMark = mbtwhyService.selectBookmarkByUsernameAndPostNoAndBoardType(bookmark.getUsername(), bookmark.getPostNo(), bookmark.getBoardType());
