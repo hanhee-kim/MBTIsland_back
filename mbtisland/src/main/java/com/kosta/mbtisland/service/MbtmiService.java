@@ -42,6 +42,9 @@ public interface MbtmiService {
 	// 게시글 작성
 	Mbtmi addMbtmi(MbtmiDto mbtmiDto) throws Exception;
 	
+	// 추천수 증가, 감소
+	void increaseRecommendCnt(Integer no) throws Exception;
+	void decreaseRecommendCnt(Integer no) throws Exception;
 	
 
 }

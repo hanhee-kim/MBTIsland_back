@@ -205,6 +205,20 @@ public class MbtmiServiceImpl implements MbtmiService {
 		if(ombtmi.isPresent()) return ombtmi.get(); 
 		return null;
 	}
+
+	// 추천수 증가, 감소
+	@Override
+	public void increaseRecommendCnt(Integer no) throws Exception {
+		Mbtmi mbtmi = mbtmiDetail(no);
+		mbtmi.setRecommendCnt(mbtmi.getRecommendCnt()+1);
+		mbtmiRepository.save(mbtmi);
+	}
+	@Override
+	public void decreaseRecommendCnt(Integer no) throws Exception {
+		Mbtmi mbtmi = mbtmiDetail(no);
+		mbtmi.setRecommendCnt(mbtmi.getRecommendCnt()-1);
+		mbtmiRepository.save(mbtmi);
+	}
 	
 	
 

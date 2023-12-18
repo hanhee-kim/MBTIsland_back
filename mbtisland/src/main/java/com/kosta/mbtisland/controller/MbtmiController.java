@@ -19,10 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.service.BookmarkService;
 import com.kosta.mbtisland.service.MbtmiService;
 import com.kosta.mbtisland.service.RecommendService;
 
@@ -33,6 +35,8 @@ public class MbtmiController {
 	private MbtmiService mbtmiService;
 	@Autowired
 	private RecommendService recommendService;
+	@Autowired
+	private BookmarkService bookmarkService;
 	
 	// 주간인기글 목록
 	@GetMapping("/weeklyhotmbtmi")
@@ -81,11 +85,12 @@ public class MbtmiController {
 			mbtmiService.increaseViewCount(no); // 조회수 증가
 			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no); // 댓글수
 			Boolean isMbtmiRecommend = recommendService.selectIsRecommendByUsernameAndPostNoAndBoardType(username, no, "mbtmi"); // 추천여부
-			// (북마크 여부)
+			Boolean isMbtmiBookmark = bookmarkService.selectIsBookmarkByUsernameAndPostNoAndBoardType(username, no, "mbtmi"); // 북마크여부
 			Map<String, Object> res = new HashMap<>();
 	        res.put("mbtmi", mbtmi);
 	        res.put("mbtmiCommentCnt", mbtmiCommentCnt);
 	        res.put("isMbtmiRecommend", isMbtmiRecommend);
+	        res.put("isMbtmiBookmark", isMbtmiBookmark);
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -205,42 +210,46 @@ public class MbtmiController {
 			// 추천 데이터 조회
 			Recommend mbtmiRecommend = recommendService.selectRecommend(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
 			
-			if(mbtmiRecommend == null) { // 추천되지 않은 상태라면
-				recommendService.insertRecommend(recommend); // 추천
-				mbtmi.setRecommendCnt(recommendCnt + 1); // 추천수 + 1
-				
-				MbtmiDto dto = MbtmiDto.builder().no(mbtmi.getNo()).title(mbtmi.getTitle()).content(mbtmi.getContent()).category(mbtmi.getCategory())
-						.viewCnt(mbtmi.getViewCnt()).recommendCnt(mbtmi.getRecommendCnt()).writeDate(mbtmi.getWriteDate())
-						.isBlocked(mbtmi.getIsBlocked()).writerId(mbtmi.getWriterId()).writerNickname(mbtmi.getWriterNickname())
-						.writerMbti(mbtmi.getWriterMbti()).writerMbtiColor(mbtmi.getWriterMbtiColor()).fileIdxs(mbtmi.getFileIdxs())
-//						.commentCnt(commentCnt)
-						.build();
-				mbtmiService.addMbtmi(dto); // update
-			} else { // 이미 추천된 상태라면
-				recommendService.deleteRecommend(mbtmiRecommend.getNo()); // 추천 해제 (Recommend 테이블 PK로 delete)
-				mbtmi.setRecommendCnt(recommendCnt - 1); // 추천수 - 1
-				
-				MbtmiDto dto = MbtmiDto.builder().no(mbtmi.getNo()).title(mbtmi.getTitle()).content(mbtmi.getContent()).category(mbtmi.getCategory())
-						.viewCnt(mbtmi.getViewCnt()).recommendCnt(mbtmi.getRecommendCnt()).writeDate(mbtmi.getWriteDate())
-						.isBlocked(mbtmi.getIsBlocked()).writerId(mbtmi.getWriterId()).writerNickname(mbtmi.getWriterNickname())
-						.writerMbti(mbtmi.getWriterMbti()).writerMbtiColor(mbtmi.getWriterMbtiColor()).fileIdxs(mbtmi.getFileIdxs())
-//						.commentCnt(commentCnt)
-						.build();
-				mbtmiService.addMbtmi(dto); // update
+			if(mbtmiRecommend == null) {
+				recommendService.insertRecommend(recommend);
+				mbtmiService.increaseRecommendCnt(recommend.getPostNo());
+			} else { 
+				recommendService.deleteRecommend(mbtmiRecommend.getNo());
+				mbtmiService.decreaseRecommendCnt(recommend.getPostNo());
 			}
-			
-//			// 업데이트된 추천수 조회
-//			Integer mbtmiRecommendCount = mbtmiService.selectRecommendCountByPostNoAndBoardType(recommend.getPostNo(), recommend.getBoardType());
-			
+	
 			// 게시글 및 추천수 재조회
 			Mbtmi updatedMbtmi = mbtmiService.mbtmiDetail(recommend.getPostNo());
 			Integer updatedRecommendCnt = mbtmi.getRecommendCnt();
 			
-			// 추천수 반환
 			Map<String, Object> res = new HashMap<>();
 			res.put("mbtmiRecommendCount", updatedRecommendCnt);
-			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 북마크
+	@PostMapping("/mbtmibookmark")
+	public ResponseEntity<Object> mbtmiDetailBookmark(@RequestBody Bookmark bookmark) {
+		try {
+			// 게시글 조회
+			Mbtmi mbtmi = mbtmiService.mbtmiDetail(bookmark.getPostNo());
+			
+			// 북마크 데이터 조회
+			Bookmark mbtmiBookmark = bookmarkService.selectBookmark(bookmark.getUsername(), bookmark.getPostNo(), bookmark.getBoardType());
+			
+			if(mbtmiBookmark == null) {
+				bookmarkService.insertBookmark(bookmark);
+			} else { 
+				bookmarkService.deleteBookmark(mbtmiBookmark.getNo());
+			}
+	
+			// 게시글 재조회
+//			Mbtmi updatedMbtmi = mbtmiService.mbtmiDetail(bookmark.getPostNo());
+			return new ResponseEntity<Object>("북마크/해제 성공", HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
