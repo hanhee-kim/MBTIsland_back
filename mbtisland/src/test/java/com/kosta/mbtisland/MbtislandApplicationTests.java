@@ -10,13 +10,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
 
 import com.kosta.mbtisland.dto.NoteDto;
+import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
-import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.entity.Note;
+import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.entity.Question;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
@@ -68,43 +69,54 @@ class MbtislandApplicationTests {
 	
 	
 	/* 인수 */
-	@Test
+	
+	// MBTWhy
 	// Mbtwhy 게시글 목록 조회 (MBTI 타입)
-	void selectMbtwhyByMbtiCategoryAndPage() throws Exception {
+	@Test
+	void mbtwhyFindByMbtiCategoryAndPage() throws Exception {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
-			List<Mbtwhy> mbtwhyList = mbtwhyServiceImpl.selectMbtwhyListByMbtiAndPageAndSearchAndSort("ENFP", pageInfo, null, null);
+			List<MbtwhyDto> mbtwhyList = mbtwhyServiceImpl.selectMbtwhyListByMbtiAndPageAndSearchAndSort("ENFP", pageInfo, null, null);
 			for(int i = 0;i < mbtwhyList.size();i++) {
 				System.out.println(mbtwhyList);
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
-			return;
 		}
 	}
 	
+	// Mbtwhy 일간 인기 게시글 조회 (MBTI)
+	@Test
+	void mbtwhyDailyHotMbtwhyFind() throws Exception {
+		try {
+			MbtwhyDto mbtwhyDto = mbtwhyServiceImpl.selectDailyHotMbtwhy("ISTJ");
+			System.out.println(mbtwhyDto.getWriteDate());
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// Mbtwhy 게시글 작성
 	@Test
 	@Commit
-	// Mbtwhy 게시글 작성
-	void insertMbtwhy() throws Exception {
+	void mbtwhyInsert() throws Exception {
 //		String currentTimestampToString = "2022/12/12 08:03:15";
-//
-//		//  String => Timestamp
+
+		//  String => Timestamp
 //		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-//		
-//		// 날짜 형식이 맞는지 확인하는 함수 setLenient()
-//		// false로 설정해두면, 날짜 형식이 잘못 되었을 경우 해당 행에서 오류를 발생시킴
+		
+		// 날짜 형식이 맞는지 확인하는 함수 setLenient()
+		// false로 설정해두면, 날짜 형식이 잘못 되었을 경우 해당 행에서 오류를 발생시킴
 //		dateFormat.setLenient(false);
-//		
 //		java.util.Date stringToDate = dateFormat.parse(currentTimestampToString);
 //	    Timestamp stringToTimestamp = new Timestamp(stringToDate.getTime());
 		
 		Mbtwhy mbtwhy = Mbtwhy.builder()
-				.content("나는 서울시 동작구의 김희찬이다. 꼬우면 찾아와라 현피뜨자!!!!!!!!!!!")
+				.content("하이요!!!!!!!!!!!")
 				.mbtiCategory("ISTJ")
 //				.writeDate(stringToTimestamp)
-				.writerId("user02")
-				.writerNickname("토큰킴")
+				.writerId("asdf")
+				.writerNickname("asdf")
 				.writerMbti("ISTP")
 				.writerMbtiColor("#4D6879").build();
 		
@@ -112,12 +124,13 @@ class MbtislandApplicationTests {
 
 	}
 	
+	// Mbtwhy 댓글 작성
 	@Test
 	@Commit
-	void insetMbtwhyComment() throws Exception {
+	void mbtwhyCommentInsert() throws Exception {
 		MbtwhyComment mbtwhyComment = MbtwhyComment.builder()
 				.commentContent("ㅋㅋ")
-				.mbtwhyNo(12)
+				.mbtwhyNo(14)
 				.writerId("user02")
 				.writerNickname("토큰킴")
 				.writerMbti("ISTP")
@@ -236,17 +249,18 @@ class MbtislandApplicationTests {
 	@Test
 	void mbtmiNewlyMbtmiList() throws Exception {
 		// 컨트롤러
-		String category = "잡담";
-		String type = "SF";
+		String category = null;
+		String type = "PI";
 		String searchTerm = null;
 		Integer page = 1;
+		String sort = null;
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 		// 서비스
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
 		
-		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest);
+		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort);
 		System.out.println("------최신글 목록 출력------");
 		Iterator<Mbtmi> iter = newlyMbtmiList.iterator();
 		while(iter.hasNext()) {
@@ -254,13 +268,6 @@ class MbtislandApplicationTests {
 		}
 	}
 	
-	@Test
-	void mbtmiCntBy() {
-		Long cnt = mbtmiRepository.countByCategory("잡담");
-		cnt = mbtmiDslRepository.countByCategoryPlusWriterMbti("취미", "NF");
-		cnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch("학교", "P", "스타");
-		System.out.println("결과: " + cnt);
-	}
 	
 	@Test
 	void mbtwhyCntBy() {
@@ -290,20 +297,7 @@ class MbtislandApplicationTests {
 		}
 	}
 
-/*
-	// 게시글별 댓글 수(리스트에 표기하기 위함)
-	@Test void mbtmiCommentCntOfMbtmiNoArr() throws Exception {
-		List<Integer> mbtmiNoList = new ArrayList<Integer>();
-		mbtmiNoList.add(1);
-		mbtmiNoList.add(240);
-		List<Map<Integer, Integer>> resList = mbtmiService.commentCntByMbtmiNoArr(mbtmiNoList);
-		System.out.println("결과목록: ");
-		Iterator<Map<Integer, Integer>> iter = resList.iterator();
-		while(iter.hasNext()) {
-			System.out.println(iter.next());
-		}
-	}
- */	
+
 	// 특정게시글의 댓글수
 	@Test
 	void mbtmiCommentCntByMbtmiNo() throws Exception {

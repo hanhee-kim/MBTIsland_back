@@ -16,6 +16,7 @@ import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -75,55 +76,106 @@ public class MbtmiDslRepository {
 	}
 	
 	
-	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징) ******* type이 ITJ 와 같은 경우에 문자열 포함으로 쿼리시 결과가 나오지 않게됨 ********
-	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest) {
-		return jpaQueryfactory.selectFrom(mbtmi)
-							.where(
-									category!=null? mbtmi.category.eq(category) : null,
-									type!=null? mbtmi.writerMbti.containsIgnoreCase(type) : null,
-									searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
-											.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
-									mbtmi.isBlocked.eq("N")
-							)
-							.orderBy(mbtmi.no.desc())
-							.offset(pageRequest.getOffset())
-							.limit(pageRequest.getPageSize())
-							.fetch();
+	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징)
+//	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest, String sort) {
+//		return jpaQueryfactory.selectFrom(mbtmi)
+//							.where(
+//									category!=null? mbtmi.category.eq(category) : null,
+//									type!=null? isWriterMbtiContainsStr(type) : null,
+//									searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
+//											.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+//									mbtmi.isBlocked.eq("N")
+//							)
+//							.orderBy(
+//									sort!=null&&sort.equals("최신순")? mbtmi.no.desc() :
+//									sort!=null&&sort.equals("조회순")? mbtmi.viewCnt.desc() :
+//									sort!=null&&sort.equals("추천순")? mbtmi.recommendCnt.desc() : null
+//									)
+//							.offset(pageRequest.getOffset())
+//							.limit(pageRequest.getPageSize())
+//							.fetch();
+//	}
+	
+	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest, String sort) {
+//		System.out.println("dsl의 파라미터 정렬값: " + sort);
+	    JPAQuery<Mbtmi> query = jpaQueryfactory.selectFrom(mbtmi)
+	            .where(
+	                    category != null ? mbtmi.category.eq(category) : null,
+	                    type != null ? isWriterMbtiContainsStr(type) : null,
+	                    searchTerm != null ? mbtmi.title.containsIgnoreCase(searchTerm)
+	                            .or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+	                    mbtmi.isBlocked.eq("N")
+	            );
+
+	    if(sort==null) {
+	    	query.orderBy(mbtmi.no.desc());
+	    } else {
+	    	query.orderBy(
+	    			sort.equals("최신순") ? mbtmi.no.desc() : 
+	    			sort.equals("조회순") ? mbtmi.viewCnt.desc() : 
+	    			sort.equals("추천순") ? mbtmi.recommendCnt.desc() : null
+	    			);
+	    }
+
+	    return query.offset(pageRequest.getOffset())
+	            .limit(pageRequest.getPageSize())
+	            .fetch();
 	}
 	
-	
-	
-	// 카테고리 && 타입 적용된 게시글수
-	public Long countByCategoryPlusWriterMbti(String category, String type) {
-		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
-				.where(
-						mbtmi.category.eq(category)
-						.and(mbtmi.writerMbti.containsIgnoreCase(type))
-						)
-				.fetchOne();
+	// 2-1. where절에서 사용할 검색조건의 일부를 BooleanExpression로 반환하는 메서드 선언
+	private BooleanExpression isWriterMbtiContainsStr(String type) {						
+		BooleanExpression strCondition = null;
+	    
+	    for (int j=0; j<type.length(); j++) { // 문자열type의 길이만큼 반복
+	        BooleanExpression charCondition  = mbtmi.writerMbti.containsIgnoreCase(String.valueOf(type.charAt(j)));
+	        strCondition = (strCondition == null)? charCondition : strCondition.and(charCondition); // 1회차(0인덱스)는 한번비교, 2회차부터는 &&로 비교
+	        
+//	        System.out.println("===> " + strCondition); 
+	        /* 출력예시 type="IST"인 경우
+	         ===> containsIc(mbtmi.writerMbti,I)
+			 ===> containsIc(mbtmi.writerMbti,I) && containsIc(mbtmi.writerMbti,S)
+			 ===> containsIc(mbtmi.writerMbti,I) && containsIc(mbtmi.writerMbti,S) && containsIc(mbtmi.writerMbti,T)
+	        */
+	    }
+	    return strCondition;
 	}
 	
-	// 카테고리 && 타입 && 검색어 적용된 게시글수
+	// 3. 최신글수 조회 (PageInfo의 allPage값 계산시 필요)
 	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm) {
-		return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
-				.where(
-						mbtmi.category.eq(category)
-						.and(mbtmi.writerMbti.containsIgnoreCase(type))
-						.and(mbtmi.title.containsIgnoreCase(searchTerm)
-								.or(mbtmi.content.containsIgnoreCase(searchTerm)))
-						)
-				.fetchOne();
+
+	    return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
+	    		.where(
+	    				category!=null? mbtmi.category.eq(category) : null,
+	    				type!=null? isWriterMbtiContainsStr(type) : null,
+	    				searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
+				    					.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+				    	mbtmi.isBlocked.eq("N")
+	    				)
+	    		.fetchOne();
 	}
+
 	
-	// 특정 게시글의 댓글 목록
+	// 4. 특정 게시글의 댓글 목록
 	public List<MbtmiComment> findMbtmiCommentListByMbtmiNoAndPaging(Integer mbtmiNo, PageRequest pageRequest) {
 		return jpaQueryfactory.selectFrom(mbtmiComment)
-								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo)
-										.and(mbtmiComment.isBlocked.eq("N")))
+								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo))
 								.orderBy(mbtmiComment.writeDate.asc())
 								.offset(pageRequest.getOffset())
 								.limit(pageRequest.getPageSize())
 								.fetch();
+	}
+	
+	// 5. 특정 게시글의 댓글수 조회 (PageInfo의 allPage값 계산시 필요)
+	public Long countCommentByMbtmiNo(Integer mbtmiNo) {
+	    return jpaQueryfactory
+	            .select(mbtmiComment.count())
+	            .from(mbtmiComment)
+	            .where(
+	                    mbtmiComment.mbtmiNo.eq(mbtmiNo)
+//	                        .and(mbtmiComment.isBlocked.eq("N"))
+//	                        .and(mbtmiComment.isRemoved.eq("N"))
+	            )
+	            .fetchOne();
 	}
 
 	

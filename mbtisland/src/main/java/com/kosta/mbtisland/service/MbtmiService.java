@@ -13,7 +13,7 @@ public interface MbtmiService {
 	List<MbtmiDto> weeklyHotMbtmiList() throws Exception;
 	
 	// 최신글 목록
-	List<MbtmiDto> mbtmiListByCategoryAndTypeAndSearch(String category, String type, String searchTerm, PageInfo pageInfo) throws Exception;
+	List<MbtmiDto> mbtmiListByCategoryAndTypeAndSearch(String category, String type, String searchTerm, PageInfo pageInfo, String sort) throws Exception;
 	
 	// 최신글수 조회 (PageInfo의 allPage값 계산시 필요)
 	Integer mbtmiCntByCriteria(String category, String type, String searchTerm) throws Exception;
@@ -33,7 +33,15 @@ public interface MbtmiService {
 	// 게시글 삭제
 	void deleteMbtmi(Integer no) throws Exception;
 
-
+	// 댓글 삭제(IS_REMOVED 컬럼값 업데이트)
+	void deleteMbtmiComment(Integer commentNo) throws Exception;
+	
+	// 댓글 작성
+	void addMbtmiComment(MbtmiComment mbtmiComment) throws Exception;
+	
+	// 게시글 작성
+	Mbtmi addMbtmi(MbtmiDto mbtmiDto) throws Exception;
+	
 	
 
 }
