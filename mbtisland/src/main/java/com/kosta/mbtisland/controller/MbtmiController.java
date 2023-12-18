@@ -19,11 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.service.AlarmService;
 import com.kosta.mbtisland.service.BookmarkService;
 import com.kosta.mbtisland.service.MbtmiService;
 import com.kosta.mbtisland.service.RecommendService;
@@ -37,6 +39,8 @@ public class MbtmiController {
 	private RecommendService recommendService;
 	@Autowired
 	private BookmarkService bookmarkService;
+	@Autowired
+	private AlarmService alarmService;
 	
 	// 주간인기글 목록
 	@GetMapping("/weeklyhotmbtmi")
@@ -149,6 +153,7 @@ public class MbtmiController {
 													  , @RequestParam(required = false) Integer commentpage) {
 		
 		try {
+			// 1. 댓글 삽입
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
 			MbtmiComment mbtmiComment = MbtmiComment.builder()
@@ -161,8 +166,32 @@ public class MbtmiController {
 										.writerMbtiColor(sendUser.getUserMbtiColor())
 										.writeDate(writeDate)
 										.build();
-			
 			mbtmiService.addMbtmiComment(mbtmiComment);
+
+			// 2. 알림데이터 삽입
+			// alarmCnt로 할당할 값 조회: 게시글의 댓글 수 or 댓글의 대댓글 수
+			Integer alarmCnt = 0;
+			if(parentcommentNo==null) alarmCnt = mbtmiService.mbtmiCommentCnt(no);
+			else alarmCnt = alarmCnt = mbtmiService.mbtmiChildCommentCnt(parentcommentNo);
+			
+			// alarmTargetNo && alarmTargetFrom이 같은 기존 데이터 유무를 조회하여 있다면 인서트가 아닌 업데이트 수행
+			Alarm existAlarm = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo==null? no : parentcommentNo, parentcommentNo==null? "mbtmi" : "mbtmiComment");
+			
+			if(existAlarm!=null) {
+				existAlarm.setAlarmCnt(alarmCnt);
+				alarmService.addAlarm(existAlarm);
+			} else {
+				Alarm alarm = Alarm.builder()
+						.username(sendUser.getUsername())
+						.alarmType("댓글")
+						.alarmTargetNo(parentcommentNo==null? no : parentcommentNo)
+						.alarmTargetFrom(parentcommentNo==null? "mbtmi" : "mbtmiComment")
+						.alarmUpdateDate(writeDate)
+						.alarmCnt(alarmCnt)
+						.build();
+				
+				alarmService.addAlarm(alarm);
+			}
 			
 			PageInfo pageInfo = PageInfo.builder().curPage(commentpage==null? 1: commentpage).build();
 			List<MbtmiComment> mbtmiCommentList = mbtmiService.mbtmiCommentListByMbtmiNo(no, pageInfo);

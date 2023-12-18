@@ -46,5 +46,9 @@ public interface MbtmiService {
 	void increaseRecommendCnt(Integer no) throws Exception;
 	void decreaseRecommendCnt(Integer no) throws Exception;
 	
+	// 댓글의 대댓글 수 조회
+	Integer mbtmiChildCommentCnt(Integer mbtmiCommentNo) throws Exception;
+	
+	
 
 }

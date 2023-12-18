@@ -177,6 +177,17 @@ public class MbtmiDslRepository {
 	            )
 	            .fetchOne();
 	}
+	
+	// 6. 댓글의 대댓글 수 조회
+	public Long countCommentByParentcommentNo(Integer mbtmiCommentNo) {
+		return jpaQueryfactory
+				.select(mbtmiComment.count())
+				.from(mbtmiComment)
+				.where(
+						mbtmiComment.parentcommentNo.eq(mbtmiCommentNo)
+				)
+				.fetchOne();
+	}
 
 	
 }

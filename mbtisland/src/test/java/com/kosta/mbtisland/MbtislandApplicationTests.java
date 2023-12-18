@@ -2,6 +2,7 @@ package com.kosta.mbtisland;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,16 +10,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
 
-import com.kosta.mbtisland.dto.NoteDto;
 import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
-import com.kosta.mbtisland.entity.Note;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.entity.Question;
+import com.kosta.mbtisland.repository.AlarmRepository;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
@@ -50,6 +51,8 @@ class MbtislandApplicationTests {
 	private QuestionRepository questionRepository;
 	@Autowired
 	private MbtmiService mbtmiService;
+	@Autowired
+	private AlarmRepository alarmRepository;
 
 	// 인수
 	@Autowired
@@ -327,5 +330,18 @@ class MbtislandApplicationTests {
 //		}
 	}
 	
+	// 알림타겟넘버와 알림타겟프롬으로 알림데이터 조회
+//	@Test
+//	void alarmSelect() throws Exception {
+//		Integer alarmTargetNo = 276;
+//		String alarmTargetFrom = "mbtmi";
+//		List<Alarm> alarms = alarmRepository.findByAlarmTargetNoAndAlarmTargetFrom(alarmTargetNo, alarmTargetFrom);
+//		if(alarms!=null) {
+//			System.out.println("결과: " );
+//			for (Alarm alarm : alarms) {
+//				System.out.println(alarm);
+//			}
+//		}
+//	}
 	
 }

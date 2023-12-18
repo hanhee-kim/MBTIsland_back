@@ -219,8 +219,15 @@ public class MbtmiServiceImpl implements MbtmiService {
 		mbtmi.setRecommendCnt(mbtmi.getRecommendCnt()-1);
 		mbtmiRepository.save(mbtmi);
 	}
+
+	// 댓글의 대댓글 수 조회
+	@Override
+	public Integer mbtmiChildCommentCnt(Integer mbtmiCommentNo) throws Exception {
+		Long mbtmiChildCommentCnt = mbtmiDslRepository.countCommentByParentcommentNo(mbtmiCommentNo);
+		return mbtmiChildCommentCnt.intValue();
+	}
 	
-	
+
 
 
 	
