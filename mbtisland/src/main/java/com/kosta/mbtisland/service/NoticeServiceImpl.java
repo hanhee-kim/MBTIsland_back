@@ -1,5 +1,7 @@
 package com.kosta.mbtisland.service;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.kosta.mbtisland.dto.NoticeDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
@@ -138,6 +142,23 @@ public class NoticeServiceImpl implements NoticeService {
 		Notice notice = noticeDetail(no);
 		notice.setViewCnt(notice.getViewCnt()+1);
 		noticeRepository.save(notice);
+	}
+
+	// 공지사항 등록
+	@Override
+	public Notice addNotice(NoticeDto noticeDto) throws Exception {
+		LocalDate currentDate = LocalDate.now();
+		Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+		Notice notice = Notice.builder()
+							.title(noticeDto.getTitle())
+							.content(noticeDto.getContent())
+							.writeDate(writeDate)
+							.writerId(noticeDto.getWriterId())
+							.build();
+		noticeRepository.save(notice);
+		Optional<Notice> onotice = noticeRepository.findById(notice.getNo());
+		if(onotice.isPresent()) return onotice.get(); 
+		else return null;
 	}
 
 	

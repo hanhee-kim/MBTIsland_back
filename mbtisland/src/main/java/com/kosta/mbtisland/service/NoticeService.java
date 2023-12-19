@@ -3,6 +3,7 @@ package com.kosta.mbtisland.service;
 import java.util.List;
 import java.util.Map;
 
+import com.kosta.mbtisland.dto.NoticeDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Notice;
 
@@ -29,6 +30,8 @@ public interface NoticeService {
 	// 조회수 증가
 	void increaseViewCount(Integer no) throws Exception;
 
+	// 공지사항 등록
+	Notice addNotice(NoticeDto noticeDto) throws Exception;
 	
 	
 }

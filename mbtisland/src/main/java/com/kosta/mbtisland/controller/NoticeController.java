@@ -11,9 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kosta.mbtisland.dto.NoticeDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.service.NoticeService;
@@ -89,6 +92,21 @@ public class NoticeController {
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	// 공지사항 등록
+	@PostMapping("/noticewrite")
+	public ResponseEntity<Object> addNotice (@RequestBody NoticeDto noticeDto) {
+		try {
+			Notice writtenNotice = noticeService.addNotice(noticeDto);
+			Map<String, Object> res = new HashMap<>();
+			res.put("notice", writtenNotice);
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 	
 	
 

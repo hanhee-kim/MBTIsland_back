@@ -40,7 +40,7 @@ public interface MbtmiService {
 	// 댓글 작성
 	void addMbtmiComment(MbtmiComment mbtmiComment) throws Exception;
 	
-	// 게시글 작성
+	// 게시글 등록
 	Mbtmi addMbtmi(MbtmiDto mbtmiDto) throws Exception;
 	
 	// 추천수 증가, 감소

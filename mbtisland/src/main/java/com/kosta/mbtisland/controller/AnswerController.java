@@ -42,6 +42,7 @@ public class AnswerController {
 					.alarmTargetNo(answerDto.getQuestionNo())
 					.alarmTargetFrom("question")
 					.alarmUpdateDate(answerDto.getWriteDate())
+					.alarmCnt(1)
 					.build();
 			alarmService.addAlarm(alarm);
 			
