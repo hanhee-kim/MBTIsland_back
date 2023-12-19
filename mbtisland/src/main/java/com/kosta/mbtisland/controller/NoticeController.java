@@ -33,10 +33,10 @@ public class NoticeController {
 											, @RequestParam(required = false) String hidden
 											, @RequestParam(required = false) Integer page) {
 		
-		System.out.println("***컨트롤러가 받은 파라미터 출력-----");
-		System.out.println("search: " + search);
-		System.out.println("hidden: " + hidden);
-		System.out.println("page: " + page);
+//		System.out.println("***컨트롤러가 받은 파라미터 출력-----");
+//		System.out.println("search: " + search);
+//		System.out.println("hidden: " + hidden);
+//		System.out.println("page: " + page);
 		
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
@@ -100,6 +100,20 @@ public class NoticeController {
 			Notice writtenNotice = noticeService.addNotice(noticeDto);
 			Map<String, Object> res = new HashMap<>();
 			res.put("notice", writtenNotice);
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 공지사항 수정
+	@PostMapping("/noticemodify")
+	public ResponseEntity<Object> modifyNotice (@RequestBody NoticeDto noticeDto) {
+		try {
+			Notice modifiedNotice = noticeService.modifyNotice(noticeDto);
+			Map<String, Object> res = new HashMap<>();
+			res.put("notice", modifiedNotice);
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

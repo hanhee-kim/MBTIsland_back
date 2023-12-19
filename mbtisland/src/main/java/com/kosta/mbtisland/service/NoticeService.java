@@ -33,5 +33,7 @@ public interface NoticeService {
 	// 공지사항 등록
 	Notice addNotice(NoticeDto noticeDto) throws Exception;
 	
+	// 공지사항 수정
+	Notice modifyNotice(NoticeDto noticeDto) throws Exception;
 	
 }
