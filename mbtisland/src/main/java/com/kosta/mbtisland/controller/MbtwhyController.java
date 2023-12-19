@@ -1,6 +1,5 @@
 package com.kosta.mbtisland.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -71,17 +70,17 @@ public class MbtwhyController {
 			// 게시글 댓글 수
 //			Integer mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
 			// 추천 여부
-			Boolean isMbtwhyRecommend = mbtwhyService.selectIsRecommendByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
+			Boolean isMbtwhyRecommended = mbtwhyService.selectIsRecommendByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
 			// 북마크 여부 조회
-			Boolean isMbtwhyBookmark = mbtwhyService.selectIsBookmarkByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
+			Boolean isMbtwhyBookmarked = mbtwhyService.selectIsBookmarkByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
 			
 			Map<String, Object> res = new HashMap<>();
 //			res.put("pageInfo", pageInfo);
 			res.put("mbtwhy", mbtwhy);
 //			res.put("mbtwhyCommentList", mbtwhyCommentList);
 //			res.put("mbtwhyCommentCnt", mbtwhyCommentCnt);
-			res.put("isMbtwhyRecommend", isMbtwhyRecommend);
-			res.put("isMbtwhyBookmark", isMbtwhyBookmark);
+			res.put("isMbtwhyRecommended", isMbtwhyRecommended);
+			res.put("isMbtwhyBookmarked", isMbtwhyBookmarked);
 			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
