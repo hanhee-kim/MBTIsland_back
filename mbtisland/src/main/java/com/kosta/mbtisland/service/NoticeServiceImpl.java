@@ -164,17 +164,15 @@ public class NoticeServiceImpl implements NoticeService {
 	// 공지사항 수정
 	@Override
 	public Notice modifyNotice(NoticeDto noticeDto) throws Exception {
-		Notice notice = Notice.builder()
-							.no(noticeDto.getNo()) // 게시글 번호(pk)
-							.title(noticeDto.getTitle())
-							.content(noticeDto.getContent())
-							.writeDate(noticeDto.getWriteDate()) // 기존 등록일
-							.writerId(noticeDto.getWriterId())
-							.build();
-		noticeRepository.save(notice); // 업데이트
-		Optional<Notice> onotice = noticeRepository.findById(notice.getNo());
-		if(onotice.isPresent()) return onotice.get(); 
-		else return null;
+		Notice existNotice = noticeRepository.findById(noticeDto.getNo()).get();
+		if(existNotice==null) throw new Exception("해당 공지사항이 존재하지 않습니다.");
+		
+		existNotice.setTitle(noticeDto.getTitle());
+		existNotice.setContent(noticeDto.getContent());
+		existNotice.setWriterId(noticeDto.getWriterId());
+
+		noticeRepository.save(existNotice); // 업데이트
+		return existNotice;
 	}
 	
 
