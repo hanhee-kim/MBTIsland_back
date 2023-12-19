@@ -26,7 +26,8 @@ public class MbtwhyDslRepository {
 		(String mbti, PageRequest pageRequest, String search, String sort) throws Exception {
 		OrderSpecifier<?> orderSpecifier;
 		System.out.println(sort);
-		
+
+/*
 		// 정렬 조건
 		if(sort.equals("최신순")) { // 최신순
 			orderSpecifier = mbtwhy.no.desc();
@@ -37,11 +38,29 @@ public class MbtwhyDslRepository {
 		} else { // 기본 최신순
 			orderSpecifier = mbtwhy.no.desc();
 		}
+*/		
+		
+		// 정렬 조건
+		if(sort==null) {
+			orderSpecifier = mbtwhy.no.desc();
+		} else if(sort.equals("최신순")) { // 최신순
+			orderSpecifier = mbtwhy.no.desc();
+		} else if(sort.equals("조회순")) { // 조회순
+			orderSpecifier = mbtwhy.viewCnt.desc();
+		} else if(sort.equals("추천순")) { // 추천순
+			orderSpecifier = mbtwhy.recommendCnt.desc();
+		} 
+		else { // 기본 최신순
+			orderSpecifier = mbtwhy.no.desc();
+		}
+
+
 		
 		return jpaQueryFactory.selectFrom(mbtwhy)
 				.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,
 						mbtwhy.isBlocked.eq("N"),
-						mbtwhy.mbtiCategory.eq(mbti))
+//						mbtwhy.mbtiCategory.eq(mbti))
+						mbti!=null? mbtwhy.mbtiCategory.eq(mbti) : null)
 						.orderBy(orderSpecifier) // 정렬
 						.offset(pageRequest.getOffset()) // 인덱스
 						.limit(pageRequest.getPageSize()) // 개수 제한
@@ -55,7 +74,9 @@ public class MbtwhyDslRepository {
 						.from(mbtwhy)
 						.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,
 										mbtwhy.isBlocked.eq("N"),
-										mbtwhy.mbtiCategory.eq(mbti)).fetchOne();
+//										mbtwhy.mbtiCategory.eq(mbti))
+										mbti!=null? mbtwhy.mbtiCategory.eq(mbti) : null)
+						.fetchOne();
 	}
 	
 	// 일간 인기 게시글 조회 (MBTI)
@@ -67,7 +88,8 @@ public class MbtwhyDslRepository {
 		return jpaQueryFactory.select(mbtwhy)
 				.from(mbtwhy)
 				.where(mbtwhy.writeDate.after(startDate),
-						mbtwhy.mbtiCategory.eq(mbti),
+//						mbtwhy.mbtiCategory.eq(mbti),
+						mbti!=null? mbtwhy.mbtiCategory.eq(mbti) : null,
 						mbtwhy.isBlocked.eq("N"))
 				.orderBy(mbtwhy.recommendCnt.desc())
 				.limit(1).fetchOne();

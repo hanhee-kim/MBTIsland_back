@@ -66,7 +66,7 @@ public class MbtmiController {
 											  , @RequestParam(required = false) String username) {
 		
 		
-		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지, 정렬, 작성자): " + category + ", " + type + ", " + search + ", " + page + ", " + sort + ", " + username);
+//		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지, 정렬, 작성자): " + category + ", " + type + ", " + search + ", " + page + ", " + sort + ", " + username);
 		
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
