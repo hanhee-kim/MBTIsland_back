@@ -65,7 +65,7 @@ public class MbtwhyController {
 			// 조회수 증가
 			mbtwhyService.increaseViewCount(no);
 			// Mbtwhy 게시글 (추천 수 포함하므로, 게시글 처음 보여질 때는 해당 GetMapping에서 추천수 가져와서 사용)
-			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(no);			
+			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(no);
 			// 게시글 댓글 목록
 //			List<MbtwhyComment> mbtwhyCommentList = mbtwhyService.selectMbtwhyCommentListByMbtwhyNoAndPage(no, pageInfo);
 			// 게시글 댓글 수
@@ -120,11 +120,39 @@ public class MbtwhyController {
 		}
 	}
 	
-	// 게시글 삭제
-	@DeleteMapping("/deletembtwhy/{no}")
-	public ResponseEntity<Object> deleteMbtmi(@PathVariable Integer no) {
+	// 게시글 수정폼 조회
+	@GetMapping("/getmbtwhymodify/{no}")
+	public ResponseEntity<Object> getMbtwhyModify(@PathVariable Integer no) {
 		try {
-			System.out.println("게시글 번호: " + no);
+			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(no);
+			Map<String, Object> res = new HashMap<>();
+			res.put("mbtiCategory", mbtwhy.getMbtiCategory());
+			res.put("content", mbtwhy.getContent());
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 게시글 수정
+	@PostMapping("/mbtwhymodify/{no}/{content}")
+	public ResponseEntity<Object> mbtwhyModify(@PathVariable Integer no, @PathVariable String content) {
+		try {
+			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(no);
+			mbtwhy.setContent(content);
+			mbtwhyService.insertMbtwhy(mbtwhy);
+			return new ResponseEntity<Object>(HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 게시글 삭제
+	@DeleteMapping("/mbtwhydelete/{no}")
+	public ResponseEntity<Object> mbtwhyDelete(@PathVariable Integer no) {
+		try {
 			mbtwhyService.deleteMbtwhy(no);
 			return new ResponseEntity<Object>(no + " 삭제 성공", HttpStatus.OK);
 		} catch (Exception e) {
@@ -201,7 +229,7 @@ public class MbtwhyController {
 	}
 	
 	// 댓글 삭제(IS_REMOVED 컬럼값 업데이트)
-	@GetMapping("/deletembtwhycomment/{commentNo}")
+	@GetMapping("/mbtwhycommentdelete/{commentNo}")
 	public ResponseEntity<String> deleteMbtwhyComment(@PathVariable Integer commentNo) {
 		try {
 			mbtwhyService.deleteMbtwhyComment(commentNo);
