@@ -181,13 +181,13 @@ public class MbtmiServiceImpl implements MbtmiService {
 		mbtmiCommentRepository.save(targetComment.get());
 	}
 
-	// 댓글 작성
+	// 댓글 등록
 	@Override
 	public void addMbtmiComment(MbtmiComment mbtmiComment) throws Exception {
 		mbtmiCommentRepository.save(mbtmiComment);
 	}
 
-	// 게시글 작성
+	// 게시글 등록
 	@Override
 	public Mbtmi addMbtmi(MbtmiDto mbtmiDto) throws Exception {
 		LocalDate currentDate = LocalDate.now();
@@ -205,7 +205,7 @@ public class MbtmiServiceImpl implements MbtmiService {
 		mbtmiRepository.save(mbtmi);
 		Optional<Mbtmi> ombtmi = mbtmiRepository.findById(mbtmi.getNo());
 		if(ombtmi.isPresent()) return ombtmi.get(); 
-		return null;
+		else return null;
 	}
 
 	// 추천수 증가, 감소

@@ -146,7 +146,7 @@ public class MbtmiController {
 		}
 	}
 	
-	// 댓글 작성
+	// 댓글 등록
 	@PostMapping("/mbtmicomment")
 	public ResponseEntity<Object> mbtmiDetailComment(@RequestBody UserEntity sendUser
 													  , @RequestParam(required = false) Integer no
@@ -171,20 +171,23 @@ public class MbtmiController {
 			mbtmiService.addMbtmiComment(mbtmiComment);
 
 			// 2. 알림데이터 삽입
-			// alarmCnt로 할당할 값 조회: 게시글의 댓글 수 or 댓글의 대댓글 수
+			// 알림텥이블의 alarmCnt로 할당할 값 조회: 게시글의 댓글 수 or 댓글의 대댓글 수
 			Integer alarmCnt = 0;
 			if(parentcommentNo==null) alarmCnt = mbtmiService.mbtmiCommentCnt(no);
 			else alarmCnt = alarmCnt = mbtmiService.mbtmiChildCommentCnt(parentcommentNo);
+			// 알림테이블의 username으로 할당할 값 조회: 게시글 작성자
+			Mbtmi mbtmi = mbtmiService.mbtmiDetail(no);
+			String mbtmiWriterId = mbtmi.getWriterId(); 
 			
 			// alarmTargetNo && alarmTargetFrom이 같은 기존 데이터 유무를 조회하여 있다면 인서트가 아닌 업데이트 수행
 			Alarm existAlarm = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo==null? no : parentcommentNo, parentcommentNo==null? "mbtmi" : "mbtmiComment");
 			
 			if(existAlarm!=null) {
 				existAlarm.setAlarmCnt(alarmCnt);
-				alarmService.addAlarm(existAlarm);
+				alarmService.addAlarm(existAlarm); // alarmCnt컬럼값 업데이트
 			} else {
 				Alarm alarm = Alarm.builder()
-						.username(sendUser.getUsername())
+						.username(mbtmiWriterId) // 알림의주인==게시글작성자
 						.alarmType("댓글")
 						.alarmTargetNo(parentcommentNo==null? no : parentcommentNo)
 						.alarmTargetFrom(parentcommentNo==null? "mbtmi" : "mbtmiComment")
@@ -192,7 +195,7 @@ public class MbtmiController {
 						.alarmCnt(alarmCnt)
 						.build();
 				
-				alarmService.addAlarm(alarm);
+				alarmService.addAlarm(alarm); // 인서트
 			}
 			
 			PageInfo pageInfo = PageInfo.builder().curPage(commentpage==null? 1: commentpage).build();
@@ -212,17 +215,15 @@ public class MbtmiController {
 	}
 	
 	
-	// 게시글 작성
+	// 게시글 등록
 	@PostMapping("/mbtmiwrite")
 	public ResponseEntity<Object> addPost(@RequestBody MbtmiDto mbtmiDto) {
 //		System.out.println("게시글작성 컨트롤러가 받은 파라미터 mbtmiDto: " + mbtmiDto);
 		
 		try {
 			Mbtmi mbtmi = mbtmiService.addMbtmi(mbtmiDto);
-			
 			Map<String, Object> res = new HashMap<>();
 			res.put("mbtmi", mbtmi);
-			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,17 +1,13 @@
-package com.kosta.mbtisland.entity;
-
+package com.kosta.mbtisland.dto;
 
 import java.sql.Timestamp;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import com.kosta.mbtisland.entity.Answer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,39 +16,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@DynamicInsert
-@DynamicUpdate
 @ToString
-public class Answer {
+public class AnswerDto {
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer answerNo;
-	
-	@Column
 	private String title;
-	@Column
 	private String content;
-	
-	@Column
-	@CreationTimestamp
 	private Timestamp writeDate;
-	
-	@Column
 	private String writerId;
-	
-	@Column
 	private Integer questionNo;
-	
-	@Column
 	private String fileIdxs;
 	
+	// 문의글 작성자
+	private String questionWriterId;
 	
-
 }
