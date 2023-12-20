@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.mbtisland.dto.MbtmiDto;
+import com.kosta.mbtisland.dto.NoticeDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Bookmark;
@@ -283,6 +284,20 @@ public class MbtmiController {
 //			Mbtmi updatedMbtmi = mbtmiService.mbtmiDetail(bookmark.getPostNo());
 			return new ResponseEntity<Object>("북마크/해제 성공", HttpStatus.OK);
 		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 게시글 수정
+	@PostMapping("/mbtmimodify")
+	public ResponseEntity<Object> modifyMbtmi (@RequestBody MbtmiDto mbtmiDto) {
+		try {
+			Mbtmi modifiedMbtmi = mbtmiService.modifyMbtmi(mbtmiDto);
+			Map<String, Object> res = new HashMap<>();
+			res.put("notice", modifiedMbtmi);
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}

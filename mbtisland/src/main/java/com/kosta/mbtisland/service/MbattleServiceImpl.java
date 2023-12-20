@@ -1,10 +1,12 @@
 package com.kosta.mbtisland.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.repository.MbattleRepository;
 
+@Service
 public class MbattleServiceImpl implements MbattleService {
 	@Autowired
 	private MbattleRepository mbattleRepository;

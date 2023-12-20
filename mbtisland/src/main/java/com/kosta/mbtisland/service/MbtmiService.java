@@ -50,6 +50,9 @@ public interface MbtmiService {
 	// 댓글의 대댓글 수 조회
 	Integer mbtmiChildCommentCnt(Integer mbtmiCommentNo) throws Exception;
 	
+	// 게시글 수정
+	Mbtmi modifyMbtmi(MbtmiDto mbtmiDto) throws Exception;
+	
 	
 
 }

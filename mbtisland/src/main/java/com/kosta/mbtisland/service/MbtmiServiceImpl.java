@@ -17,6 +17,7 @@ import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
+import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
@@ -228,10 +229,20 @@ public class MbtmiServiceImpl implements MbtmiService {
 		Long mbtmiChildCommentCnt = mbtmiDslRepository.countCommentByParentcommentNo(mbtmiCommentNo);
 		return mbtmiChildCommentCnt.intValue();
 	}
-	
 
+	// 게시글 수정
+	@Override
+	public Mbtmi modifyMbtmi(MbtmiDto mbtmiDto) throws Exception {
+		Mbtmi existMbtmi = mbtmiRepository.findById(mbtmiDto.getNo()).get();
+		if(existMbtmi==null) throw new Exception("해당 게시글이 존재하지 않습니다.");
+		
+		existMbtmi.setTitle(mbtmiDto.getTitle());
+		existMbtmi.setContent(mbtmiDto.getContent());
+		existMbtmi.setCategory(mbtmiDto.getCategory());
 
-
+		mbtmiRepository.save(existMbtmi); // 업데이트
+		return existMbtmi;
+	}
 	
 
 }
