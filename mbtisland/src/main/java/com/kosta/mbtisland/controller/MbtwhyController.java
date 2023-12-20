@@ -1,8 +1,8 @@
 package com.kosta.mbtisland.controller;
 
-import java.util.Arrays;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +26,20 @@ import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.service.BookmarkService;
 import com.kosta.mbtisland.service.MbtwhyService;
+import com.kosta.mbtisland.service.RecommendService;
 
 @RestController
 public class MbtwhyController {
 	@Autowired
 	private MbtwhyService mbtwhyService;
+	
+	@Autowired
+	private RecommendService recommendService;
+	
+	@Autowired
+	private BookmarkService bookmarkService;
 	
 	// 게시글 페이징, 게시글 목록, 인기 게시글, 개수 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
 	@GetMapping("/mbtwhy")
@@ -70,9 +78,9 @@ public class MbtwhyController {
 			// 게시글 댓글 수
 //			Integer mbtwhyCommentCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no);
 			// 추천 여부
-			Boolean isMbtwhyRecommended = mbtwhyService.selectIsRecommendByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
+			Boolean isMbtwhyRecommended = recommendService.selectIsRecommendByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
 			// 북마크 여부 조회
-			Boolean isMbtwhyBookmarked = mbtwhyService.selectIsBookmarkByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
+			Boolean isMbtwhyBookmarked = bookmarkService.selectIsBookmarkByUsernameAndPostNoAndBoardType(username, no, "mbtwhy");
 			
 			Map<String, Object> res = new HashMap<>();
 //			res.put("pageInfo", pageInfo);
@@ -245,28 +253,26 @@ public class MbtwhyController {
 	public ResponseEntity<Object> mbtwhyDetailRecommend(@RequestBody Recommend recommend) {
 		try {
 			// 게시글 및 추천수 조회
-			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(recommend.getPostNo());
-			Integer recommendCnt = mbtwhy.getRecommendCnt();
+//			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(recommend.getPostNo());
 			
 			// 추천 데이터 조회
-			Recommend mbtwhyRecommend = mbtwhyService.selectRecommendByUsernameAndPostNoAndBoardType(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
+			Recommend mbtwhyRecommend = recommendService.selectRecommend(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
 			
 			if(mbtwhyRecommend == null) { // 추천되지 않은 상태라면
-				mbtwhyService.insertRecommend(recommend); // 추천
-				mbtwhy.setRecommendCnt(recommendCnt + 1); // 추천수 + 1
-				mbtwhyService.insertMbtwhy(mbtwhy); // update
+				recommendService.insertRecommend(recommend); // 추천
+				mbtwhyService.increaseRecommendCnt(recommend.getPostNo()); // 추천수 + 1
 			} else { // 이미 추천된 상태라면
-				mbtwhyService.deleteRecommend(mbtwhyRecommend.getNo()); // 추천 해제 (Recommend 테이블 PK로 delete)
-				mbtwhy.setRecommendCnt(recommendCnt - 1); // 추천수 - 1
-				mbtwhyService.insertMbtwhy(mbtwhy); // update
+				recommendService.deleteRecommend(mbtwhyRecommend.getNo()); // 추천 해제 (Recommend 테이블 PK로 delete)
+				mbtwhyService.decreaseRecommendCnt(recommend.getPostNo()); // 추천수 - 1
 			}
 			
 			// 업데이트된 추천수 조회
-			Integer mbtwhyRecommendCount = mbtwhyService.selectRecommendCountByPostNoAndBoardType(recommend.getPostNo(), recommend.getBoardType());
+			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(recommend.getPostNo());
+			Integer updatedRecommendCount = mbtwhy.getRecommendCnt();
 			
 			// 추천수 반환
 			Map<String, Object> res = new HashMap<>();
-			res.put("mbtwhyRecommendCount", mbtwhyRecommendCount);
+			res.put("mbtwhyRecommendCount", updatedRecommendCount);
 			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
@@ -279,18 +285,14 @@ public class MbtwhyController {
 	// 매개변수로 가져온 Bookmark와 동일한 컬럼이 있다면 delete, 없다면 insert
 	@PostMapping("mbtwhybookmark")
 	public void mbtwhyDetailBookmark(@RequestBody Bookmark bookmark) {
-		
-		System.out.println(bookmark.getBoardType());
-		System.out.println(bookmark.getPostNo());
-		System.out.println(bookmark.getUsername());
 		try {
 			// 북마크 데이터 조회
-			Bookmark mbtwhyBookMark = mbtwhyService.selectBookmarkByUsernameAndPostNoAndBoardType(bookmark.getUsername(), bookmark.getPostNo(), bookmark.getBoardType());
+			Bookmark mbtwhyBookMark = bookmarkService.selectBookmark(bookmark.getUsername(), bookmark.getPostNo(), bookmark.getBoardType());
 
 			if (mbtwhyBookMark == null) { // 추천되지 않은 상태라면
-				mbtwhyService.insertBookmark(bookmark); // 북마크
+				bookmarkService.insertBookmark(bookmark); // 북마크
 			} else { // 이미 추천된 상태라면
-				mbtwhyService.deleteBookmark(mbtwhyBookMark.getNo()); // 북마크 해제 (Bookmark 테이블 PK로 delete)
+				bookmarkService.deleteBookmark(mbtwhyBookMark.getNo()); // 북마크 해제 (Bookmark 테이블 PK로 delete)
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
