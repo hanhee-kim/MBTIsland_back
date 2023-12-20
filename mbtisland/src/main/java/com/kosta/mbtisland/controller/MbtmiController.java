@@ -244,10 +244,15 @@ public class MbtmiController {
 			List<MbtmiComment> mbtmiCommentList = mbtmiService.mbtmiCommentListByMbtmiNo(no, pageInfo);
 			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no);
 			
+			// 삽입된 댓글
+//			MbtmiComment writtenComment = mbtmiCommentRepository.findById(mbtmiCommentCnt)
+			Integer writtenCommentNo = mbtmiComment.getCommentNo(); // 방금 삽입된 댓글의 pk
+			
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("mbtmiCommentList", mbtmiCommentList);
 			res.put("mbtmiCommentCnt", mbtmiCommentCnt);
+			res.put("writtenCommentNo", writtenCommentNo);
 			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
