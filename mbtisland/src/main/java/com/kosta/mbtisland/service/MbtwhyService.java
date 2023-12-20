@@ -13,8 +13,9 @@ public interface MbtwhyService {
 	public List<MbtwhyDto> selectMbtwhyListByMbtiAndPageAndSearchAndSort
 		(String mbtiCategory, PageInfo pageInfo, String search, String sort) throws Exception;	// 게시글 목록 조회
 	public Long selectMbtwhyCountByMbtiAndSearch(String mbti, String search) throws Exception; // 게시글 개수 조회
-	public MbtwhyDto selectMbtwhyDtoByNo(Integer no) throws Exception; // DTO 게시글 조회
+//	public MbtwhyDto selectMbtwhyDtoByNo(Integer no) throws Exception; // DTO 게시글 조회
 	public Mbtwhy selectMbtwhyByNo(Integer no) throws Exception; // Entity 게시글 조회
+	public void increaseViewCount(Integer no) throws Exception; // 조회수 증가
 	public MbtwhyDto selectDailyHotMbtwhy(String mbti) throws Exception; // 일간 인기 게시글 조회
 	public Integer insertMbtwhy(Mbtwhy mbtwhy) throws Exception; // 게시글 작성
 	public void deleteMbtwhy(Integer no) throws Exception; // 게시글 삭제

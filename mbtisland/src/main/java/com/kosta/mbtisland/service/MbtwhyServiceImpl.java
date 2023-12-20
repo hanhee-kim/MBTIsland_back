@@ -48,8 +48,8 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5);
 		List<Mbtwhy> mbtwhyList = mbtwhyDslRepository.findMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageRequest, search, sort);
 
+		List<MbtwhyDto> dtoList = new ArrayList<>();
 		if(mbtwhyList.size()!=0) {
-			List<MbtwhyDto> dtoList = new ArrayList<>();
 			// Entity => Dto
 			// 각 Mbtwhy 객체 변수마다 댓글 개수 추가
 			for(Mbtwhy mbtwhy : mbtwhyList) {
@@ -77,8 +77,9 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 			
 			return dtoList;
 		}
-		
-		return null;		
+
+		return dtoList;
+//		return null;
 	}
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값, 정렬 옵션)
@@ -87,26 +88,37 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		return mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearch(mbti, search);
 	}
 	
-	// DTO 게시글 조회 (게시글 번호)
-	@Override
-	public MbtwhyDto selectMbtwhyDtoByNo(Integer no) throws Exception {
-		Mbtwhy mbtwhy = mbtwhyRepository.findById(no).get();
-		
-		if(mbtwhy!=null) {
-			Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
-			MbtwhyDto dto = MbtwhyDto.builder().no(mbtwhy.getNo()).content(mbtwhy.getContent()).mbtiCategory(mbtwhy.getMbtiCategory())
-					.viewCnt(mbtwhy.getViewCnt()).recommendCnt(mbtwhy.getRecommendCnt()).writeDate(mbtwhy.getWriteDate())
-					.isBlocked(mbtwhy.getIsBlocked()).writerId(mbtwhy.getWriterId()).writerNickname(mbtwhy.getWriterNickname())
-					.writerMbti(mbtwhy.getWriterMbti()).writerMbtiColor(mbtwhy.getWriterMbtiColor()).commentCnt(commentCnt).build();
-			return dto;
-		}
-		return null;
-	}
+//	// DTO 게시글 조회 (게시글 번호)
+//	@Override
+//	public MbtwhyDto selectMbtwhyDtoByNo(Integer no) throws Exception {
+//		Mbtwhy mbtwhy = mbtwhyRepository.findById(no).get();
+//		
+//		if(mbtwhy!=null) {
+//			Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
+//			MbtwhyDto dto = MbtwhyDto.builder().no(mbtwhy.getNo()).content(mbtwhy.getContent()).mbtiCategory(mbtwhy.getMbtiCategory())
+//					.viewCnt(mbtwhy.getViewCnt()).recommendCnt(mbtwhy.getRecommendCnt()).writeDate(mbtwhy.getWriteDate())
+//					.isBlocked(mbtwhy.getIsBlocked()).writerId(mbtwhy.getWriterId()).writerNickname(mbtwhy.getWriterNickname())
+//					.writerMbti(mbtwhy.getWriterMbti()).writerMbtiColor(mbtwhy.getWriterMbtiColor()).commentCnt(commentCnt).build();
+//			return dto;
+//		}
+//		return null;
+//	}
 	
 	// Entity 게시글 조회 (게시글 번호)
 	@Override
 	public Mbtwhy selectMbtwhyByNo(Integer no) throws Exception {
-		return mbtwhyRepository.findById(no).get();
+		Optional<Mbtwhy> ombtwhy = mbtwhyRepository.findById(no);
+		if(ombtwhy.isEmpty()) throw new Exception(no + "번 게시글이 존재하지 않습니다.");
+		Mbtwhy mbtwhy = ombtwhy.get();
+		return mbtwhy;
+	}
+	
+	// 조회수 증가
+	@Override
+	public void increaseViewCount(Integer no) throws Exception {
+		Mbtwhy mbtwhy = selectMbtwhyByNo(no);
+		mbtwhy.setViewCnt(mbtwhy.getViewCnt()+1);
+		mbtwhyRepository.save(mbtwhy);
 	}
 	
 	// 일간 인기 게시글 조회 (MBTI)
