@@ -236,9 +236,13 @@ public class MbtmiServiceImpl implements MbtmiService {
 		Mbtmi existMbtmi = mbtmiRepository.findById(mbtmiDto.getNo()).get();
 		if(existMbtmi==null) throw new Exception("해당 게시글이 존재하지 않습니다.");
 		
+		// 변경 가능한 값
 		existMbtmi.setTitle(mbtmiDto.getTitle());
 		existMbtmi.setContent(mbtmiDto.getContent());
 		existMbtmi.setCategory(mbtmiDto.getCategory());
+
+		if(existMbtmi.getViewCnt()>2) existMbtmi.setViewCnt(existMbtmi.getViewCnt()-2);
+		else existMbtmi.setViewCnt(0);
 
 		mbtmiRepository.save(existMbtmi); // 업데이트
 		return existMbtmi;

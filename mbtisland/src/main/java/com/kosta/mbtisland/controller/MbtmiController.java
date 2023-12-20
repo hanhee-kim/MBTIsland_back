@@ -252,7 +252,7 @@ public class MbtmiController {
 			}
 	
 			// 게시글 및 추천수 재조회
-			Mbtmi updatedMbtmi = mbtmiService.mbtmiDetail(recommend.getPostNo());
+//			Mbtmi updatedMbtmi = mbtmiService.mbtmiDetail(recommend.getPostNo());
 			Integer updatedRecommendCnt = mbtmi.getRecommendCnt();
 			
 			Map<String, Object> res = new HashMap<>();
@@ -269,7 +269,7 @@ public class MbtmiController {
 	public ResponseEntity<Object> mbtmiDetailBookmark(@RequestBody Bookmark bookmark) {
 		try {
 			// 게시글 조회
-			Mbtmi mbtmi = mbtmiService.mbtmiDetail(bookmark.getPostNo());
+//			Mbtmi mbtmi = mbtmiService.mbtmiDetail(bookmark.getPostNo());
 			
 			// 북마크 데이터 조회
 			Bookmark mbtmiBookmark = bookmarkService.selectBookmark(bookmark.getUsername(), bookmark.getPostNo(), bookmark.getBoardType());
@@ -292,6 +292,7 @@ public class MbtmiController {
 	// 게시글 수정
 	@PostMapping("/mbtmimodify")
 	public ResponseEntity<Object> modifyMbtmi (@RequestBody MbtmiDto mbtmiDto) {
+		System.out.println("수정컨트롤러가 받은 파라미터 mbtmiDto: " + mbtmiDto);
 		try {
 			Mbtmi modifiedMbtmi = mbtmiService.modifyMbtmi(mbtmiDto);
 			Map<String, Object> res = new HashMap<>();
