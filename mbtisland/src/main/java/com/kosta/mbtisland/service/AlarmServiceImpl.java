@@ -182,6 +182,21 @@ public class AlarmServiceImpl implements AlarmService{
 			}
 		}
 	}
+
+	
+	// 댓글작성시, 문의답글시, 회원제재시 알림 데이터 삽입
+	@Override
+	public void addAlarm(Alarm alarm) throws Exception {
+		alarmRepository.save(alarm);
+	}
+
+	// 기존 알림데이터 조회
+	@Override
+	public Alarm selectAlarmByAlarmTargetNoAndAlarmTargetFrom(Integer alarmTargetNo, String alarmTargetFrom) throws Exception {
+		Optional<Alarm> oalarm = alarmRepository.findByAlarmTargetNoAndAlarmTargetFrom(alarmTargetNo, alarmTargetFrom);
+		if(oalarm.isEmpty()) return null; // 기존 알림 데이터가 없으면 null반환
+		return oalarm.get();
+	}
 	
 	
 	

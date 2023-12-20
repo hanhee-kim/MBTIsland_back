@@ -2,6 +2,7 @@ package com.kosta.mbtisland;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,16 +10,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
 
-import com.kosta.mbtisland.dto.NoteDto;
 import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
-import com.kosta.mbtisland.entity.Note;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.entity.Question;
+import com.kosta.mbtisland.repository.AlarmRepository;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
@@ -50,6 +51,8 @@ class MbtislandApplicationTests {
 	private QuestionRepository questionRepository;
 	@Autowired
 	private MbtmiService mbtmiService;
+	@Autowired
+	private AlarmRepository alarmRepository;
 
 	// 인수
 	@Autowired
@@ -250,17 +253,18 @@ class MbtislandApplicationTests {
 	void mbtmiNewlyMbtmiList() throws Exception {
 		// 컨트롤러
 		String category = null;
-		String type = "PI";
+		String type = null;
 		String searchTerm = null;
 		Integer page = 1;
 		String sort = null;
+		String username = "react03"; // 마이페이지 리스트 조회를 위해 파라미터 추가
 		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 		// 서비스
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
 		
-		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort);
+		List<Mbtmi> newlyMbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort, username);
 		System.out.println("------최신글 목록 출력------");
 		Iterator<Mbtmi> iter = newlyMbtmiList.iterator();
 		while(iter.hasNext()) {
@@ -327,5 +331,5 @@ class MbtislandApplicationTests {
 //		}
 	}
 	
-	
+
 }
