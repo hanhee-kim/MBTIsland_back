@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -98,8 +99,12 @@ public class MbtwhyDslRepository {
 	// 댓글 목록 조회 (게시글 번호)
 	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) {
 		return jpaQueryFactory.selectFrom(mbtwhyComment)
-				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
-				.orderBy(mbtwhyComment.commentNo.asc()) // 정렬
+//				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
+				.where(mbtwhyComment.mbtwhyNo.eq(no))
+//				.orderBy(mbtwhyComment.commentNo.asc()) // 정렬
+//				.orderBy(NumberTemplate.create(Number.class, "COALESCE({0}, {1})", QComment.comment.b, QComment.comment.a).asc(), QComment.comment.a.asc())
+//				.orderBy(NumberTemplate.create(Number.class, "COALESCE({0}, {1})", mbtwhyComment.parentcommentNo, mbtwhyComment.commentNo).asc(), mbtwhyComment.commentNo.asc())
+				.orderBy(mbtwhyComment.parentcommentNo.coalesce(mbtwhyComment.commentNo).asc(), mbtwhyComment.commentNo.asc())
 				.offset(pageRequest.getOffset()) // 인덱스
 				.limit(pageRequest.getPageSize()) // 개수 제한
 				.fetch();
