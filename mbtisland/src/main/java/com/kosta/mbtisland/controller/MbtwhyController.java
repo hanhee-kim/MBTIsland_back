@@ -329,15 +329,12 @@ public class MbtwhyController {
 		List<Integer> noList = Arrays.stream(sendArrayItems.split(","))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
-//		for(Integer no : noList) {
-//			System.out.println(no);
-//		}
 		try {
-			mbtwhyService.updateIsRemoved(noList);
-			return new ResponseEntity<Object>("삭제컬럼 변경 성공",HttpStatus.OK);
+			mbtwhyService.deleteMbtwhyList(noList);
+			return new ResponseEntity<Object>("삭제 성공",HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Object>("삭제 변경 실패",HttpStatus.OK);
+			return new ResponseEntity<Object>("삭제 실패",HttpStatus.OK);
 		}
 		
 	}

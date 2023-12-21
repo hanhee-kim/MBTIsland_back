@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.repository.MbattleRepository;
+import com.kosta.mbtisland.repository.MbtmiRepository;
 import com.kosta.mbtisland.repository.MbtwhyRepository;
 import com.kosta.mbtisland.repository.UserRepository;
 
@@ -23,6 +25,10 @@ public class UserServiceImpl implements UserService{
 	private UserRepository userRepository;
 	@Autowired
 	private MbtwhyRepository mbtwhyRepository;
+	@Autowired
+	private MbattleRepository mbattleRepository;
+	@Autowired
+	private MbtmiRepository mbtmiRepository;
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder; 
 
@@ -184,6 +190,28 @@ public class UserServiceImpl implements UserService{
 			return user;
 		}else {
 			throw new Exception("해당 유저 없음");
+		}
+	}
+
+	//특정유저가 작성한 게시글의 수
+	@Override
+	public Integer getCountTotalBoardByUser(String username) throws Exception {
+		
+		Integer mbattleCnt = mbattleRepository.countByWriterId(username);
+		Integer mbtwhyCnt = mbtwhyRepository.countByWriterId(username);
+		Integer mbtmiCnt = mbtmiRepository.countByWriterId(username);
+		return mbattleCnt + mbtwhyCnt + mbtmiCnt;
+	}
+
+	@Override
+	public void leaveUser(UserEntity user) throws Exception {
+		if(user != null) {
+			user.setIsLeave("Y");
+			user.setLeaveDate(new Timestamp(new Date().getTime()));
+//			user.setUserRole("ROLE_LEAVE");
+			userRepository.save(user);
+		} else {
+			throw new Exception("해당 유저 없음.");
 		}
 	}
 

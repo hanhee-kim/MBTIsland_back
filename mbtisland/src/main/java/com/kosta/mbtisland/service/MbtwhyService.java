@@ -37,5 +37,5 @@ public interface MbtwhyService {
 //	public void deleteBookmark(Integer no) throws Exception; // 게시글 북마크 취소
 	
 	List<Mbtwhy> getMyMbtwhyListByPage(String username,PageInfo pageInfo) throws Exception; //마이페이지에서 내가 작성한 게시글 불러오기
-	void updateIsRemoved(List<Integer> noList)throws Exception; // List로 isRemoved변경하기
+	void deleteMbtwhyList(List<Integer> noList)throws Exception; 
 }

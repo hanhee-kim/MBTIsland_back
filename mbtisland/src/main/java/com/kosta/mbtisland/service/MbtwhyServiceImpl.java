@@ -289,9 +289,9 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		}
 	}
 
-	// 삭제로 변경
+	// noList 삭제
 	@Override
-	public void updateIsRemoved(List<Integer> noList) throws Exception {
+	public void deleteMbtwhyList(List<Integer> noList) throws Exception {
 		for (Integer no : noList) {
 			Optional<Mbtwhy> optionalMbtwhy = mbtwhyRepository.findById(no);
 			if (optionalMbtwhy.isPresent()) {
