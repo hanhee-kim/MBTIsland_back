@@ -57,13 +57,13 @@ public class MbtwhyController {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1 : page).build();
 			List<MbtwhyDto> mbtwhyList = mbtwhyService.selectMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageInfo, search, sort);
-			MbtwhyDto mbtwhyHot = mbtwhyService.selectDailyHotMbtwhy(mbti);
+			MbtwhyDto hotMbtwhy = mbtwhyService.selectDailyHotMbtwhy(mbti);
 //			Long mbtwhyCnt = mbtwhyService.selectMbtwhyCountByMbtiAndSearch(mbti, search);
 			
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("mbtwhyList", mbtwhyList);
-			res.put("mbtwhyHot", mbtwhyHot);
+			res.put("hotMbtwhy", hotMbtwhy);
 //			res.put("mbtwhyCnt", mbtwhyCnt);
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
@@ -165,6 +165,58 @@ public class MbtwhyController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 게시글 추천 or 추천 취소
+	// 매개변수로 가져온 Recommend와 동일한 컬럼이 있다면 delete, 없다면 insert
+	@PostMapping("/mbtwhyrecommend")
+	public ResponseEntity<Object> mbtwhyDetailRecommend(@RequestBody Recommend recommend) {
+		try {
+			// 게시글 및 추천수 조회
+//			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(recommend.getPostNo());
+			
+			// 추천 데이터 조회
+			Recommend mbtwhyRecommend = recommendService.selectRecommend(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
+			
+			if(mbtwhyRecommend == null) { // 추천되지 않은 상태라면
+				recommendService.insertRecommend(recommend); // 추천
+				mbtwhyService.increaseRecommendCnt(recommend.getPostNo()); // 추천수 + 1
+			} else { // 이미 추천된 상태라면
+				recommendService.deleteRecommend(mbtwhyRecommend.getNo()); // 추천 해제 (Recommend 테이블 PK로 delete)
+				mbtwhyService.decreaseRecommendCnt(recommend.getPostNo()); // 추천수 - 1
+			}
+			
+			// 업데이트된 추천수 조회
+			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(recommend.getPostNo());
+			Integer updatedRecommendCount = mbtwhy.getRecommendCnt();
+			
+			// 추천수 반환
+			Map<String, Object> res = new HashMap<>();
+			res.put("mbtwhyRecommendCount", updatedRecommendCount);
+			
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 게시글 북마크 or 북마크 취소
+	// 매개변수로 가져온 Bookmark와 동일한 컬럼이 있다면 delete, 없다면 insert
+	@PostMapping("mbtwhybookmark")
+	public void mbtwhyDetailBookmark(@RequestBody Bookmark bookmark) {
+		try {
+			// 북마크 데이터 조회
+			Bookmark mbtwhyBookMark = bookmarkService.selectBookmark(bookmark.getUsername(), bookmark.getPostNo(), bookmark.getBoardType());
+
+			if (mbtwhyBookMark == null) { // 추천되지 않은 상태라면
+				bookmarkService.insertBookmark(bookmark); // 북마크
+			} else { // 이미 추천된 상태라면
+				bookmarkService.deleteBookmark(mbtwhyBookMark.getNo()); // 북마크 해제 (Bookmark 테이블 PK로 delete)
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -303,58 +355,6 @@ public class MbtwhyController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 게시글 추천 or 추천 취소
-	// 매개변수로 가져온 Recommend와 동일한 컬럼이 있다면 delete, 없다면 insert
-	@PostMapping("/mbtwhyrecommend")
-	public ResponseEntity<Object> mbtwhyDetailRecommend(@RequestBody Recommend recommend) {
-		try {
-			// 게시글 및 추천수 조회
-//			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(recommend.getPostNo());
-			
-			// 추천 데이터 조회
-			Recommend mbtwhyRecommend = recommendService.selectRecommend(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
-			
-			if(mbtwhyRecommend == null) { // 추천되지 않은 상태라면
-				recommendService.insertRecommend(recommend); // 추천
-				mbtwhyService.increaseRecommendCnt(recommend.getPostNo()); // 추천수 + 1
-			} else { // 이미 추천된 상태라면
-				recommendService.deleteRecommend(mbtwhyRecommend.getNo()); // 추천 해제 (Recommend 테이블 PK로 delete)
-				mbtwhyService.decreaseRecommendCnt(recommend.getPostNo()); // 추천수 - 1
-			}
-			
-			// 업데이트된 추천수 조회
-			Mbtwhy mbtwhy = mbtwhyService.selectMbtwhyByNo(recommend.getPostNo());
-			Integer updatedRecommendCount = mbtwhy.getRecommendCnt();
-			
-			// 추천수 반환
-			Map<String, Object> res = new HashMap<>();
-			res.put("mbtwhyRecommendCount", updatedRecommendCount);
-			
-			return new ResponseEntity<Object>(res, HttpStatus.OK);
-		} catch(Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 게시글 북마크 or 북마크 취소
-	// 매개변수로 가져온 Bookmark와 동일한 컬럼이 있다면 delete, 없다면 insert
-	@PostMapping("mbtwhybookmark")
-	public void mbtwhyDetailBookmark(@RequestBody Bookmark bookmark) {
-		try {
-			// 북마크 데이터 조회
-			Bookmark mbtwhyBookMark = bookmarkService.selectBookmark(bookmark.getUsername(), bookmark.getPostNo(), bookmark.getBoardType());
-
-			if (mbtwhyBookMark == null) { // 추천되지 않은 상태라면
-				bookmarkService.insertBookmark(bookmark); // 북마크
-			} else { // 이미 추천된 상태라면
-				bookmarkService.deleteBookmark(mbtwhyBookMark.getNo()); // 북마크 해제 (Bookmark 테이블 PK로 delete)
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
