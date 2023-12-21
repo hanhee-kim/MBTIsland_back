@@ -159,12 +159,12 @@ public class MbtmiController {
 													  , @RequestParam(required = false) Integer commentpage) {
 		
 		
-		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
-		System.out.println("sendUser: " + sendUser);
-		System.out.println("no(게시글번호): " + no);
-		System.out.println("comment(댓글내용): " + comment);
-		System.out.println("1차댓글번호: " + parentcommentNo);
-		System.out.println("commentPage: " + commentpage);
+//		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
+//		System.out.println("sendUser: " + sendUser);
+//		System.out.println("no(게시글번호): " + no);
+//		System.out.println("comment(댓글내용): " + comment);
+//		System.out.println("1차댓글번호: " + parentcommentNo);
+//		System.out.println("commentPage: " + commentpage);
 		
 		try {
 			// 1. 댓글 삽입
