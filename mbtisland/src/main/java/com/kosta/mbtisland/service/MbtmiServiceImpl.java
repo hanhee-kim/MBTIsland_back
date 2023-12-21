@@ -17,6 +17,7 @@ import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
+import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
@@ -246,6 +247,18 @@ public class MbtmiServiceImpl implements MbtmiService {
 
 		mbtmiRepository.save(existMbtmi); // 업데이트
 		return existMbtmi;
+	}
+
+	@Override
+	public void deleteMbtmiList(List<Integer> noList) throws Exception {
+		for (Integer no : noList) {
+			Optional<Mbtmi> optionalMbtmi = mbtmiRepository.findById(no);
+			if (optionalMbtmi.isPresent()) {
+				mbtmiRepository.deleteById(no);
+			} else {
+				throw new Exception("해당 번호 Mbtmi게시글 없음");
+			}
+		}
 	}
 	
 

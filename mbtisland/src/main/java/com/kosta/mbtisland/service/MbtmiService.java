@@ -53,7 +53,8 @@ public interface MbtmiService {
 	// 게시글 수정
 	Mbtmi modifyMbtmi(MbtmiDto mbtmiDto) throws Exception;
 	
-	
+	// 배열번호로 mbtmi게시글 삭제
+	void deleteMbtmiList(List<Integer> noList)throws Exception;
 	
 
 }

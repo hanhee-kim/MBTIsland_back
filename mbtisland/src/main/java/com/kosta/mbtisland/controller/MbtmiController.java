@@ -2,9 +2,11 @@ package com.kosta.mbtisland.controller;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -119,6 +121,28 @@ public class MbtmiController {
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@DeleteMapping("/deletembtmilist")
+	public ResponseEntity<Object> deleteMbtmiList(@RequestParam String sendArrayItems){
+		System.out.println("noList 삭제 컨트롤러 진입");
+		System.out.println(sendArrayItems);
+		//숫자 형태의 리스트로 변환
+		List<Integer> noList = Arrays.stream(sendArrayItems.split(","))
+		        .map(Integer::parseInt)
+		        .collect(Collectors.toList());
+		
+		try {
+			mbtmiService.deleteMbtmiList(noList);
+			return new ResponseEntity<Object>("삭제 성공",HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>("삭제 실패",HttpStatus.OK);
+		}
+	}
+	
+	
+	
+	
 	
 	// 댓글 목록
 	@GetMapping("/mbtmicommentlist/{no}")
