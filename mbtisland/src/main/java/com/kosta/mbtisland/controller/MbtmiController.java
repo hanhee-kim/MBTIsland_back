@@ -24,10 +24,12 @@ import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Bookmark;
+import com.kosta.mbtisland.entity.FileVo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.repository.FileVoRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.service.AlarmService;
 import com.kosta.mbtisland.service.BookmarkService;
@@ -47,6 +49,10 @@ public class MbtmiController {
 	private AlarmService alarmService;
 	@Autowired
 	private MbtmiCommentRepository mbtmiCommentRepository;
+	@Autowired
+	private FileVoRepository fileVoRepository;
+	
+	
 	
 	// 주간인기글 목록
 	@GetMapping("/weeklyhotmbtmi")
@@ -394,8 +400,24 @@ public class MbtmiController {
 			// 원하는 디렉토리에 업로드
 			String uploadFolderPath = "C:/upload";
 			String fileName = file.getOriginalFilename();
-            File uploadFile = new File(uploadFolderPath, fileName);
-            file.transferTo(uploadFile);
+			
+			FileVo fileVo = new FileVo();
+			fileVo.setFilePath(uploadFolderPath);
+			fileVo.setFileName(fileName);
+			fileVo.setFileSize(file.getSize());
+			fileVo.setFileType(file.getContentType());
+//			fileVo.setData(file.getBytes());
+			LocalDate currentDate = LocalDate.now();
+			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+			fileVo.setUploadDate(writeDate);
+			
+			// 파일테이블에 인서트 먼저 수행
+			fileVoRepository.save(fileVo);
+			// upload폴더에 저장
+			File uploadFile = new File(uploadFolderPath + fileVo.getFileIdx());
+			file.transferTo(uploadFile);
+			
+			
             
             // 업로드완료된 파일의 url생성
             String imageUrl = "http://localhost:8090/" + fileName;
