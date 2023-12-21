@@ -52,6 +52,8 @@ public class Alarm {
 	@Column
 	@CreationTimestamp
 	private Timestamp alarmUpdateDate;
+	@Column
+	private Integer alarmCnt;
 	
 	
 	
