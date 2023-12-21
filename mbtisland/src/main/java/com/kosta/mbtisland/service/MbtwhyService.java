@@ -4,10 +4,8 @@ import java.util.List;
 
 import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
-import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
-import com.kosta.mbtisland.entity.Recommend;
 
 public interface MbtwhyService {
 	public List<MbtwhyDto> selectMbtwhyListByMbtiAndPageAndSearchAndSort
@@ -25,16 +23,18 @@ public interface MbtwhyService {
 	public void insertMbtwhyComment(MbtwhyComment mbtwhyComment) throws Exception; // 댓글 작성
 	public void deleteMbtwhyComment(Integer commentNo) throws Exception; // 댓글 삭제
 		
-	public Recommend selectRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 추천 데이터 조회
-	public Boolean selectIsRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 추천 여부 조회
-	public Integer selectRecommendCountByPostNoAndBoardType(Integer postNo, String boardType) throws Exception; // 게시글 추천수 조회
-	public void insertRecommend(Recommend recommend) throws Exception; // 게시글 추천
-	public void deleteRecommend(Integer no) throws Exception; // 게시글 추천 취소
+//	public Recommend selectRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 추천 데이터 조회
+//	public Boolean selectIsRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 추천 여부 조회
+//	public Integer selectRecommendCountByPostNoAndBoardType(Integer postNo, String boardType) throws Exception; // 게시글 추천수 조회
+	public void increaseRecommendCnt(Integer no) throws Exception; // 추천수 증가
+	public void decreaseRecommendCnt(Integer no) throws Exception; // 추천수 감소
+//	public void insertRecommend(Recommend recommend) throws Exception; // 게시글 추천
+//	public void deleteRecommend(Integer no) throws Exception; // 게시글 추천 취소
 	
-	public Bookmark selectBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 북마크 데이터 조회
-	public Boolean selectIsBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 북마크 여부 조회
-	public void insertBookmark(Bookmark ㅠookmark) throws Exception; // 게시글 북마크
-	public void deleteBookmark(Integer no) throws Exception; // 게시글 북마크 취소
+//	public Bookmark selectBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 북마크 데이터 조회
+//	public Boolean selectIsBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception; // 게시글 북마크 여부 조회
+//	public void insertBookmark(Bookmark ㅠookmark) throws Exception; // 게시글 북마크
+//	public void deleteBookmark(Integer no) throws Exception; // 게시글 북마크 취소
 	
 	List<Mbtwhy> getMyMbtwhyListByPage(String username,PageInfo pageInfo) throws Exception; //마이페이지에서 내가 작성한 게시글 불러오기
 	void updateIsRemoved(List<Integer> noList)throws Exception; // List로 isRemoved변경하기
