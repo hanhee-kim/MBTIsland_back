@@ -165,7 +165,7 @@ public class MbtmiController {
 //		System.out.println("comment(댓글내용): " + comment);
 //		System.out.println("1차댓글번호: " + parentcommentNo);
 //		System.out.println("commentPage: " + commentpage);
-		
+
 		try {
 			// 1. 댓글 삽입
 			LocalDate currentDate = LocalDate.now();
@@ -189,12 +189,15 @@ public class MbtmiController {
 
 				Integer alarmCnt = mbtmiService.mbtmiCommentCnt(no); // alarmCnt컬럼값
 				String username = mbtmiService.mbtmiDetail(no).getWriterId(); // 알림의 주인==게시글작성자
+				
+				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 댓글인지 여부)
+				Boolean isWrittenByOneSelf = username.equals(sendUser.getUsername());
 
 				// 알림의 존재여부에 따라 alarmCnt컬럼값만 업데이트 수행* or 알림데이터 인서트 수행**
-				if(alarmForPostWriter!=null) {
+				if(alarmForPostWriter!=null && !isWrittenByOneSelf) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt);
 					alarmService.addAlarm(alarmForPostWriter); // *
-				} else {
+				} else if(alarmForPostWriter==null && !isWrittenByOneSelf) {
 					Alarm alarm = Alarm.builder()
 							.username(username)
 							.alarmType("댓글")
@@ -214,13 +217,17 @@ public class MbtmiController {
 				Integer alarmCnt1 = mbtmiService.mbtmiChildCommentCnt(parentcommentNo); // 알림Cnt1
 				String username1 = mbtmiCommentRepository.findById(parentcommentNo).get().getWriterId(); // 알림의 주인1==1차댓글의 작성자
 				Integer alarmCnt2 = mbtmiService.mbtmiCommentCnt(no); // 알림Cnt2
-//				String username2 = mbtmiService.mbtmiDetail(no).getWriterId(); // 알림의 주인2==게시글작성자
+				String username2 = mbtmiService.mbtmiDetail(no).getWriterId(); // 알림의 주인2==게시글작성자
 				
-				// 2-2-1. target을 1차댓글로 하는 알림데이터 업데이트 또는 인서트
-				if(alarmForParentcommentWriter!=null) {
+				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 2차댓글인지, 1차댓글작성자 본인의 2차댓글인지 여부)
+				Boolean isWrittenByParentcommentWriter = username1.equals(sendUser.getUsername());
+				Boolean isWrittenByPostWriter = username2.equals(sendUser.getUsername());
+				
+				// 2-2-1. 1차댓글 작성자를 향한 알림데이터 업데이트 또는 인서트
+				if(alarmForParentcommentWriter!=null && !isWrittenByParentcommentWriter) {
 					alarmForParentcommentWriter.setAlarmCnt(alarmCnt1);
 					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값만 업데이트 수행
-				} else {
+				} else if(alarmForParentcommentWriter==null && !isWrittenByParentcommentWriter) {
 					Alarm alarm1 = Alarm.builder()
 							.username(username1)
 							.alarmType("댓글")
@@ -232,8 +239,8 @@ public class MbtmiController {
 					alarmService.addAlarm(alarm1); // 인서트 수행
 				}
 				
-				// 2-2-2. target을 게시글로 하는 알림데이터 업데이트
-				if(alarmForPostWriter!=null) {
+				// 2-2-2. 게시글 작성자를 향한 알림데이터 업데이트
+				if(alarmForPostWriter!=null && !isWrittenByPostWriter) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt2);
 					alarmService.addAlarm(alarmForPostWriter); // alarmCnt컬럼값만 업데이트 수행
 				}
@@ -244,10 +251,15 @@ public class MbtmiController {
 			List<MbtmiComment> mbtmiCommentList = mbtmiService.mbtmiCommentListByMbtmiNo(no, pageInfo);
 			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no);
 			
+			// 삽입된 댓글
+//			MbtmiComment writtenComment = mbtmiCommentRepository.findById(mbtmiCommentCnt)
+			Integer writtenCommentNo = mbtmiComment.getCommentNo(); // 방금 삽입된 댓글의 pk
+			
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("mbtmiCommentList", mbtmiCommentList);
 			res.put("mbtmiCommentCnt", mbtmiCommentCnt);
+			res.put("writtenCommentNo", writtenCommentNo);
 			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
