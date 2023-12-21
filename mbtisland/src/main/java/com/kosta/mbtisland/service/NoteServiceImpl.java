@@ -51,6 +51,7 @@ public class NoteServiceImpl implements NoteService{
 				.alarmTargetNo(note.getNoteNo())
 				.alarmTargetFrom("NOTE")
 				.alarmReadDate(null)
+				.alarmCnt(1)
 				.build();
 		
 		alarmRepository.save(alarm);

@@ -100,7 +100,7 @@ public class AlarmServiceImpl implements AlarmService{
 				.alarmType(alarm.getAlarmType())
 				.detailType(type)
 				.detailNo(no)
-				.alarmContent("["+myContent+"] 에 "+alarm.getAlarmType()+"(이)/가 도착했습니다.")
+				.alarmContent("["+myContent+"] 에 "+alarm.getAlarmType()+"(이)/가 도착했습니다. ( "+alarm.getAlarmCnt()+" )")
 				.alarmTargetNo(alarm.getAlarmTargetNo())
 				.alarmTargetFrom(alarm.getAlarmTargetFrom())
 				.alarmIsRead(alarm.getAlarmIsRead())
