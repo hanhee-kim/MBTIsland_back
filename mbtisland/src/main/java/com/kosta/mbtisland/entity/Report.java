@@ -42,6 +42,9 @@ public class Report {
 	private Integer reportedPostNo;
 	
 	@Column
+	private Integer reportedCommentNo;
+	
+	@Column
 	private String reportedId;
 	
 	@Column

@@ -76,27 +76,8 @@ public class MbtmiDslRepository {
 	}
 	
 	
-	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징)
-//	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest, String sort) {
-//		return jpaQueryfactory.selectFrom(mbtmi)
-//							.where(
-//									category!=null? mbtmi.category.eq(category) : null,
-//									type!=null? isWriterMbtiContainsStr(type) : null,
-//									searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
-//											.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
-//									mbtmi.isBlocked.eq("N")
-//							)
-//							.orderBy(
-//									sort!=null&&sort.equals("최신순")? mbtmi.no.desc() :
-//									sort!=null&&sort.equals("조회순")? mbtmi.viewCnt.desc() :
-//									sort!=null&&sort.equals("추천순")? mbtmi.recommendCnt.desc() : null
-//									)
-//							.offset(pageRequest.getOffset())
-//							.limit(pageRequest.getPageSize())
-//							.fetch();
-//	}
-	
-	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest, String sort) {
+	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징, 정렬, 작성자)
+	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest, String sort, String username) {
 //		System.out.println("dsl의 파라미터 정렬값: " + sort);
 	    JPAQuery<Mbtmi> query = jpaQueryfactory.selectFrom(mbtmi)
 	            .where(
@@ -104,6 +85,7 @@ public class MbtmiDslRepository {
 	                    type != null ? isWriterMbtiContainsStr(type) : null,
 	                    searchTerm != null ? mbtmi.title.containsIgnoreCase(searchTerm)
 	                            .or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+	                    username != null? mbtmi.writerId.eq(username) : null,
 	                    mbtmi.isBlocked.eq("N")
 	            );
 
@@ -141,7 +123,7 @@ public class MbtmiDslRepository {
 	}
 	
 	// 3. 최신글수 조회 (PageInfo의 allPage값 계산시 필요)
-	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm) {
+	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm, String username) {
 
 	    return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
 	    		.where(
@@ -149,6 +131,7 @@ public class MbtmiDslRepository {
 	    				type!=null? isWriterMbtiContainsStr(type) : null,
 	    				searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
 				    					.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+				    	username != null? mbtmi.writerId.eq(username) : null,
 				    	mbtmi.isBlocked.eq("N")
 	    				)
 	    		.fetchOne();
@@ -159,7 +142,8 @@ public class MbtmiDslRepository {
 	public List<MbtmiComment> findMbtmiCommentListByMbtmiNoAndPaging(Integer mbtmiNo, PageRequest pageRequest) {
 		return jpaQueryfactory.selectFrom(mbtmiComment)
 								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo))
-								.orderBy(mbtmiComment.writeDate.asc())
+//								.orderBy(mbtmiComment.writeDate.asc())
+								.orderBy(mbtmiComment.parentcommentNo.coalesce(mbtmiComment.commentNo).asc(), mbtmiComment.commentNo.asc())
 								.offset(pageRequest.getOffset())
 								.limit(pageRequest.getPageSize())
 								.fetch();
@@ -176,6 +160,17 @@ public class MbtmiDslRepository {
 //	                        .and(mbtmiComment.isRemoved.eq("N"))
 	            )
 	            .fetchOne();
+	}
+	
+	// 6. 댓글의 대댓글 수 조회
+	public Long countCommentByParentcommentNo(Integer mbtmiCommentNo) {
+		return jpaQueryfactory
+				.select(mbtmiComment.count())
+				.from(mbtmiComment)
+				.where(
+						mbtmiComment.parentcommentNo.eq(mbtmiCommentNo)
+				)
+				.fetchOne();
 	}
 
 	

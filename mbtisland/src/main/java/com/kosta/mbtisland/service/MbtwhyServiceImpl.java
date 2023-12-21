@@ -10,15 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
-import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
-import com.kosta.mbtisland.entity.Recommend;
-import com.kosta.mbtisland.repository.BookmarkRepository;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.repository.MbtwhyRepository;
-import com.kosta.mbtisland.repository.RecommendRepository;
 
 @Service
 public class MbtwhyServiceImpl implements MbtwhyService {
@@ -33,12 +29,6 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	@Autowired
 	private MbtwhyCommentRepository mbtwhyCommentRepository;
 	
-	@Autowired
-	private RecommendRepository recommendRepository;
-	
-	@Autowired
-	private BookmarkRepository bookmarkRepository;
-	
 	// 게시글 목록 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
 	// 댓글수 포함
 	@Override
@@ -48,8 +38,8 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5);
 		List<Mbtwhy> mbtwhyList = mbtwhyDslRepository.findMbtwhyListByMbtiAndPageAndSearchAndSort(mbti, pageRequest, search, sort);
 
+		List<MbtwhyDto> dtoList = new ArrayList<>();
 		if(mbtwhyList.size()!=0) {
-			List<MbtwhyDto> dtoList = new ArrayList<>();
 			// Entity => Dto
 			// 각 Mbtwhy 객체 변수마다 댓글 개수 추가
 			for(Mbtwhy mbtwhy : mbtwhyList) {
@@ -77,8 +67,9 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 			
 			return dtoList;
 		}
-		
-		return null;		
+
+		return dtoList;
+//		return null;
 	}
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값, 정렬 옵션)
@@ -87,26 +78,37 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		return mbtwhyDslRepository.findMbtwhyCountByMbtiAndSearch(mbti, search);
 	}
 	
-	// DTO 게시글 조회 (게시글 번호)
-	@Override
-	public MbtwhyDto selectMbtwhyDtoByNo(Integer no) throws Exception {
-		Mbtwhy mbtwhy = mbtwhyRepository.findById(no).get();
-		
-		if(mbtwhy!=null) {
-			Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
-			MbtwhyDto dto = MbtwhyDto.builder().no(mbtwhy.getNo()).content(mbtwhy.getContent()).mbtiCategory(mbtwhy.getMbtiCategory())
-					.viewCnt(mbtwhy.getViewCnt()).recommendCnt(mbtwhy.getRecommendCnt()).writeDate(mbtwhy.getWriteDate())
-					.isBlocked(mbtwhy.getIsBlocked()).writerId(mbtwhy.getWriterId()).writerNickname(mbtwhy.getWriterNickname())
-					.writerMbti(mbtwhy.getWriterMbti()).writerMbtiColor(mbtwhy.getWriterMbtiColor()).commentCnt(commentCnt).build();
-			return dto;
-		}
-		return null;
-	}
+//	// DTO 게시글 조회 (게시글 번호)
+//	@Override
+//	public MbtwhyDto selectMbtwhyDtoByNo(Integer no) throws Exception {
+//		Mbtwhy mbtwhy = mbtwhyRepository.findById(no).get();
+//		
+//		if(mbtwhy!=null) {
+//			Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
+//			MbtwhyDto dto = MbtwhyDto.builder().no(mbtwhy.getNo()).content(mbtwhy.getContent()).mbtiCategory(mbtwhy.getMbtiCategory())
+//					.viewCnt(mbtwhy.getViewCnt()).recommendCnt(mbtwhy.getRecommendCnt()).writeDate(mbtwhy.getWriteDate())
+//					.isBlocked(mbtwhy.getIsBlocked()).writerId(mbtwhy.getWriterId()).writerNickname(mbtwhy.getWriterNickname())
+//					.writerMbti(mbtwhy.getWriterMbti()).writerMbtiColor(mbtwhy.getWriterMbtiColor()).commentCnt(commentCnt).build();
+//			return dto;
+//		}
+//		return null;
+//	}
 	
 	// Entity 게시글 조회 (게시글 번호)
 	@Override
 	public Mbtwhy selectMbtwhyByNo(Integer no) throws Exception {
-		return mbtwhyRepository.findById(no).get();
+		Optional<Mbtwhy> ombtwhy = mbtwhyRepository.findById(no);
+		if(ombtwhy.isEmpty()) throw new Exception(no + "번 게시글이 존재하지 않습니다.");
+		Mbtwhy mbtwhy = ombtwhy.get();
+		return mbtwhy;
+	}
+	
+	// 조회수 증가
+	@Override
+	public void increaseViewCount(Integer no) throws Exception {
+		Mbtwhy mbtwhy = selectMbtwhyByNo(no);
+		mbtwhy.setViewCnt(mbtwhy.getViewCnt()+1);
+		mbtwhyRepository.save(mbtwhy);
 	}
 	
 	// 일간 인기 게시글 조회 (MBTI)
@@ -190,58 +192,74 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	}
 	
 	// 게시글 추천 데이터 조회
-	@Override
-	public Recommend selectRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
-		return recommendRepository.findByUsernameAndPostNoAndBoardType(username, postNo, boardType);
-	}
+//	@Override
+//	public Recommend selectRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
+//		return recommendRepository.findByUsernameAndPostNoAndBoardType(username, postNo, boardType);
+//	}
 	
 	// 게시글 추천 여부 조회
-	@Override
-	public Boolean selectIsRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
-		return recommendRepository.existsByUsernameAndPostNoAndBoardType(username, postNo, boardType);
-	}
+//	@Override
+//	public Boolean selectIsRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
+//		return recommendRepository.existsByUsernameAndPostNoAndBoardType(username, postNo, boardType);
+//	}
 	
 	// 게시글 추천 개수 조회
+//	@Override
+//	public Integer selectRecommendCountByPostNoAndBoardType(Integer postNo, String boardType) throws Exception {
+//		return mbtwhyRepository.countByPostNoAndBoardType(postNo, boardType);
+//	}
+	
+	// 추천수 증가
 	@Override
-	public Integer selectRecommendCountByPostNoAndBoardType(Integer postNo, String boardType) throws Exception {
-		return recommendRepository.countByPostNoAndBoardType(postNo, boardType);
+	public void increaseRecommendCnt(Integer no) throws Exception {
+		Mbtwhy mbtwhy = selectMbtwhyByNo(no);
+		mbtwhy.setRecommendCnt(mbtwhy.getRecommendCnt()+1);
+		mbtwhyRepository.save(mbtwhy);
+	}
+	
+	// 추천수 감소
+	@Override
+	public void decreaseRecommendCnt(Integer no) throws Exception {
+		Mbtwhy mbtwhy = selectMbtwhyByNo(no);
+		mbtwhy.setRecommendCnt(mbtwhy.getRecommendCnt()-1);
+		mbtwhyRepository.save(mbtwhy);
 	}
 	
 	// 게시글 추천
-	@Override
-	public void insertRecommend(Recommend recommend) throws Exception {
-		recommendRepository.save(recommend);
-	}
-
+//	@Override
+//	public void insertRecommend(Recommend recommend) throws Exception {
+//		recommendRepository.save(recommend);
+//	}
+//
 	// 게시글 추천 취소
-	@Override
-	public void deleteRecommend(Integer no) throws Exception {
-		recommendRepository.deleteById(no);
-	}
-	
+//	@Override
+//	public void deleteRecommend(Integer no) throws Exception {
+//		recommendRepository.deleteById(no);
+//	}
+//	
 	// 게시글 북마크 데이터 조회
-	@Override
-	public Bookmark selectBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
-		return bookmarkRepository.findByUsernameAndPostNoAndBoardType(username, postNo, boardType);
-	}
+//	@Override
+//	public Bookmark selectBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
+//		return bookmarkRepository.findByUsernameAndPostNoAndBoardType(username, postNo, boardType);
+//	}
 	
 	// 게시글 북마크 여부 조회
-	@Override
-	public Boolean selectIsBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
-		return bookmarkRepository.existsByUsernameAndPostNoAndBoardType(username, postNo, boardType);
-	}
+//	@Override
+//	public Boolean selectIsBookmarkByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
+//		return bookmarkRepository.existsByUsernameAndPostNoAndBoardType(username, postNo, boardType);
+//	}
 	
 	// 게시글 북마크
-	@Override
-	public void insertBookmark(Bookmark bookmark) throws Exception {
-		bookmarkRepository.save(bookmark);
-	}
+//	@Override
+//	public void insertBookmark(Bookmark bookmark) throws Exception {
+//		bookmarkRepository.save(bookmark);
+//	}
 	
 	// 게시글 북마크 취소
-	@Override
-	public void deleteBookmark(Integer no) throws Exception {
-		bookmarkRepository.deleteById(no);
-	}
+//	@Override
+//	public void deleteBookmark(Integer no) throws Exception {
+//		bookmarkRepository.deleteById(no);
+//	}
 	
 	//마이페이지에서 내가 작성한 mbtwhyList불러오기 ( 회원ID,page로 mbtwhyList )
 	@Override

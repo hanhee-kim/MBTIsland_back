@@ -37,7 +37,7 @@ public class FileVo {
 	@Column
 	private String fileName;
 	@Column
-	private String type;
+	private String fileType;
 	@Column
 	private Integer fileSize;
 	@Column

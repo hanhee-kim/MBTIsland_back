@@ -18,11 +18,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.mbtisland.dto.MbtmiDto;
+import com.kosta.mbtisland.dto.NoticeDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Alarm;
+import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.repository.MbtmiCommentRepository;
+import com.kosta.mbtisland.service.AlarmService;
+import com.kosta.mbtisland.service.BookmarkService;
 import com.kosta.mbtisland.service.MbtmiService;
 import com.kosta.mbtisland.service.RecommendService;
 
@@ -33,6 +39,12 @@ public class MbtmiController {
 	private MbtmiService mbtmiService;
 	@Autowired
 	private RecommendService recommendService;
+	@Autowired
+	private BookmarkService bookmarkService;
+	@Autowired
+	private AlarmService alarmService;
+	@Autowired
+	private MbtmiCommentRepository mbtmiCommentRepository;
 	
 	// 주간인기글 목록
 	@GetMapping("/weeklyhotmbtmi")
@@ -54,14 +66,16 @@ public class MbtmiController {
 											  , @RequestParam(required = false) String type
 											  , @RequestParam(required = false) String search
 											  , @RequestParam(required = false) Integer page
-											  , @RequestParam(required = false) String sort) {
+											  , @RequestParam(required = false) String sort
+											  , @RequestParam(required = false) String username) {
 		
 		
-		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지, 정렬): " + category + ", " + type + ", " + search + ", " + page + ", " + sort);
+//		System.out.println("최신글목록 컨트롤러가 받은 파라미터(카테고리, 타입, 검색어, 페이지, 정렬, 작성자): " + category + ", " + type + ", " + search + ", " + page + ", " + sort + ", " + username);
 		
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1: page).build();
-			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo, sort);
+//			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo, sort);
+			List<MbtmiDto> mbtmiList = mbtmiService.mbtmiListByCategoryAndTypeAndSearch(category, type, search, pageInfo, sort, username);
 			Map<String, Object> res = new HashMap<>();
 	        res.put("pageInfo", pageInfo);
 	        res.put("mbtmiList", mbtmiList);
@@ -81,11 +95,12 @@ public class MbtmiController {
 			mbtmiService.increaseViewCount(no); // 조회수 증가
 			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no); // 댓글수
 			Boolean isMbtmiRecommend = recommendService.selectIsRecommendByUsernameAndPostNoAndBoardType(username, no, "mbtmi"); // 추천여부
-			// (북마크 여부)
+			Boolean isMbtmiBookmark = bookmarkService.selectIsBookmarkByUsernameAndPostNoAndBoardType(username, no, "mbtmi"); // 북마크여부
 			Map<String, Object> res = new HashMap<>();
 	        res.put("mbtmi", mbtmi);
 	        res.put("mbtmiCommentCnt", mbtmiCommentCnt);
 	        res.put("isMbtmiRecommend", isMbtmiRecommend);
+	        res.put("isMbtmiBookmark", isMbtmiBookmark);
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -135,7 +150,7 @@ public class MbtmiController {
 		}
 	}
 	
-	// 댓글 작성
+	// 댓글 등록
 	@PostMapping("/mbtmicomment")
 	public ResponseEntity<Object> mbtmiDetailComment(@RequestBody UserEntity sendUser
 													  , @RequestParam(required = false) Integer no
@@ -143,7 +158,16 @@ public class MbtmiController {
 													  , @RequestParam(required = false) Integer parentcommentNo
 													  , @RequestParam(required = false) Integer commentpage) {
 		
+		
+//		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
+//		System.out.println("sendUser: " + sendUser);
+//		System.out.println("no(게시글번호): " + no);
+//		System.out.println("comment(댓글내용): " + comment);
+//		System.out.println("1차댓글번호: " + parentcommentNo);
+//		System.out.println("commentPage: " + commentpage);
+
 		try {
+			// 1. 댓글 삽입
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
 			MbtmiComment mbtmiComment = MbtmiComment.builder()
@@ -156,17 +180,86 @@ public class MbtmiController {
 										.writerMbtiColor(sendUser.getUserMbtiColor())
 										.writeDate(writeDate)
 										.build();
-			
 			mbtmiService.addMbtmiComment(mbtmiComment);
+
+			// 2. 알림데이터 처리
+			// 2-1. 1차댓글 등록의 경우
+			if(parentcommentNo==null) {
+				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtmi");
+
+				Integer alarmCnt = mbtmiService.mbtmiCommentCnt(no); // alarmCnt컬럼값
+				String username = mbtmiService.mbtmiDetail(no).getWriterId(); // 알림의 주인==게시글작성자
+				
+				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 댓글인지 여부)
+				Boolean isWrittenByOneSelf = username.equals(sendUser.getUsername());
+
+				// 알림의 존재여부에 따라 alarmCnt컬럼값만 업데이트 수행* or 알림데이터 인서트 수행**
+				if(alarmForPostWriter!=null && !isWrittenByOneSelf) {
+					alarmForPostWriter.setAlarmCnt(alarmCnt);
+					alarmService.addAlarm(alarmForPostWriter); // *
+				} else if(alarmForPostWriter==null && !isWrittenByOneSelf) {
+					Alarm alarm = Alarm.builder()
+							.username(username)
+							.alarmType("댓글")
+							.alarmTargetNo(no)
+							.alarmTargetFrom("mbtmi")
+							.alarmUpdateDate(writeDate)
+							.alarmCnt(alarmCnt)
+							.build();
+					alarmService.addAlarm(alarm); // **
+				}
+				
+			// 2-2. 2차댓글 등록의 경우
+			} else {
+				Alarm alarmForParentcommentWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo, "mbtmiComment");
+				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtmi");
+				
+				Integer alarmCnt1 = mbtmiService.mbtmiChildCommentCnt(parentcommentNo); // 알림Cnt1
+				String username1 = mbtmiCommentRepository.findById(parentcommentNo).get().getWriterId(); // 알림의 주인1==1차댓글의 작성자
+				Integer alarmCnt2 = mbtmiService.mbtmiCommentCnt(no); // 알림Cnt2
+				String username2 = mbtmiService.mbtmiDetail(no).getWriterId(); // 알림의 주인2==게시글작성자
+				
+				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 2차댓글인지, 1차댓글작성자 본인의 2차댓글인지 여부)
+				Boolean isWrittenByParentcommentWriter = username1.equals(sendUser.getUsername());
+				Boolean isWrittenByPostWriter = username2.equals(sendUser.getUsername());
+				
+				// 2-2-1. 1차댓글 작성자를 향한 알림데이터 업데이트 또는 인서트
+				if(alarmForParentcommentWriter!=null && !isWrittenByParentcommentWriter) {
+					alarmForParentcommentWriter.setAlarmCnt(alarmCnt1);
+					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값만 업데이트 수행
+				} else if(alarmForParentcommentWriter==null && !isWrittenByParentcommentWriter) {
+					Alarm alarm1 = Alarm.builder()
+							.username(username1)
+							.alarmType("댓글")
+							.alarmTargetNo(parentcommentNo)
+							.alarmTargetFrom("mbtmiComment")
+							.alarmUpdateDate(writeDate)
+							.alarmCnt(alarmCnt1)
+							.build();
+					alarmService.addAlarm(alarm1); // 인서트 수행
+				}
+				
+				// 2-2-2. 게시글 작성자를 향한 알림데이터 업데이트
+				if(alarmForPostWriter!=null && !isWrittenByPostWriter) {
+					alarmForPostWriter.setAlarmCnt(alarmCnt2);
+					alarmService.addAlarm(alarmForPostWriter); // alarmCnt컬럼값만 업데이트 수행
+				}
+			}
+			
 			
 			PageInfo pageInfo = PageInfo.builder().curPage(commentpage==null? 1: commentpage).build();
 			List<MbtmiComment> mbtmiCommentList = mbtmiService.mbtmiCommentListByMbtmiNo(no, pageInfo);
 			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no);
 			
+			// 삽입된 댓글
+//			MbtmiComment writtenComment = mbtmiCommentRepository.findById(mbtmiCommentCnt)
+			Integer writtenCommentNo = mbtmiComment.getCommentNo(); // 방금 삽입된 댓글의 pk
+			
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("mbtmiCommentList", mbtmiCommentList);
 			res.put("mbtmiCommentCnt", mbtmiCommentCnt);
+			res.put("writtenCommentNo", writtenCommentNo);
 			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
@@ -176,17 +269,15 @@ public class MbtmiController {
 	}
 	
 	
-	// 게시글 작성
+	// 게시글 등록
 	@PostMapping("/mbtmiwrite")
 	public ResponseEntity<Object> addPost(@RequestBody MbtmiDto mbtmiDto) {
 //		System.out.println("게시글작성 컨트롤러가 받은 파라미터 mbtmiDto: " + mbtmiDto);
 		
 		try {
 			Mbtmi mbtmi = mbtmiService.addMbtmi(mbtmiDto);
-			
 			Map<String, Object> res = new HashMap<>();
 			res.put("mbtmi", mbtmi);
-			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -201,47 +292,67 @@ public class MbtmiController {
 			// 게시글 및 추천수 조회
 			Mbtmi mbtmi = mbtmiService.mbtmiDetail(recommend.getPostNo());
 			Integer recommendCnt = mbtmi.getRecommendCnt();
+//			System.out.println("이전 추천수: " + recommendCnt);
 			
 			// 추천 데이터 조회
 			Recommend mbtmiRecommend = recommendService.selectRecommend(recommend.getUsername(), recommend.getPostNo(), recommend.getBoardType());
 			
-			if(mbtmiRecommend == null) { // 추천되지 않은 상태라면
-				recommendService.insertRecommend(recommend); // 추천
-				mbtmi.setRecommendCnt(recommendCnt + 1); // 추천수 + 1
-				
-				MbtmiDto dto = MbtmiDto.builder().no(mbtmi.getNo()).title(mbtmi.getTitle()).content(mbtmi.getContent()).category(mbtmi.getCategory())
-						.viewCnt(mbtmi.getViewCnt()).recommendCnt(mbtmi.getRecommendCnt()).writeDate(mbtmi.getWriteDate())
-						.isBlocked(mbtmi.getIsBlocked()).writerId(mbtmi.getWriterId()).writerNickname(mbtmi.getWriterNickname())
-						.writerMbti(mbtmi.getWriterMbti()).writerMbtiColor(mbtmi.getWriterMbtiColor()).fileIdxs(mbtmi.getFileIdxs())
-//						.commentCnt(commentCnt)
-						.build();
-				mbtmiService.addMbtmi(dto); // update
-			} else { // 이미 추천된 상태라면
-				recommendService.deleteRecommend(mbtmiRecommend.getNo()); // 추천 해제 (Recommend 테이블 PK로 delete)
-				mbtmi.setRecommendCnt(recommendCnt - 1); // 추천수 - 1
-				
-				MbtmiDto dto = MbtmiDto.builder().no(mbtmi.getNo()).title(mbtmi.getTitle()).content(mbtmi.getContent()).category(mbtmi.getCategory())
-						.viewCnt(mbtmi.getViewCnt()).recommendCnt(mbtmi.getRecommendCnt()).writeDate(mbtmi.getWriteDate())
-						.isBlocked(mbtmi.getIsBlocked()).writerId(mbtmi.getWriterId()).writerNickname(mbtmi.getWriterNickname())
-						.writerMbti(mbtmi.getWriterMbti()).writerMbtiColor(mbtmi.getWriterMbtiColor()).fileIdxs(mbtmi.getFileIdxs())
-//						.commentCnt(commentCnt)
-						.build();
-				mbtmiService.addMbtmi(dto); // update
+			if(mbtmiRecommend == null) {
+				recommendService.insertRecommend(recommend);
+				mbtmiService.increaseRecommendCnt(recommend.getPostNo());
+			} else { 
+				recommendService.deleteRecommend(mbtmiRecommend.getNo());
+				mbtmiService.decreaseRecommendCnt(recommend.getPostNo());
 			}
-			
-//			// 업데이트된 추천수 조회
-//			Integer mbtmiRecommendCount = mbtmiService.selectRecommendCountByPostNoAndBoardType(recommend.getPostNo(), recommend.getBoardType());
-			
-			// 게시글 및 추천수 재조회
-			Mbtmi updatedMbtmi = mbtmiService.mbtmiDetail(recommend.getPostNo());
+	
+			// 추천수 재조회
 			Integer updatedRecommendCnt = mbtmi.getRecommendCnt();
+//			System.out.println("현재 추천수: " + updatedRecommendCnt);
 			
-			// 추천수 반환
 			Map<String, Object> res = new HashMap<>();
 			res.put("mbtmiRecommendCount", updatedRecommendCnt);
-			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 북마크
+	@PostMapping("/mbtmibookmark")
+	public ResponseEntity<Object> mbtmiDetailBookmark(@RequestBody Bookmark bookmark) {
+		try {
+			// 게시글 조회
+//			Mbtmi mbtmi = mbtmiService.mbtmiDetail(bookmark.getPostNo());
+			
+			// 북마크 데이터 조회
+			Bookmark mbtmiBookmark = bookmarkService.selectBookmark(bookmark.getUsername(), bookmark.getPostNo(), bookmark.getBoardType());
+			
+			if(mbtmiBookmark == null) {
+				bookmarkService.insertBookmark(bookmark);
+			} else { 
+				bookmarkService.deleteBookmark(mbtmiBookmark.getNo());
+			}
+	
+			// 게시글 재조회
+//			Mbtmi updatedMbtmi = mbtmiService.mbtmiDetail(bookmark.getPostNo());
+			return new ResponseEntity<Object>("북마크/해제 성공", HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 게시글 수정
+	@PostMapping("/mbtmimodify")
+	public ResponseEntity<Object> modifyMbtmi (@RequestBody MbtmiDto mbtmiDto) {
+		System.out.println("수정컨트롤러가 받은 파라미터 mbtmiDto: " + mbtmiDto);
+		try {
+			Mbtmi modifiedMbtmi = mbtmiService.modifyMbtmi(mbtmiDto);
+			Map<String, Object> res = new HashMap<>();
+			res.put("notice", modifiedMbtmi);
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}

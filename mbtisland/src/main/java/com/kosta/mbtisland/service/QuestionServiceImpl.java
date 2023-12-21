@@ -107,9 +107,15 @@ public class QuestionServiceImpl implements QuestionService {
 		return counts;
 	}
 		
+	// 답변완료 상태로 변경
+	@Override
+	public void changeIsAnswered(Integer questionNo) throws Exception {
+		Question question = questionDetailByNo(questionNo);
+		question.setIsAnswered("Y");
+		questionRepository.save(question);
+	}
 		
 		
-	
 	
 	
 	/* 마이페이지 */
@@ -130,6 +136,9 @@ public class QuestionServiceImpl implements QuestionService {
 			throw new Exception("해당 게시글 존재하지 않음.");
 		}
 	}
+
+
+	
 
 	
 

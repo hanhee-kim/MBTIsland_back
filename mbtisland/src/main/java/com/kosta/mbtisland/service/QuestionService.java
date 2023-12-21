@@ -17,6 +17,9 @@ public interface QuestionService {
 	
 	// 프론트에 표시하기 위한 전체, 처리, 미처리 게시글수 조회(검색어유무에 따라 달라지도록 함)
 	Map<String, Integer> getQuestionCounts(String searchTerm, String username) throws Exception;
+	
+	// 답변완료 상태로 변경
+	void changeIsAnswered(Integer questionNo) throws Exception;
 
 	
 	
