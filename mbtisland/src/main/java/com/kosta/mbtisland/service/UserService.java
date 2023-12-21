@@ -21,7 +21,7 @@ public interface UserService {
 	//유저정보 수정
 	UserEntity modifyUser(UserEntity user,Map<String, Object> param) throws Exception;
 	UserEntity setAddUser(UserEntity user,String mbti) throws Exception;
-	
-	
+	Integer getCountTotalBoardByUser(String username) throws Exception;
+	void leaveUser(UserEntity user) throws Exception;
 
 }
