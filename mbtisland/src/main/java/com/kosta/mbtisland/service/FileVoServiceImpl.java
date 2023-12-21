@@ -19,7 +19,7 @@ public class FileVoServiceImpl implements FileVoService {
 	
 	// 파일 저장
 	@Override
-	public String insertFile(Integer no, List<MultipartFile> files) throws Exception {
+	public String insertFile(String boardType, Integer postNo, List<MultipartFile> files) throws Exception {
 		LocalDate currentDate = LocalDate.now();
 		Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
 		
@@ -37,8 +37,8 @@ public class FileVoServiceImpl implements FileVoService {
 						.fileType(file.getContentType())
 						.fileSize((int) file.getSize())
 						.uploadDate(writeDate)
-						.postNo(no)
-						.boardType("mbattle").build();
+						.postNo(postNo)
+						.boardType(boardType).build();
 
 				// Repository에 업로드할 파일을 save
 				fileVoRepository.save(fileVo);

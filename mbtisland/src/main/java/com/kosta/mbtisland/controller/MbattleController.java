@@ -27,11 +27,19 @@ public class MbattleController {
 	// 게시글 작성
 	@PostMapping("/mbattlewrite")
 	public ResponseEntity<Object> mbattleWrite(@ModelAttribute Mbattle mbattle, List<MultipartFile> files) {
-		
+		System.out.println(mbattle.getTitle());
+		System.out.println("파일즈" + files);
 		try {
-			
-			String fileNums = fileVoService.insertFile(mbattle.getNo(), files);
 			Integer no = mbattleService.insertMbattle(mbattle);
+			
+			String fileNums = fileVoService.insertFile("mbattle", no, files);
+			System.out.println("파일명들:" + fileNums);
+			String[] fileArr = fileNums.split(",");
+			mbattle.setFileIdx1(fileArr[0]);
+			mbattle.setFileIdx2(fileArr[1]);
+			// 파일 인덱스를 수정하여 업데이트?
+			mbattleService.insertMbattle(mbattle);
+			
 			Map<String, Object> res = new HashMap<>();
 			res.put("no", no);
 			

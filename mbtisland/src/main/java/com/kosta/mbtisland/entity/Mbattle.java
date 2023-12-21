@@ -67,8 +67,8 @@ public class Mbattle {
 	private String title;
 	
 	@Column
-	private Integer file1idx;
+	private String fileIdx1;
 	
 	@Column
-	private Integer file2idx;
+	private String fileIdx2;
 }
