@@ -117,6 +117,15 @@ public class MbtwhyDslRepository {
 				.fetchOne();
 	}
 	
+	// 댓글의 대댓글 수 조회
+	public Long countCommentByParentcommentNo(Integer commentNo) {
+		return jpaQueryFactory
+				.select(mbtwhyComment.count())
+				.from(mbtwhyComment)
+				.where(mbtwhyComment.parentcommentNo.eq(commentNo))
+				.fetchOne();
+	}
+	
 	//
 	public List<Mbtwhy> findMbtwhyListUserAndPaging(String username, PageRequest pageRequest){
 		return jpaQueryFactory.selectFrom(mbtwhy)

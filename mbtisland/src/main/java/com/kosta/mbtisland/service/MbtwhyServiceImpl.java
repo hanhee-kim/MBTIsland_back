@@ -181,7 +181,6 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		mbtwhyCommentRepository.save(mbtwhyComment);
 	}
 	
-
 	// 댓글 삭제
 	@Override
 	public void deleteMbtwhyComment(Integer commentNo) throws Exception {
@@ -189,6 +188,13 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		if(targetComment.isEmpty()) throw new Exception("댓글이 존재하지 않습니다");
 		targetComment.get().setIsRemoved("Y");
 		mbtwhyCommentRepository.save(targetComment.get());
+	}
+	
+	// 댓글의 대댓글 수 조회
+	@Override
+	public Integer selectMbtwhyChildCommentCount(Integer commentNo) throws Exception {
+		Long mbtwhyChildCommentCount = mbtwhyDslRepository.countCommentByParentcommentNo(commentNo);
+		return mbtwhyChildCommentCount.intValue();
 	}
 	
 	// 게시글 추천 데이터 조회
