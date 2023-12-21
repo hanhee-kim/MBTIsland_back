@@ -109,21 +109,10 @@ public class UserController {
 	public ResponseEntity<Object> userModify(Authentication authentication,@RequestBody Map<String,Object> param){
 		System.out.println("user/modify 진입");
 		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
-//		System.out.println("param-----------------");
-//		System.out.println("id"+param.get("username"));
-//		System.out.println("pw"+param.get("userPassword"));
-//		if(param.get("userPassword") == null || param.get("userPassword") == "") {
-//			System.out.println("널아니고 빈문자열");
-//		}
-//		System.out.println("nick"+param.get("userNickname"));
-//		System.out.println("mbti"+param.get("userMbti"));
-//		System.out.println("beMbti"+param.get("beforeMbti"));
-//		System.out.println("email"+param.get("userEmail"));
 		try {
 			UserEntity user = userService.modifyUser(principalDetails.getUser(), param);
 			System.out.println("비번"+principalDetails.getUser().getUserPassword());
 			return new ResponseEntity<Object>(user, HttpStatus.OK);
-//			return new ResponseEntity<Object>("ok", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -194,7 +183,7 @@ public class UserController {
 		}		
 	}
 	
-
+	
 	
 
 }

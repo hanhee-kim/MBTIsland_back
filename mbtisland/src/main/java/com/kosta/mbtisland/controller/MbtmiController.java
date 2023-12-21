@@ -122,6 +122,7 @@ public class MbtmiController {
 		}
 	}
 	
+	//리스트삭제
 	@DeleteMapping("/deletembtmilist")
 	public ResponseEntity<Object> deleteMbtmiList(@RequestParam String sendArrayItems){
 		System.out.println("noList 삭제 컨트롤러 진입");
@@ -139,10 +140,6 @@ public class MbtmiController {
 			return new ResponseEntity<Object>("삭제 실패",HttpStatus.OK);
 		}
 	}
-	
-	
-	
-	
 	
 	// 댓글 목록
 	@GetMapping("/mbtmicommentlist/{no}")
