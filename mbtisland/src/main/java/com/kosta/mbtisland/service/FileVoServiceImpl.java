@@ -40,7 +40,8 @@ public class FileVoServiceImpl implements FileVoService {
 			for(MultipartFile file : files) {
 				// Entity 생성 (new FileVo()로 해도 무방)
 				FileVo fileVo = FileVo.builder()
-						.filePath(uploadPath)
+//						.filePath(uploadPath)
+						.filePath("c:/upload/")
 						.fileName(file.getOriginalFilename())
 						.fileType(file.getContentType())
 //						.fileSize((int) file.getSize())
@@ -73,8 +74,7 @@ public class FileVoServiceImpl implements FileVoService {
 	@Override
 	public void readImage(Integer fileIdx, OutputStream out) throws Exception {
 		// 경로 설정
-		String dir = "c:/upload/";
-		FileInputStream fis = new FileInputStream(dir + fileIdx);
+		FileInputStream fis = new FileInputStream(uploadPath + fileIdx);
 		FileCopyUtils.copy(fis, out);
 		fis.close();
 	}

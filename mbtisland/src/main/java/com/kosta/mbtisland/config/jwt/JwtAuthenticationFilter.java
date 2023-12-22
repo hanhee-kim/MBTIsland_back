@@ -66,7 +66,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 							.withClaim("username", principalDetails.getUser().getUsername())
 							.sign(Algorithm.HMAC512(JwtProperties.SECRET));
 		
-//		response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+//		response.setHeader("Access-Control-Allow-Origin", "http://:3000");
 //		response.setStatus(HttpServletResponse.SC_OK);
 		System.out.println("토큰:"+jwtToken);
 		response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
