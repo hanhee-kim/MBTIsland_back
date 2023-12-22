@@ -1,5 +1,7 @@
 package com.kosta.mbtisland.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,16 +21,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.mbtisland.dto.MbtmiDto;
-import com.kosta.mbtisland.dto.NoticeDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Bookmark;
+import com.kosta.mbtisland.entity.FileVo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.repository.FileVoRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.service.AlarmService;
 import com.kosta.mbtisland.service.BookmarkService;
@@ -47,6 +52,14 @@ public class MbtmiController {
 	private AlarmService alarmService;
 	@Autowired
 	private MbtmiCommentRepository mbtmiCommentRepository;
+	@Autowired
+	private FileVoRepository fileVoRepository;
+	
+	// 파일 업로드 경로
+	@Value("${upload.path}") // org.springframework.beans.factory.annotation.Value
+	private String uploadPath;
+	
+	
 	
 	// 주간인기글 목록
 	@GetMapping("/weeklyhotmbtmi")
@@ -273,7 +286,6 @@ public class MbtmiController {
 			Integer mbtmiCommentCnt = mbtmiService.mbtmiCommentCnt(no);
 			
 			// 삽입된 댓글
-//			MbtmiComment writtenComment = mbtmiCommentRepository.findById(mbtmiCommentCnt)
 			Integer writtenCommentNo = mbtmiComment.getCommentNo(); // 방금 삽입된 댓글의 pk
 			
 			Map<String, Object> res = new HashMap<>();
@@ -378,6 +390,76 @@ public class MbtmiController {
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	
+	// 퀼데이터 받기 테스트
+	@PostMapping("/quilltest")
+	public ResponseEntity<Object> quillTest (@RequestBody MbtmiDto mbtmiDto) {
+		System.out.println("quillTest가 받은 mbtmiDto: " + mbtmiDto); // title, category, writerId등, content
+		System.out.println("*quillTest가 받은 mbtmiDto의 content값: " + mbtmiDto.getContent()); // <p>입력된 문자열 state에 저장하여 서버로 보내기 테스트</p>
+		
+		try {
+				
+			Mbtmi mbtmi = mbtmiService.addMbtmi(mbtmiDto);
+			Map<String, Object> res = new HashMap<>();
+			res.put("mbtmi", mbtmi);
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		
+	}
+	
+	// 프런트의 삽입된이미지핸들러 함수 안에서 호출되며 에디터에 삽입된 이미지를 업로드(저장)하고 업로드된 이미지의 url을 리턴하는 메서드
+	@PostMapping("/uploadImage")
+	public ResponseEntity<Object> handleImageUpload(@RequestParam("image") MultipartFile file) {
+		
+		System.out.println("/uploadImage메서드 호출됨");
+		
+		try {
+			// 파일 파라미터가 있는지 체크
+			if (file.isEmpty()) {
+                return new ResponseEntity<>("업로드될 파일이 없음", HttpStatus.BAD_REQUEST);
+            }
+			
+			// 원하는 디렉토리에 업로드
+//			String uploadFolderPath = "";
+			String fileName = file.getOriginalFilename();
+			
+			FileVo fileVo = new FileVo();
+//			fileVo.setFilePath(uploadFolderPath);
+			fileVo.setFilePath(uploadPath);
+			fileVo.setFileName(fileName);
+			fileVo.setFileSize(file.getSize());
+			fileVo.setFileType(file.getContentType());
+//			fileVo.setData(file.getBytes());
+			LocalDate currentDate = LocalDate.now();
+			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+			fileVo.setUploadDate(writeDate);
+			
+			// 파일테이블에 인서트 먼저 수행
+			fileVoRepository.save(fileVo);
+			// upload폴더에 저장
+			File uploadFile = new File(uploadPath + fileVo.getFileIdx());
+			file.transferTo(uploadFile);
+			
+			
+            
+            // 업로드완료된 파일의 url생성
+            String imageUrl = "uploaded" + fileName;
+            
+            // 프론트로 리턴
+            Map<String, Object> response = new HashMap<>();
+            response.put("imageUrl", imageUrl);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	
 	
 	

@@ -70,7 +70,6 @@ public class MbtwhyDslRepository {
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값)
 	public Long findMbtwhyCountByMbtiAndSearch(String mbti, String search) throws Exception {
-		
 		return jpaQueryFactory.select(mbtwhy.count())
 						.from(mbtwhy)
 						.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,
@@ -114,6 +113,15 @@ public class MbtwhyDslRepository {
 	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) {
 		return jpaQueryFactory.select(mbtwhyComment.count()).from(mbtwhyComment)
 				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
+				.fetchOne();
+	}
+	
+	// 댓글의 대댓글 수 조회
+	public Long countCommentByParentcommentNo(Integer commentNo) {
+		return jpaQueryFactory
+				.select(mbtwhyComment.count())
+				.from(mbtwhyComment)
+				.where(mbtwhyComment.parentcommentNo.eq(commentNo))
 				.fetchOne();
 	}
 	

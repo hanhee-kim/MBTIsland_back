@@ -13,7 +13,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,7 +45,7 @@ public class Alarm {
 	@Column
 	private String alarmTargetFrom;
 	@Column
-	@ColumnDefault("N")
+//	@ColumnDefault("N")
 	private String alarmIsRead;
 	@Column
 	private Timestamp alarmReadDate;
