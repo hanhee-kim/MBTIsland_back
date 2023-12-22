@@ -1,12 +1,15 @@
 package com.kosta.mbtisland.service;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.mbtisland.entity.FileVo;
@@ -59,5 +62,15 @@ public class FileVoServiceImpl implements FileVoService {
 		
 		// 파일 인덱스 목록 반환
 		return fileNums;
+	}
+	
+	// 이미지 출력
+	@Override
+	public void readImage(Integer fileIdx, OutputStream out) throws Exception {
+		// 경로 설정
+		String dir = "c:/upload/";
+		FileInputStream fis = new FileInputStream(dir + fileIdx);
+		FileCopyUtils.copy(fis, out);
+		fis.close();
 	}
 }

@@ -16,6 +16,7 @@ public interface RecommendService {
 	// 로그인유저의 게시글 추천여부 조회
 	Boolean selectIsRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception;
 	
-
+	// 추천 데이터 삭제 (게시판 타입, 게시글 번호)
+//	void deleteRecommendByBoardTypeAndPostNo(String boardType, Integer postNo) throws Exception;
 
 }
