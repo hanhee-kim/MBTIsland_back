@@ -1,5 +1,6 @@
 package com.kosta.mbtisland.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,11 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.kosta.mbtisland.dto.MbattleDto;
 import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbattleVoter;
+import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbattleDslRepository;
 import com.kosta.mbtisland.repository.MbattleRepository;
@@ -35,8 +38,27 @@ public class MbattleServiceImpl implements MbattleService {
 	@Override
 	public List<Mbattle> selectMbattleListByPageAndSearchAndSort(PageInfo pageInfo, String search, String sort)
 			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		// 페이지 번호, 한 페이지에 보여줄 게시글 수
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5);
+		List<Mbattle> mbattleList = mbattleDslRepository.findMbattleListByPageAndSearchAndSort(pageRequest, search, sort);
+
+		if(mbattleList.size()!=0) {
+			// 페이징 계산
+			// MbattleController에서 넘겨준 pageInfo를 참조하기에, 반환하지 않아도 됨
+			Long allCount = mbattleDslRepository.findMbattleCountBySearch(search);
+			Integer allPage = allCount.intValue() / pageRequest.getPageSize();
+			if(allCount % pageRequest.getPageSize()!=0) allPage += 1;
+			Integer startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
+			Integer endPage = Math.min(startPage + 10 - 1, allPage);
+			
+			pageInfo.setAllPage(allPage);
+			pageInfo.setStartPage(startPage);
+			pageInfo.setEndPage(endPage);
+			
+			return mbattleList;
+		}
+
+		return mbattleList;
 	}
 	
 	// 일간 인기 게시글 조회

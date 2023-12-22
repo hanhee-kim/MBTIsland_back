@@ -69,7 +69,6 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 		}
 
 		return dtoList;
-//		return null;
 	}
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값, 정렬 옵션)

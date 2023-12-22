@@ -70,7 +70,6 @@ public class MbtwhyDslRepository {
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값)
 	public Long findMbtwhyCountByMbtiAndSearch(String mbti, String search) throws Exception {
-		
 		return jpaQueryFactory.select(mbtwhy.count())
 						.from(mbtwhy)
 						.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,

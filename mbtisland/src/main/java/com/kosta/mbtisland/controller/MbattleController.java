@@ -49,8 +49,8 @@ public class MbattleController {
 	private AlarmService alarmService;
 	
 	// 게시글 페이징, 게시글 목록, 인기 게시글, 개수 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
-	@GetMapping("/mbtwhy")
-	public ResponseEntity<Object> mbtwhyList(@RequestParam(required = false) Integer page,
+	@GetMapping("/mbattle")
+	public ResponseEntity<Object> mbattleList(@RequestParam(required = false) Integer page,
 			@RequestParam(required = false) String search, @RequestParam(required = false) String sort) {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1 : page).build();
