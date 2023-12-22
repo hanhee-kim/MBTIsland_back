@@ -35,7 +35,8 @@ public class FileVoServiceImpl implements FileVoService {
 						.filePath(dir)
 						.fileName(file.getOriginalFilename())
 						.fileType(file.getContentType())
-						.fileSize((int) file.getSize())
+//						.fileSize((int) file.getSize())
+						.fileSize((long) file.getSize())
 						.uploadDate(writeDate)
 						.postNo(postNo)
 						.boardType(boardType).build();
