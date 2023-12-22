@@ -40,8 +40,8 @@ public class FileVoServiceImpl implements FileVoService {
 			for(MultipartFile file : files) {
 				// Entity 생성 (new FileVo()로 해도 무방)
 				FileVo fileVo = FileVo.builder()
-//						.filePath(uploadPath)
-						.filePath("c:/upload/")
+						.filePath(uploadPath) // application.properties 파일의 upload.path 이용(pc/클라우드)
+//						.filePath("c:/upload/")
 						.fileName(file.getOriginalFilename())
 						.fileType(file.getContentType())
 //						.fileSize((int) file.getSize())
