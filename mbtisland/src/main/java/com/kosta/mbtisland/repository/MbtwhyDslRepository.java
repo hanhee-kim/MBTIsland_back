@@ -96,7 +96,7 @@ public class MbtwhyDslRepository {
 	}
 	
 	// 댓글 목록 조회 (게시글 번호)
-	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) {
+	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) throws Exception {
 		return jpaQueryFactory.selectFrom(mbtwhyComment)
 //				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
 				.where(mbtwhyComment.mbtwhyNo.eq(no))
@@ -110,14 +110,14 @@ public class MbtwhyDslRepository {
 	}
 
 	// 댓글 개수 조회 (게시글 번호)
-	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) {
+	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception{
 		return jpaQueryFactory.select(mbtwhyComment.count()).from(mbtwhyComment)
 				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
 				.fetchOne();
 	}
 	
 	// 댓글의 대댓글 수 조회
-	public Long countCommentByParentcommentNo(Integer commentNo) {
+	public Long countCommentByParentcommentNo(Integer commentNo) throws Exception {
 		return jpaQueryFactory
 				.select(mbtwhyComment.count())
 				.from(mbtwhyComment)
@@ -126,7 +126,7 @@ public class MbtwhyDslRepository {
 	}
 	
 	//
-	public List<Mbtwhy> findMbtwhyListUserAndPaging(String username, PageRequest pageRequest){
+	public List<Mbtwhy> findMbtwhyListUserAndPaging(String username, PageRequest pageRequest) throws Exception {
 		return jpaQueryFactory.selectFrom(mbtwhy)
 //			.where(mbtwhy.writerId.eq(username).and(mbtwhy.isRemoved.eq("N"))
 			.orderBy(mbtwhy.no.desc())

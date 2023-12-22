@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
+import com.kosta.mbtisland.entity.MbattleResult;
 import com.kosta.mbtisland.entity.MbattleVoter;
 import com.kosta.mbtisland.entity.UserEntity;
 import com.kosta.mbtisland.service.AlarmService;
@@ -78,7 +78,7 @@ public class MbattleController {
 			// Mbattle 게시글 (추천 수 포함하므로, 게시글 처음 보여질 때는 해당 GetMapping에서 추천수 가져와서 사용)
 			Mbattle mbattle = mbattleService.selectMbattleByNo(no);
 			// 투표 데이터 조회 (투표 여부)
-			MbattleVoter mbattleVoter = mbattleService.selectIsVoteByUsernameAndPostNo(username, no);
+			MbattleVoter mbattleVoter = mbattleService.selectMbattleVoterByUsernameAndPostNo(username, no);
 			// 북마크 여부 조회
 			Boolean isMbattleBookmarked = bookmarkService.selectIsBookmarkByUsernameAndPostNoAndBoardType(username, no, "mbattle");
 			
@@ -160,6 +160,22 @@ public class MbattleController {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	// 랜덤 게시글 번호 조회
+	@GetMapping("/mbattlerandom")
+	public ResponseEntity<Object> mbattleRandom() {
+		try {
+			Integer randomNo = mbattleService.selectRandomMbattleNo();
+			Map<String, Object> res = new HashMap<>();
+			System.out.println("랜덤값: " + randomNo);
+			res.put("randomNo", randomNo);
+
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 	
@@ -265,4 +281,49 @@ public class MbattleController {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	// 투표
+//	@PostMapping("/mbattlevote/{no}/{voteItem}/{voterId}/{voterMbti}")
+//	public ResponseEntity<Object> voteMbattleItem(@PathVariable Integer no, @PathVariable Integer voteItem,
+//			@PathVariable String voterId, @PathVariable String voterMbti) {
+//		try {
+//			// mbattleVoter 테이블에 투표 여부 삽입
+//			MbattleVoter mbattleVoter = 
+//			mbattleService.insertMbattleVoter();
+//			
+//			// mbattleResult 테이블에 결과 삽입 (업데이트)
+//			MbattleResult mbattleResult = mbattleService.selectMbattleResultByMbattleNoAndVoteItem(no, voteItem);
+//			
+//			// 투표 후, 투표 결과 반환
+//			Map<String, Object> res = new HashMap<>();
+//			return new ResponseEntity<Object>(res, HttpStatus.OK);
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+//		}
+//	}
+	
+	@PostMapping("/mbattlevote/{voterMbti}")
+	public ResponseEntity<Object> voteMbattleItem(@RequestBody MbattleVoter voter, @PathVariable String voterMbti) {
+		try {
+			// mbattleVoter 테이블에 투표 여부 삽입
+			mbattleService.insertMbattleVoter(voter);
+
+			// mbattleResult 테이블에 결과 삽입 (업데이트)
+			mbattleService.insertMbattleResult(voter, voterMbti);
+			
+			// mbattleResult 조회
+			MbattleResult mbattleResult = mbattleService.selectMbattleResultByMbattleNoAndVoteItem(voter.getMbattleNo(), voter.getVoteItem());
+			
+			
+			
+			// 투표 후, 투표 결과 반환
+			Map<String, Object> res = new HashMap<>();
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 }

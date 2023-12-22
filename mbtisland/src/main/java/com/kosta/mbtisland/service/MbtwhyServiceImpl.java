@@ -116,7 +116,7 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	public MbtwhyDto selectDailyHotMbtwhy(String mbti) throws Exception {
 		Mbtwhy mbtwhy = mbtwhyDslRepository.findDailyHotMbtwhy(mbti);
 		
-		if(mbtwhy!=null) {
+		if(mbtwhy != null) {
 			Integer commentCnt = selectMbtwhyCommentCountByMbtwhyNo(mbtwhy.getNo());
 			MbtwhyDto dto = MbtwhyDto.builder().no(mbtwhy.getNo()).content(mbtwhy.getContent()).mbtiCategory(mbtwhy.getMbtiCategory())
 					.viewCnt(mbtwhy.getViewCnt()).recommendCnt(mbtwhy.getRecommendCnt()).writeDate(mbtwhy.getWriteDate())
