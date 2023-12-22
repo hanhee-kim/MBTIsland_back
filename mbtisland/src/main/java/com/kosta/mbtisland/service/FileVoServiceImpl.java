@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,10 @@ public class FileVoServiceImpl implements FileVoService {
 	@Autowired
 	FileVoRepository fileVoRepository;
 	
+	// 파일 업로드 경로
+	@Value("${upload.path}") // org.springframework.beans.factory.annotation.Value
+	private String uploadPath;
+	
 	// 파일 저장
 	@Override
 	public String insertFile(String boardType, Integer postNo, List<MultipartFile> files) throws Exception {
@@ -27,7 +32,7 @@ public class FileVoServiceImpl implements FileVoService {
 		Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
 		
 		// 파일 저장 경로
-		String dir = "c:/upload/";
+//		String dir = "";
 		// 파일 인덱스 목록
 		String fileNums = "";
 		
@@ -35,7 +40,7 @@ public class FileVoServiceImpl implements FileVoService {
 			for(MultipartFile file : files) {
 				// Entity 생성 (new FileVo()로 해도 무방)
 				FileVo fileVo = FileVo.builder()
-						.filePath(dir)
+						.filePath(uploadPath)
 						.fileName(file.getOriginalFilename())
 						.fileType(file.getContentType())
 //						.fileSize((int) file.getSize())
@@ -48,7 +53,7 @@ public class FileVoServiceImpl implements FileVoService {
 				fileVoRepository.save(fileVo);
 				
 				// upload 폴더에 파일 업로드
-				File uploadFile = new File(dir + fileVo.getFileIdx());
+				File uploadFile = new File(uploadPath + fileVo.getFileIdx());
 				file.transferTo(uploadFile);
 				
 				// file들의 번호를 구분자 , 로 나누어 목록으로 만듬

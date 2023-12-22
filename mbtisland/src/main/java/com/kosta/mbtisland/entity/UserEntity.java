@@ -15,13 +15,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.relational.core.mapping.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity(name="user")
+@Entity(name="USER")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -34,7 +36,7 @@ public class UserEntity {
 	@Id 
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer userIdx;
-	@Column(unique = true)
+//	@Column(unique = true)
 	private String username;
 	private String userPassword;
 	private String userNickname;

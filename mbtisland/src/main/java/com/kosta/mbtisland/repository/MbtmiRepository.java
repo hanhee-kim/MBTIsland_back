@@ -1,6 +1,5 @@
 package com.kosta.mbtisland.repository;
 
-import static com.kosta.mbtisland.entity.QMbtmi.mbtmi;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,6 +54,10 @@ public class MbtmiController {
 	private MbtmiCommentRepository mbtmiCommentRepository;
 	@Autowired
 	private FileVoRepository fileVoRepository;
+	
+	// 파일 업로드 경로
+	@Value("${upload.path}") // org.springframework.beans.factory.annotation.Value
+	private String uploadPath;
 	
 	
 	
@@ -419,11 +424,12 @@ public class MbtmiController {
             }
 			
 			// 원하는 디렉토리에 업로드
-			String uploadFolderPath = "C:/upload";
+//			String uploadFolderPath = "";
 			String fileName = file.getOriginalFilename();
 			
 			FileVo fileVo = new FileVo();
-			fileVo.setFilePath(uploadFolderPath);
+//			fileVo.setFilePath(uploadFolderPath);
+			fileVo.setFilePath(uploadPath);
 			fileVo.setFileName(fileName);
 			fileVo.setFileSize(file.getSize());
 			fileVo.setFileType(file.getContentType());
@@ -435,13 +441,13 @@ public class MbtmiController {
 			// 파일테이블에 인서트 먼저 수행
 			fileVoRepository.save(fileVo);
 			// upload폴더에 저장
-			File uploadFile = new File(uploadFolderPath + fileVo.getFileIdx());
+			File uploadFile = new File(uploadPath + fileVo.getFileIdx());
 			file.transferTo(uploadFile);
 			
 			
             
             // 업로드완료된 파일의 url생성
-            String imageUrl = "http://localhost:8090/" + fileName;
+            String imageUrl = "uploaded" + fileName;
             
             // 프론트로 리턴
             Map<String, Object> response = new HashMap<>();
