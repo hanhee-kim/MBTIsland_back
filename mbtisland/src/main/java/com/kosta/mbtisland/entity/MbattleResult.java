@@ -57,4 +57,7 @@ public class MbattleResult {
 	
 	@Column
 	private Integer P;
+	
+	@Column
+	private Integer voteCnt;	
 }

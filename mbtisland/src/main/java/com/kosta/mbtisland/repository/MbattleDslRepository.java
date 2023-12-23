@@ -74,6 +74,7 @@ public class MbattleDslRepository {
 						.fetchOne();
 	}
 	
+	// 랜덤 게시글 조회
 	public Integer findRandomMbattleNo() throws Exception {
 		return jpaQueryFactory.select(mbattle.no)
 				.from(mbattle)

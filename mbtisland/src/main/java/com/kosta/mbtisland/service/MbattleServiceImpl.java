@@ -171,6 +171,9 @@ public class MbattleServiceImpl implements MbattleService {
 	}
 	
 	// 투표 결과 조회
+	
+	
+	// n번 항목 투표 결과 조회
 	@Override
 	public MbattleResult selectMbattleResultByMbattleNoAndVoteItem(Integer no, Integer voteItem) throws Exception {
 		return mbattleResultRepository.findMbattleResultByMbattleNoAndVoteItem(no, voteItem);
@@ -178,9 +181,7 @@ public class MbattleServiceImpl implements MbattleService {
 	
 	// 투표 결과 삽입 (업데이트)
 	@Override
-	public void insertMbattleResult(MbattleVoter voter, String voterMbti) throws Exception {
-		MbattleResult mbattleResult = null;
-		mbattleResult.setNo(voter.getMbattleNo());
-		
+	public void insertMbattleResult(MbattleResult mbattleResult) throws Exception {
+		mbattleResultRepository.save(mbattleResult);
 	}
 }

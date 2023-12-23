@@ -26,5 +26,5 @@ public interface MbattleService {
 	public MbattleVoter selectMbattleVoterByUsernameAndPostNo(String username, Integer no) throws Exception; // 투표 데이터 조회
 	public void insertMbattleVoter(MbattleVoter voter) throws Exception; // 투표 데이터 삽입
 	public MbattleResult selectMbattleResultByMbattleNoAndVoteItem(Integer no, Integer voteItem) throws Exception; // 투표 결과 조회
-	public void insertMbattleResult(MbattleVoter voter, String voterMbti) throws Exception; // 투표 결과 삽입
+	public void insertMbattleResult(MbattleResult mbattleResult) throws Exception; // 투표 결과 삽입
 }

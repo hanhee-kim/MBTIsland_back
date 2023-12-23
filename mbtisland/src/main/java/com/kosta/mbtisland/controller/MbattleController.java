@@ -81,11 +81,18 @@ public class MbattleController {
 			MbattleVoter mbattleVoter = mbattleService.selectMbattleVoterByUsernameAndPostNo(username, no);
 			// 북마크 여부 조회
 			Boolean isMbattleBookmarked = bookmarkService.selectIsBookmarkByUsernameAndPostNoAndBoardType(username, no, "mbattle");
+			// 투표 결과 조회
+			MbattleResult mbattleResult1 = mbattleService.selectMbattleResultByMbattleNoAndVoteItem(no, 1);
+			MbattleResult mbattleResult2 = mbattleService.selectMbattleResultByMbattleNoAndVoteItem(no, 2);
+			System.out.println(mbattleResult1);
+			System.out.println(mbattleResult2);
 			
 			Map<String, Object> res = new HashMap<>();
 			res.put("mbattle", mbattle);
 			res.put("mbattleVoter", mbattleVoter);
 			res.put("isMbattleBookmarked", isMbattleBookmarked);
+			res.put("mbattleResult1", mbattleResult1);
+			res.put("mbattleResult2", mbattleResult2);
 			
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
@@ -303,22 +310,93 @@ public class MbattleController {
 //		}
 //	}
 	
-	@PostMapping("/mbattlevote/{voterMbti}")
-	public ResponseEntity<Object> voteMbattleItem(@RequestBody MbattleVoter voter, @PathVariable String voterMbti) {
+	// 투표
+	@PostMapping("/mbattlevote/{voterMbti}/{vote}")
+	public ResponseEntity<Object> voteMbattleItem(@RequestBody MbattleVoter voter,
+			@PathVariable String voterMbti, @PathVariable Integer vote) {
 		try {
-			// mbattleVoter 테이블에 투표 여부 삽입
+			// mbattleVoter 테이블에 투표 여부 삽입 (게시글 번호, 유저 아이디, 투표 항목)
+			voter.setVoteItem(vote);
 			mbattleService.insertMbattleVoter(voter);
 
-			// mbattleResult 테이블에 결과 삽입 (업데이트)
-			mbattleService.insertMbattleResult(voter, voterMbti);
-			
 			// mbattleResult 조회
 			MbattleResult mbattleResult = mbattleService.selectMbattleResultByMbattleNoAndVoteItem(voter.getMbattleNo(), voter.getVoteItem());
 			
+			// 조회 결과가 없다면, 새로 생성
+			if(mbattleResult == null) {
+				mbattleResult = new MbattleResult();
+				// 게시글 번호 set
+				mbattleResult.setMbattleNo(voter.getMbattleNo());
+				// 투표 항목 set
+				mbattleResult.setVoteItem(voter.getVoteItem());
+				
+				// 총 투표수 set
+				mbattleResult.setVoteCnt(1);
+				
+				// mbti 분류 결과 set
+				if(voterMbti.charAt(0)=='I'){
+					mbattleResult.setI(1);
+				} else if(voterMbti.charAt(0)=='E') {
+					mbattleResult.setE(1);
+				}
+				
+				if(voterMbti.charAt(1)=='S'){
+					mbattleResult.setS(1);
+				} else if(voterMbti.charAt(1)=='N') {
+					mbattleResult.setN(1);
+				}
+
+				if(voterMbti.charAt(2)=='T'){
+					mbattleResult.setT(1);
+				} else if(voterMbti.charAt(2)=='F') {
+					mbattleResult.setF(1);
+				}
+				
+				if(voterMbti.charAt(3)=='J'){
+					mbattleResult.setJ(1);
+				} else if(voterMbti.charAt(3)=='P') {
+					mbattleResult.setP(1);
+				}
+			} else { // 조회 결과가 있다면
+				mbattleResult.setVoteCnt(mbattleResult.getVoteCnt() + 1);
+				// mbti 분류 결과 set
+				if(voterMbti.charAt(0)=='I'){
+					mbattleResult.setI(mbattleResult.getI() + 1);						
+				} else if(voterMbti.charAt(0)=='E') {
+					mbattleResult.setE(mbattleResult.getE() + 1);						
+				}
+				
+				if(voterMbti.charAt(1)=='S'){
+					mbattleResult.setS(mbattleResult.getS() + 1);						
+				} else if(voterMbti.charAt(1)=='N') {
+					mbattleResult.setN(mbattleResult.getN() + 1);						
+				}
+
+				if(voterMbti.charAt(2)=='T'){
+					mbattleResult.setT(mbattleResult.getT() + 1);						
+				} else if(voterMbti.charAt(2)=='F') {
+					mbattleResult.setI(mbattleResult.getI() + 1);						
+				}
+				
+				if(voterMbti.charAt(3)=='J'){
+					mbattleResult.setJ(mbattleResult.getJ() + 1);						
+				} else if(voterMbti.charAt(3)=='P') {
+					mbattleResult.setP(mbattleResult.getP() + 1);						
+				}
+			}
 			
+			// mbattle voteCnt 컬럼 1 증가
+			Mbattle mbattle = mbattleService.selectMbattleByNo(voter.getMbattleNo());
+			mbattle.setVoteCnt(mbattle.getVoteCnt() + 1);
+			mbattleService.insertMbattle(mbattle);
+			
+			// mbattleResult 테이블에 결과 삽입 (업데이트)
+			mbattleService.insertMbattleResult(mbattleResult);
 			
 			// 투표 후, 투표 결과 반환
 			Map<String, Object> res = new HashMap<>();
+			res.put("mbattleResult", mbattleResult);
+
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();
