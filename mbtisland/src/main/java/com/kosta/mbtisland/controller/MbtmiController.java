@@ -150,7 +150,7 @@ public class MbtmiController {
 			return new ResponseEntity<Object>("삭제 성공",HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Object>("삭제 실패",HttpStatus.OK);
+			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
 	}
 	

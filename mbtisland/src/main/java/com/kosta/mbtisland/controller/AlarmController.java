@@ -75,4 +75,11 @@ public class AlarmController {
 		}
 	}
 	
+	@GetMapping("/getnoteandalarm")
+	public ResponseEntity<Object> getNoteAndAlarm(@RequestParam String username){
+		
+		
+		return new ResponseEntity<Object>("Interval 맵핑 성공",HttpStatus.OK);
+	}
+	
 }
