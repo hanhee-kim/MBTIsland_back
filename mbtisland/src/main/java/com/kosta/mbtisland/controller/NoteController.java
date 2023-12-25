@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -76,4 +77,16 @@ public class NoteController {
 			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@PutMapping("/updatenoteisreadall")
+	public ResponseEntity<Object> updateNoteIsReadAll(@RequestParam String username){
+		try {
+			noteService.allReadNoteByUser(username);
+			return new ResponseEntity<Object>("읽음처리 성공",HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 }

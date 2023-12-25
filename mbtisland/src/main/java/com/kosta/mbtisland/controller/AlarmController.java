@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.mbtisland.dto.AlarmDto;
+import com.kosta.mbtisland.dto.NoteDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.service.AlarmService;
+import com.kosta.mbtisland.service.NoteService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class AlarmController {
 
 	private final AlarmService alarmService;
+	private final NoteService noteservice;
 //	alarmList
 	
 	@GetMapping("/alarmList")
@@ -77,9 +80,21 @@ public class AlarmController {
 	
 	@GetMapping("/getnoteandalarm")
 	public ResponseEntity<Object> getNoteAndAlarm(@RequestParam String username){
-		
-		
-		return new ResponseEntity<Object>("Interval 맵핑 성공",HttpStatus.OK);
+		Map<String, Object> res = new HashMap<>();
+		try {
+			List<AlarmDto> alarmList = alarmService.getAlarmListByAlarmIsNotReadBy5(username);
+			Long alarmCnt = alarmService.getCntNotReadAlarmList(username);
+			res.put("alarmList", alarmList);
+			res.put("alarmCnt", alarmCnt);
+			List<NoteDto> noteDtoList = noteservice.getNoteListNotReadByUsername(username);
+			Long noteCnt = noteservice.getCntNotReadNoteList(username);
+			res.put("noteList", noteDtoList);
+			res.put("noteCnt", noteCnt);
+			return new ResponseEntity<Object>(res,HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 }
