@@ -62,5 +62,9 @@ public interface MbtmiService {
 	// fileIdxs를 포함하는 content로 업데이트
 	Mbtmi updateContainingFileIdxs(MbtmiDto mbtmiDto) throws Exception;
 	
-
+	// 댓글 조회
+	MbtmiComment mbtmiComment(Integer no) throws Exception;
+	
+	// 게시글 등록 (업데이트용)
+	void addMbtmiForUpdate(Mbtmi mbtmi) throws Exception;
 }

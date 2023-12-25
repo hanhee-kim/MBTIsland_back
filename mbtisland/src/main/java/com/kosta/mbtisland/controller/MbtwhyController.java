@@ -271,7 +271,7 @@ public class MbtwhyController {
 			// 2. 알림 데이터 처리
 			// 2-1. 1차댓글 등록의 경우
 			if (parentcommentNo == null) {
-				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtmi");
+				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtwhy");
 
 				Integer alarmCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no); // alarmCnt컬럼값
 				String username = mbtwhyService.selectMbtwhyByNo(no).getWriterId(); // 알림의 주인==게시글작성자
@@ -285,15 +285,15 @@ public class MbtwhyController {
 					alarmService.addAlarm(alarmForPostWriter); // *
 				} else if (alarmForPostWriter == null && !isWrittenByOneSelf) {
 					Alarm alarm = Alarm.builder().username(username).alarmType("댓글").alarmTargetNo(no)
-							.alarmTargetFrom("mbtmi").alarmUpdateDate(writeDate).alarmCnt(alarmCnt).build();
+							.alarmTargetFrom("mbtwhy").alarmUpdateDate(writeDate).alarmCnt(alarmCnt).build();
 					alarmService.addAlarm(alarm); // **
 				}
 
 			// 2-2. 2차댓글 등록의 경우
 			} else {
 				Alarm alarmForParentcommentWriter = alarmService
-						.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo, "mbtmiComment");
-				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtmi");
+						.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo, "mbtwhyComment");
+				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtwhy");
 
 				Integer alarmCnt1 = mbtwhyService.selectMbtwhyChildCommentCount(parentcommentNo); // 알림Cnt1
 				String username1 = mbtwhyCommentRepository.findById(parentcommentNo).get().getWriterId(); // 알림의
@@ -312,7 +312,7 @@ public class MbtwhyController {
 					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값만 업데이트 수행
 				} else if (alarmForParentcommentWriter == null && !isWrittenByParentcommentWriter) {
 					Alarm alarm1 = Alarm.builder().username(username1).alarmType("댓글").alarmTargetNo(parentcommentNo)
-							.alarmTargetFrom("mbtmiComment").alarmUpdateDate(writeDate).alarmCnt(alarmCnt1).build();
+							.alarmTargetFrom("mbtwhyComment").alarmUpdateDate(writeDate).alarmCnt(alarmCnt1).build();
 					alarmService.addAlarm(alarm1); // 인서트 수행
 				}
 

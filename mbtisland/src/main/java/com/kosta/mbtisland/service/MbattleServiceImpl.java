@@ -1,6 +1,5 @@
 package com.kosta.mbtisland.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,16 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.kosta.mbtisland.dto.MbattleDto;
-import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
+import com.kosta.mbtisland.entity.MbattleResult;
 import com.kosta.mbtisland.entity.MbattleVoter;
-import com.kosta.mbtisland.entity.Mbtwhy;
+import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbattleDslRepository;
 import com.kosta.mbtisland.repository.MbattleRepository;
+import com.kosta.mbtisland.repository.MbattleResultRepository;
 import com.kosta.mbtisland.repository.MbattleVoterRepository;
 
 @Service
@@ -34,12 +33,15 @@ public class MbattleServiceImpl implements MbattleService {
 	@Autowired
 	private MbattleVoterRepository mbattleVoterRepository;
 	
+	@Autowired
+	private MbattleResultRepository mbattleResultRepository;
+	
 	// 게시글 목록 조회
 	@Override
 	public List<Mbattle> selectMbattleListByPageAndSearchAndSort(PageInfo pageInfo, String search, String sort)
 			throws Exception {
 		// 페이지 번호, 한 페이지에 보여줄 게시글 수
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5);
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 4);
 		List<Mbattle> mbattleList = mbattleDslRepository.findMbattleListByPageAndSearchAndSort(pageRequest, search, sort);
 
 		if(mbattleList.size()!=0) {
@@ -64,8 +66,13 @@ public class MbattleServiceImpl implements MbattleService {
 	// 일간 인기 게시글 조회
 	@Override
 	public List<Mbattle> selectDailyHotMbattle() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		List<Mbattle> hotMbattleList = mbattleDslRepository.findDailyHotMbattle();
+		
+		if(hotMbattleList.size() < 2) {
+			return null;
+		}
+		
+		return hotMbattleList;
 	}
 	
 	// Entity 게시글 조회
@@ -99,6 +106,12 @@ public class MbattleServiceImpl implements MbattleService {
 		mbattleRepository.deleteById(no);
 	}
 	
+	// 랜덤 게시글 번호 조회
+	@Override
+	public Integer selectRandomMbattleNo() throws Exception {
+		return mbattleDslRepository.findRandomMbattleNo();
+	}
+	
 	// 댓글 목록 조회
 	@Override
 	public List<MbattleComment> selectMbattleCommentListByMbattleNoAndPage(Integer no, PageInfo pageInfo)
@@ -128,8 +141,7 @@ public class MbattleServiceImpl implements MbattleService {
 	// 댓글 개수 조회
 	@Override
 	public Integer selectMbattleCommentCountByMbattleNo(Integer no) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return mbattleCommentRepository.countByMbattleNo(no);
 	}
 	
 	// 댓글 작성
@@ -149,7 +161,34 @@ public class MbattleServiceImpl implements MbattleService {
 
 	// 투표 데이터 조회
 	@Override
-	public MbattleVoter selectIsVoteByUsernameAndPostNo(String voterId, Integer no) throws Exception {
-		return mbattleVoterRepository.findByVoterIdAndMbattleNo(voterId, no);
+	public MbattleVoter selectMbattleVoterByUsernameAndPostNo(String voterId, Integer no) throws Exception {
+		return mbattleVoterRepository.findMbattleVoterByVoterIdAndMbattleNo(voterId, no);
+	}
+	
+	// 투표 여부 삽입
+	@Override
+	public void insertMbattleVoter(MbattleVoter voter) throws Exception {
+		mbattleVoterRepository.save(voter);
+	}
+	
+	// n번 항목 투표 결과 조회
+	@Override
+	public MbattleResult selectMbattleResultByMbattleNoAndVoteItem(Integer no, Integer voteItem) throws Exception {
+		return mbattleResultRepository.findMbattleResultByMbattleNoAndVoteItem(no, voteItem);
+	}
+	
+	// 투표 결과 삽입 (업데이트)
+	@Override
+	public void insertMbattleResult(MbattleResult mbattleResult) throws Exception {
+		mbattleResultRepository.save(mbattleResult);
+	}
+	
+	// 댓글 조회
+	@Override
+	public MbattleComment selectMbattleComment(Integer no) throws Exception {
+		Optional<MbattleComment> ombattleComment = mbattleCommentRepository.findById(no);
+		if(ombattleComment.isEmpty()) throw new Exception(no +  "번 댓글이 존재하지 않습니다.");
+		MbattleComment mbattleComment = ombattleComment.get();
+		return mbattleComment;
 	}
 }
