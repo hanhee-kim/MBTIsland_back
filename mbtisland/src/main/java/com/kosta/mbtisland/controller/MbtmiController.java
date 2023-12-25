@@ -307,7 +307,7 @@ public class MbtmiController {
 	}
 	
 	
-	// 게시글 등록
+	// 게시글 등록--->대체
 	@PostMapping("/mbtmiwrite")
 	public ResponseEntity<Object> addPost(@RequestBody MbtmiDto mbtmiDto) {
 //		System.out.println("게시글작성 컨트롤러가 받은 파라미터 mbtmiDto: " + mbtmiDto);
@@ -397,8 +397,8 @@ public class MbtmiController {
 	}
 	
 	
-	// 퀼데이터 받기 테스트
-	@PostMapping("/quilltest")
+	// 이미지 없이 게시글 삽입
+	@PostMapping("/mbtmiwritewithoutimages")
 	public ResponseEntity<Object> quillTest(@RequestBody MbtmiDto mbtmiDto) {
 		System.out.println("quillTest가 받은 mbtmiDto: " + mbtmiDto); // title, category, writerId등, content
 		System.out.println("*quillTest가 받은 mbtmiDto의 content값: " + mbtmiDto.getContent());
@@ -416,7 +416,7 @@ public class MbtmiController {
 		
 	}
 	
-	// 프런트의 삽입된이미지핸들러 함수 안에서 호출되며 에디터에 삽입된 이미지를 업로드(저장)하고 업로드된 이미지의 url을 리턴하는 메서드
+	// 프런트의 uploadImage함수 안에서 호출되며 에디터에 삽입된 이미지를 디렉토리에 업로드, 파일테이블에 인서트하고 pk를 리턴
 	@PostMapping("/uploadImage")
 	public ResponseEntity<Object> handleImageUpload(@RequestParam("image") MultipartFile file, @RequestParam("postNo") Integer postNo) {
 		
@@ -429,16 +429,13 @@ public class MbtmiController {
             }
 			
 			// 원하는 디렉토리에 업로드
-//			String uploadFolderPath = "";
 			String fileName = file.getOriginalFilename();
 			
 			FileVo fileVo = new FileVo();
-//			fileVo.setFilePath(uploadFolderPath);
 			fileVo.setFilePath(uploadPath);
 			fileVo.setFileName(fileName);
 			fileVo.setFileSize(file.getSize());
 			fileVo.setFileType(file.getContentType());
-//			fileVo.setData(file.getBytes());
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
 			fileVo.setUploadDate(writeDate);
@@ -473,10 +470,6 @@ public class MbtmiController {
 
 	        Mbtmi mbtmi = mbtmiService.updateFileIdxs(postNo, fileIdx); // 게시글의 파일 컬럼 업데이트
 	        
-	        // 이미지 출력을 위하여 파일경로 반환
-	        
-
-	        // 성공 응답 반환
 	        return new ResponseEntity<>(mbtmi, HttpStatus.OK);
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -484,7 +477,7 @@ public class MbtmiController {
 	    }
 	}
 	
-	// 게시글에 file마크업이 포함되도록 업데이트
+	// 게시글 content에 <img src=fileIdx>가 포함되도록 업데이트
 	@PostMapping("/mbtmiContainingImgTags/{postNo}")
 	public ResponseEntity<Object> containImgTags(@PathVariable("postNo") Integer postNo, @RequestBody MbtmiDto mbtmiDto) {
 		System.out.println("postNo: " + postNo);
@@ -500,10 +493,10 @@ public class MbtmiController {
 		}
 	}
 	
-	// 이미지 출력
+	// 이미지 출력(게시글 상세, 게시글 수정폼)
 	@GetMapping("/mbtmiimg/{fileIdx}")
 	public void imageView(@PathVariable Integer fileIdx, HttpServletResponse response) {
-		System.out.println("imageView메서드 호출!");
+		System.out.println("imageView메서드 호출");
 		try {
 			fileVoService.readImage(fileIdx, response.getOutputStream());
 		} catch(Exception e) {
