@@ -54,8 +54,6 @@ public class MbtwhyDslRepository {
 		else { // 기본 최신순
 			orderSpecifier = mbtwhy.no.desc();
 		}
-
-
 		
 		return jpaQueryFactory.selectFrom(mbtwhy)
 				.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,

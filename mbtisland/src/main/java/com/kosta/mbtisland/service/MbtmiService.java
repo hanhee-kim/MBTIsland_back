@@ -56,5 +56,9 @@ public interface MbtmiService {
 	// 배열번호로 mbtmi게시글 삭제
 	void deleteMbtmiList(List<Integer> noList)throws Exception;
 	
-
+	// 댓글 조회
+	MbtmiComment mbtmiComment(Integer no) throws Exception;
+	
+	// 게시글 등록 (업데이트용)
+	void addMbtmiForUpdate(Mbtmi mbtmi) throws Exception;
 }

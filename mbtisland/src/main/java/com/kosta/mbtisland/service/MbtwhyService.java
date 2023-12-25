@@ -39,4 +39,5 @@ public interface MbtwhyService {
 	
 	List<Mbtwhy> getMyMbtwhyListByPage(String username,PageInfo pageInfo) throws Exception; //마이페이지에서 내가 작성한 게시글 불러오기
 	void deleteMbtwhyList(List<Integer> noList)throws Exception; 
+	public MbtwhyComment selectMbtwhyComment(Integer no) throws Exception; // 댓글 조회
 }

@@ -261,5 +261,18 @@ public class MbtmiServiceImpl implements MbtmiService {
 		}
 	}
 	
-
+	// 게시글 등록 (업데이트용)
+	@Override
+	public void addMbtmiForUpdate(Mbtmi mbtmi) throws Exception {
+		mbtmiRepository.save(mbtmi);
+	}
+	
+	// 댓글 조회
+	@Override
+	public MbtmiComment mbtmiComment(Integer no) throws Exception {
+		Optional<MbtmiComment> ombtmiComment = mbtmiCommentRepository.findById(no);
+		if(ombtmiComment.isEmpty()) throw new Exception(no + "번 댓글이 존재하지 않습니다.");
+		MbtmiComment mbtmiComment = ombtmiComment.get();
+		return mbtmiComment;
+	}
 }

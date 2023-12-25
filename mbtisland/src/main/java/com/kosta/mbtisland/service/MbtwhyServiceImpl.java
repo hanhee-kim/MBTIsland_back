@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
@@ -307,5 +308,13 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 				throw new Exception("해당 번호 Mbtwhy게시글 없음");
 			}
 		}
+	}
+	
+	@Override
+	public MbtwhyComment selectMbtwhyComment(Integer no) throws Exception {
+		Optional<MbtwhyComment> ombtwhyComment = mbtwhyCommentRepository.findById(no);
+		if(ombtwhyComment.isEmpty()) throw new Exception(no +  "번 댓글이 존재하지 않습니다.");
+		MbtwhyComment mbtwhyComment = ombtwhyComment.get();
+		return mbtwhyComment;
 	}
 }

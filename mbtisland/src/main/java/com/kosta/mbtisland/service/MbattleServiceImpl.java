@@ -12,6 +12,7 @@ import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbattleResult;
 import com.kosta.mbtisland.entity.MbattleVoter;
+import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbattleDslRepository;
 import com.kosta.mbtisland.repository.MbattleRepository;
@@ -170,9 +171,6 @@ public class MbattleServiceImpl implements MbattleService {
 		mbattleVoterRepository.save(voter);
 	}
 	
-	// 투표 결과 조회
-	
-	
 	// n번 항목 투표 결과 조회
 	@Override
 	public MbattleResult selectMbattleResultByMbattleNoAndVoteItem(Integer no, Integer voteItem) throws Exception {
@@ -183,5 +181,14 @@ public class MbattleServiceImpl implements MbattleService {
 	@Override
 	public void insertMbattleResult(MbattleResult mbattleResult) throws Exception {
 		mbattleResultRepository.save(mbattleResult);
+	}
+	
+	// 댓글 조회
+	@Override
+	public MbattleComment selectMbattleComment(Integer no) throws Exception {
+		Optional<MbattleComment> ombattleComment = mbattleCommentRepository.findById(no);
+		if(ombattleComment.isEmpty()) throw new Exception(no +  "번 댓글이 존재하지 않습니다.");
+		MbattleComment mbattleComment = ombattleComment.get();
+		return mbattleComment;
 	}
 }

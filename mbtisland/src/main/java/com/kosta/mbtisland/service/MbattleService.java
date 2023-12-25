@@ -7,6 +7,7 @@ import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbattleResult;
 import com.kosta.mbtisland.entity.MbattleVoter;
+import com.kosta.mbtisland.entity.MbtwhyComment;
 
 public interface MbattleService {
 	public List<Mbattle> selectMbattleListByPageAndSearchAndSort
@@ -27,4 +28,6 @@ public interface MbattleService {
 	public void insertMbattleVoter(MbattleVoter voter) throws Exception; // 투표 데이터 삽입
 	public MbattleResult selectMbattleResultByMbattleNoAndVoteItem(Integer no, Integer voteItem) throws Exception; // 투표 결과 조회
 	public void insertMbattleResult(MbattleResult mbattleResult) throws Exception; // 투표 결과 삽입
+	
+	public MbattleComment selectMbattleComment(Integer no) throws Exception; // 댓글 조회
 }

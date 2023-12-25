@@ -235,7 +235,7 @@ public class MbattleController {
 			
 			// 2. 알림 데이터 처리
 			if (parentcommentNo == null) {
-				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtmi");
+				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbattle");
 
 				Integer alarmCnt = mbattleService.selectMbattleCommentCountByMbattleNo(no); // alarmCnt컬럼값
 				String username = mbattleService.selectMbattleByNo(no).getWriterId(); // 알림의 주인==게시글작성자
@@ -249,7 +249,7 @@ public class MbattleController {
 					alarmService.addAlarm(alarmForPostWriter); // *
 				} else if (alarmForPostWriter == null && !isWrittenByOneSelf) {
 					Alarm alarm = Alarm.builder().username(username).alarmType("댓글").alarmTargetNo(no)
-							.alarmTargetFrom("mbtmi").alarmUpdateDate(writeDate).alarmCnt(alarmCnt).build();
+							.alarmTargetFrom("mbattle").alarmUpdateDate(writeDate).alarmCnt(alarmCnt).build();
 					alarmService.addAlarm(alarm); // **
 				}
 			}
