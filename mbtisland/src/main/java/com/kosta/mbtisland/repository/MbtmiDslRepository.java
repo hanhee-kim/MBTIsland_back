@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
@@ -149,6 +151,7 @@ public class MbtmiDslRepository {
 								.fetch();
 	}
 	
+	
 	// 5. 특정 게시글의 댓글수 조회 (PageInfo의 allPage값 계산시 필요)
 	public Long countCommentByMbtmiNo(Integer mbtmiNo) {
 	    return jpaQueryfactory
@@ -173,5 +176,23 @@ public class MbtmiDslRepository {
 				.fetchOne();
 	}
 
+	
+	// 7. 특정 게시글에 속한 댓글 삭제(게시글 삭제시 관련데이터를 함께 삭제하기 위해 호출)
+	@Transactional
+	public void deleteCommentsByMbtmiNo(Integer mbtmiNo) {
+		jpaQueryfactory.delete(mbtmiComment)
+						.where(mbtmiComment.mbtmiNo.eq(mbtmiNo))
+						.execute();
+	}
+	
+	// 8. 특정 게시글의 모든 댓글의 pk를 리스트로 반환(게시글 삭제시 관련데이터-대댓글알림-를 함께 삭제하기 위해 호출)
+	public List<Integer> findCommentNosByPostNo(Integer postNo) {
+		return jpaQueryfactory.select(mbtmiComment.commentNo)
+								.from(mbtmiComment)
+								.where(mbtmiComment.mbtmiNo.eq(postNo))
+								.fetch();
+	}
+	
+	
 	
 }

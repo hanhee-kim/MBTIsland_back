@@ -54,6 +54,7 @@ public class UserEntity {
 	@CreationTimestamp
 	private Timestamp joinDate;
 	private Timestamp leaveDate;
+	private Timestamp banDate;
 	private Integer visitCnt;
 	//OAuth2 필드
 	private String provider;
