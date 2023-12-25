@@ -61,8 +61,8 @@ public class NoteDslRepository {
 					.where(note.sentUsername.eq(username).and(
 							noteIsRead!=null?note.noteIsRead.eq(noteIsRead):null)
 							)
-					.orderBy(note.noteIsRead.asc())
-//					.orderBy(note.noteNo.asc())	//번호로 정렬하려면
+//					.orderBy(note.noteIsRead.asc())
+					.orderBy(note.noteNo.desc())	//번호로 정렬하려면
 					.offset(pageRequest.getOffset()) // 시작행의 위치
 					.limit(pageRequest.getPageSize()) // 페이지당 항목 수
 					.fetch();
@@ -75,7 +75,7 @@ public class NoteDslRepository {
 			        .where(note.receiveUsername.eq(username).and(
 			        		noteIsRead!=null?note.noteIsRead.eq(noteIsRead):null)
 			        		)
-			        .orderBy(note.noteIsRead.asc())
+			        .orderBy(note.noteNo.desc())
 			        .offset(pageRequest.getOffset()) // 시작행의 위치
 					.limit(pageRequest.getPageSize()) // 페이지당 항목 수
 			        .fetch();
@@ -135,6 +135,8 @@ public class NoteDslRepository {
 					.fetchOne();
 		}
 	}
+	
+	
 	
 	
 	

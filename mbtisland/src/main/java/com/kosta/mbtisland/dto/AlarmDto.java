@@ -27,6 +27,7 @@ public class AlarmDto {
 	private String alarmType;
 	private String detailType;
 	private Integer detailNo;
+	private String detailMbti;
 	private String alarmContent;
 	private Integer alarmTargetNo;
 	private String alarmTargetFrom;

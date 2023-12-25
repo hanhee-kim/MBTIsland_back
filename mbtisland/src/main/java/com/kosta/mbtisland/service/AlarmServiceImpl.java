@@ -15,12 +15,14 @@ import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbtmiComment;
+import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.repository.AlarmDslRepository;
 import com.kosta.mbtisland.repository.AlarmRepository;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
+import com.kosta.mbtisland.repository.MbtwhyRepository;
 @Service
 public class AlarmServiceImpl implements AlarmService{
 	
@@ -28,6 +30,8 @@ public class AlarmServiceImpl implements AlarmService{
 	private AlarmRepository alarmRepository;
 	@Autowired
 	private AlarmDslRepository alarmDslRepository;
+	@Autowired
+	private MbtwhyRepository mbtwhyRepository;
 	@Autowired
 	private MbtwhyCommentRepository mbtwhyCommentRepository;
 	@Autowired
@@ -42,6 +46,7 @@ public class AlarmServiceImpl implements AlarmService{
 			String myContent = null;
 			String type = null;
 			Integer no = null;
+			String mbti = null;
 			//myContent 정할때
 			if(alarm.getAlarmTargetFrom().toUpperCase().contains("COMMENT")) {
 				myContent = "내 댓글";
@@ -63,7 +68,11 @@ public class AlarmServiceImpl implements AlarmService{
 			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("NOTE")) {
 				type = "NOTE";
 			} else {
-				type = "SWAL";
+				if(alarm.getAlarmType().equals("경고")) {
+					type = "WARN";
+				} else {
+					type = "BAN";
+				}
 			}
 			
 			//detailNo정할떄		
@@ -93,6 +102,12 @@ public class AlarmServiceImpl implements AlarmService{
 			} else {
 				no = alarm.getAlarmTargetNo();
 			}
+			if(type.equals("MBTWHY")) {
+				Optional<Mbtwhy> optionalWhy = mbtwhyRepository.findById(no);
+				mbti = optionalWhy.get().getMbtiCategory();
+			}else {
+				mbti = "";
+			}
 			
 		alarmDtoList.add(AlarmDto.builder()
 				.alarmNo(alarm.getAlarmNo())
@@ -100,6 +115,7 @@ public class AlarmServiceImpl implements AlarmService{
 				.alarmType(alarm.getAlarmType())
 				.detailType(type)
 				.detailNo(no)
+				.detailMbti(mbti)
 				.alarmContent("["+myContent+"] 에 "+alarm.getAlarmType()+"(이)/가 도착했습니다. ( "+alarm.getAlarmCnt()+" )")
 				.alarmTargetNo(alarm.getAlarmTargetNo())
 				.alarmTargetFrom(alarm.getAlarmTargetFrom())
@@ -212,6 +228,19 @@ public class AlarmServiceImpl implements AlarmService{
 	public Long getCntNotReadAlarmList(String username) throws Exception {
 		Long cnt = alarmDslRepository.findCntAlarmNotReadByUsername(username);
 		return cnt;
+	}
+
+	//알람 읽음여부와 시간
+	@Override
+	public void updateAlarmRead(Integer no) throws Exception {
+		Optional<Alarm> optionalAlarm = alarmRepository.findById(no);
+		if(optionalAlarm.isEmpty()) {
+			throw new Exception("해당 알림 없음");
+		} else { 
+			optionalAlarm.get().setAlarmIsRead("Y");
+			optionalAlarm.get().setAlarmReadDate(new Timestamp(new Date().getTime()));
+			alarmRepository.save(optionalAlarm.get());
+		}
 	}
 	
 	

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -91,4 +92,26 @@ public class MbattleDslRepository {
 				.limit(pageRequest.getPageSize()) // 개수 제한
 				.fetch();
 	}
+	
+	public List<Mbattle> findMbattleListByUserAndPage (String username,PageRequest pageRequest){
+		List<Mbattle> mbattleList =  jpaQueryFactory
+				.select(mbattle)
+				.from(mbattle)
+				.where(mbattle.writerId.eq(username))
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize())
+				.fetch();
+		return mbattleList;
+	}
+	
+	public Long findMbattleCntByUser(String username) {
+		Long cnt = jpaQueryFactory
+				.select(mbattle.count())
+				.from(mbattle)
+				.where(mbattle.writerId.eq(username))
+				.fetchOne();
+		return cnt;
+	}
+	
+	
 }
