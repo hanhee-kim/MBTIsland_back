@@ -33,4 +33,5 @@ public class AlarmDto {
 	private String alarmIsRead;
 	private Timestamp alarmReadDate;
 	private Timestamp alarmUpdateDate;
+	private Integer alarmCnt;
 }

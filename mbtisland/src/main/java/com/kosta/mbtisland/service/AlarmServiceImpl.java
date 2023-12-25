@@ -106,6 +106,7 @@ public class AlarmServiceImpl implements AlarmService{
 				.alarmIsRead(alarm.getAlarmIsRead())
 				.alarmReadDate(alarm.getAlarmReadDate())
 				.alarmUpdateDate(alarm.getAlarmUpdateDate())
+				.alarmCnt(alarm.getAlarmCnt())
 				.build()
 				);
 		
@@ -151,6 +152,7 @@ public class AlarmServiceImpl implements AlarmService{
 			return alarmDtoList;
 		}
 	}
+	
 
 
 	@Override
@@ -196,6 +198,20 @@ public class AlarmServiceImpl implements AlarmService{
 		Optional<Alarm> oalarm = alarmRepository.findByAlarmTargetNoAndAlarmTargetFrom(alarmTargetNo, alarmTargetFrom);
 		if(oalarm.isEmpty()) return null; // 기존 알림 데이터가 없으면 null반환
 		return oalarm.get();
+	}
+
+
+	@Override
+	public List<AlarmDto> getAlarmListByAlarmIsNotReadBy5(String username) throws Exception {
+		List<Alarm> alarmList = alarmDslRepository.findAlarmListNotReadByUsername(username);
+		return alarmToAlarmDto(alarmList);
+	}
+
+
+	@Override
+	public Long getCntNotReadAlarmList(String username) throws Exception {
+		Long cnt = alarmDslRepository.findCntAlarmNotReadByUsername(username);
+		return cnt;
 	}
 	
 	

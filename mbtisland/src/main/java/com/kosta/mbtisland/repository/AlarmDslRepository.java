@@ -44,4 +44,26 @@ public class AlarmDslRepository {
 				.fetchOne();
 		return cnt;
 	}
+	
+	//5개씩만 가져옴
+	public List<Alarm> findAlarmListNotReadByUsername(String username){
+		QAlarm alarm = QAlarm.alarm;
+		List<Alarm> alarmList = jpaQueryfactory
+				.selectFrom(alarm)
+				.where(alarm.username.eq(username).and(alarm.alarmIsRead.eq("N")))
+				.orderBy(alarm.alarmUpdateDate.asc())
+				.limit(5)
+				.fetch();
+		return alarmList;
+	}
+	
+	public Long findCntAlarmNotReadByUsername(String username) {
+		QAlarm alarm = QAlarm.alarm;
+		Long cnt = jpaQueryfactory
+				.select(alarm.count())
+				.from(alarm)
+				.where(alarm.username.eq(username).and(alarm.alarmIsRead.eq("N")))
+				.fetchOne();
+		return cnt;
+	}
 }
