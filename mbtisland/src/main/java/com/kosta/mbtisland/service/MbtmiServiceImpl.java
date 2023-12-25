@@ -279,6 +279,30 @@ public class MbtmiServiceImpl implements MbtmiService {
 			}
 		}
 	}
+
+	// fileIdxs 업데이트
+	@Override
+	public Mbtmi updateFileIdxs(Integer postNo, Integer fileIdx) throws Exception {
+		Optional<Mbtmi> ombtmi = mbtmiRepository.findById(postNo);
+		if(ombtmi.isEmpty()) throw new Exception(postNo + "번 게시글이 존재하지 않습니다.");
+		Mbtmi mbtmi = ombtmi.get();
+		String fileIdxs = String.valueOf(fileIdx);
+		mbtmi.setFileIdxs(fileIdxs);
+		mbtmiRepository.save(mbtmi);
+		return mbtmi;
+	}
+
+	// fileIdxs를 포함하는 content로 업데이트
+	@Override
+	public Mbtmi updateContainingFileIdxs(MbtmiDto mbtmiDto) throws Exception {
+		Optional<Mbtmi> ombtmi = mbtmiRepository.findById(mbtmiDto.getNo());
+		if(ombtmi.isEmpty()) throw new Exception(mbtmiDto.getNo() + "번 게시글이 존재하지 않습니다.");
+		Mbtmi mbtmi = ombtmi.get();
+		mbtmi.setContent(mbtmiDto.getContent());
+		mbtmiRepository.save(mbtmi);
+		return mbtmi;
+	}
+	
 	
 
 }

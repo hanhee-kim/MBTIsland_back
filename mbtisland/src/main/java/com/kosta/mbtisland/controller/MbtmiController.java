@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,7 @@ import com.kosta.mbtisland.repository.FileVoRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.service.AlarmService;
 import com.kosta.mbtisland.service.BookmarkService;
+import com.kosta.mbtisland.service.FileVoService;
 import com.kosta.mbtisland.service.MbtmiService;
 import com.kosta.mbtisland.service.RecommendService;
 
@@ -54,6 +57,8 @@ public class MbtmiController {
 	private MbtmiCommentRepository mbtmiCommentRepository;
 	@Autowired
 	private FileVoRepository fileVoRepository;
+	@Autowired
+	private FileVoService fileVoService;
 	
 	// 파일 업로드 경로
 	@Value("${upload.path}") // org.springframework.beans.factory.annotation.Value
@@ -394,7 +399,7 @@ public class MbtmiController {
 	
 	// 퀼데이터 받기 테스트
 	@PostMapping("/quilltest")
-	public ResponseEntity<Object> quillTest (@RequestBody MbtmiDto mbtmiDto) {
+	public ResponseEntity<Object> quillTest(@RequestBody MbtmiDto mbtmiDto) {
 		System.out.println("quillTest가 받은 mbtmiDto: " + mbtmiDto); // title, category, writerId등, content
 		System.out.println("*quillTest가 받은 mbtmiDto의 content값: " + mbtmiDto.getContent());
 		
@@ -448,12 +453,61 @@ public class MbtmiController {
 			
 			// 파일테이블에 자동생성된 idx값 반환
 			Integer fileIdx = fileVo.getFileIdx();
+			System.out.println("fileIdx: " + fileIdx); // 출력됨
             
             return new ResponseEntity<>(fileIdx, HttpStatus.OK);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	// 게시글의 fileIdx컬럼 업데이트
+	@PostMapping("/updateFileIdxs/{postNo}")
+	public ResponseEntity<?> updateFileIdxs(@PathVariable("postNo") Integer postNo, @RequestBody Map<String, Object> payload) {
+	    try {
+	        // fileIdx 추출
+	        Integer fileIdx = Integer.valueOf(payload.get("fileIdx").toString());
+	        System.out.println("fileIdx: " + fileIdx);
+
+	        Mbtmi mbtmi = mbtmiService.updateFileIdxs(postNo, fileIdx); // 게시글의 파일 컬럼 업데이트
+	        
+	        // 이미지 출력을 위하여 파일경로 반환
+	        
+
+	        // 성공 응답 반환
+	        return new ResponseEntity<>(mbtmi, HttpStatus.OK);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+	
+	// 게시글에 file마크업이 포함되도록 업데이트
+	@PostMapping("/mbtmiContainingImgTags/{postNo}")
+	public ResponseEntity<Object> containImgTags(@PathVariable("postNo") Integer postNo, @RequestBody MbtmiDto mbtmiDto) {
+		System.out.println("postNo: " + postNo);
+		System.out.println("mbtmiDto: " + mbtmiDto);
+		
+		try {
+			mbtmiDto.setNo(postNo);
+			Mbtmi mbtmi = mbtmiService.updateContainingFileIdxs(mbtmiDto);
+			return new ResponseEntity<>(mbtmi, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+	        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	// 이미지 출력
+	@GetMapping("/mbtmiimg/{fileIdx}")
+	public void imageView(@PathVariable Integer fileIdx, HttpServletResponse response) {
+		System.out.println("imageView메서드 호출!");
+		try {
+			fileVoService.readImage(fileIdx, response.getOutputStream());
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
