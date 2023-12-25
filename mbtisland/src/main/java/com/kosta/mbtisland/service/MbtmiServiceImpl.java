@@ -3,11 +3,10 @@ package com.kosta.mbtisland.service;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -17,12 +16,12 @@ import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
-import com.kosta.mbtisland.entity.Mbtwhy;
-import com.kosta.mbtisland.entity.Notice;
+import com.kosta.mbtisland.repository.AlarmDslRepository;
+import com.kosta.mbtisland.repository.BookmarkDslRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
-import com.querydsl.core.Tuple;
+import com.kosta.mbtisland.repository.RecommendDslRepository;
 
 @Service
 public class MbtmiServiceImpl implements MbtmiService {
@@ -33,6 +32,12 @@ public class MbtmiServiceImpl implements MbtmiService {
 	private MbtmiDslRepository mbtmiDslRepository;
 	@Autowired
 	private MbtmiCommentRepository mbtmiCommentRepository;
+	@Autowired
+	private BookmarkDslRepository bookmarkDslRepository;
+	@Autowired
+	private RecommendDslRepository recommendDslRepository;
+	@Autowired
+	private AlarmDslRepository alarmDslRepository;
 
 	
 	// 주간인기글 목록
@@ -165,9 +170,23 @@ public class MbtmiServiceImpl implements MbtmiService {
 
 	// 게시글 삭제
 	@Override
+	@Transactional
 	public void deleteMbtmi(Integer no) throws Exception {
 		Mbtmi mbtmi = mbtmiRepository.findById(no).get();
 		if(mbtmi==null) throw new Exception("게시글이 존재하지 않습니다.");
+		
+		// (1) 게시글 삭제시 관련데이터 삭제 - 게시글에 속한 모든 댓글, 북마크, 추천, 알림
+		List<Integer> commentNos = mbtmiDslRepository.findCommentNosByPostNo(no);
+		for (Integer commentNo : commentNos) {
+			alarmDslRepository.deleteAlarmByTargetNoAndTargetFrom(commentNo, "mbtmiComment"); // 대댓글에 대한 알림
+		}
+		alarmDslRepository.deleteAlarmByTargetNoAndTargetFrom(no, "mbtmi"); // 알림
+		mbtmiDslRepository.deleteCommentsByMbtmiNo(no); // 댓글
+		bookmarkDslRepository.deleteBookmarkByPostNoAndBoardType(no, "mbtmi"); // 북마크
+		recommendDslRepository.deleteRecommendByPostNoAndBoardType(no, "mbtmi"); // 추천
+		
+		
+		// (2) 게시글 삭제
 		mbtmiRepository.deleteById(no);
 	}
 	

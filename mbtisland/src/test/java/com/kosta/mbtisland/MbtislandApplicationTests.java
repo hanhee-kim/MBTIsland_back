@@ -1,25 +1,15 @@
 package com.kosta.mbtisland;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Commit;
 
-import com.kosta.mbtisland.dto.MbtwhyDto;
-import com.kosta.mbtisland.dto.PageInfo;
-import com.kosta.mbtisland.entity.Alarm;
-import com.kosta.mbtisland.entity.Mbtmi;
-import com.kosta.mbtisland.entity.MbtmiComment;
-import com.kosta.mbtisland.entity.Mbtwhy;
-import com.kosta.mbtisland.entity.MbtwhyComment;
-import com.kosta.mbtisland.entity.Notice;
-import com.kosta.mbtisland.entity.Question;
 import com.kosta.mbtisland.repository.AlarmRepository;
+import com.kosta.mbtisland.repository.BookmarkDslRepository;
+import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
@@ -28,10 +18,10 @@ import com.kosta.mbtisland.repository.NoteDslRepository;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
 import com.kosta.mbtisland.repository.QuestionRepository;
+import com.kosta.mbtisland.repository.RecommendDslRepository;
 import com.kosta.mbtisland.service.MbtmiService;
 import com.kosta.mbtisland.service.MbtwhyServiceImpl;
 import com.kosta.mbtisland.service.NoticeService;
-import com.querydsl.core.Tuple;
 
 @SpringBootTest
 class MbtislandApplicationTests {
@@ -48,11 +38,17 @@ class MbtislandApplicationTests {
 	@Autowired
 	private MbtmiRepository mbtmiRepository;
 	@Autowired
+	private MbtmiCommentRepository mbtmiCommentRepository;
+	@Autowired
 	private QuestionRepository questionRepository;
 	@Autowired
 	private MbtmiService mbtmiService;
 	@Autowired
 	private AlarmRepository alarmRepository;
+	@Autowired
+	private BookmarkDslRepository bookmarkDslRepository;
+	@Autowired
+	private RecommendDslRepository recommendDslRepository;
 
 	// 인수
 	@Autowired
@@ -331,5 +327,40 @@ class MbtislandApplicationTests {
 ////		}
 //	}
 	
+	
+//	@Test
+//	@Commit
+//	void mbtmiCommentDeleteByMbtmiNo() throws Exception {
+//		Integer mbtmiNo = 317;
+//		mbtmiDslRepository.deleteCommentsByMbtmiNo(mbtmiNo);
+//	}
 
+	@Test
+	@Commit
+	void recommendDeleteByPostNoAndBoardType() throws Exception {
+		Integer postNo = 323;
+		String boardType = "MBTMI";
+		recommendDslRepository.deleteRecommendByPostNoAndBoardType(postNo, boardType);
+	}
+	
+	@Test
+	void findCommentNosByPostNo() {
+		Integer postNo = 1;
+		List<Integer> nos = mbtmiDslRepository.findCommentNosByPostNo(postNo);
+		System.out.println("결과------------");
+		for (Integer no : nos) {
+			System.out.println(no);
+		}
+	}
+	
+	@Test
+	@Commit
+	void deleteMbtmi() throws Exception {
+		Integer mbtmiNo = 317;
+		mbtmiService.deleteMbtmi(mbtmiNo);
+	}
+	
+	
+	
 }
+	
