@@ -18,5 +18,6 @@ public interface AlarmService {
 	Alarm selectAlarmByAlarmTargetNoAndAlarmTargetFrom(Integer alarmTargetNo, String alarmTargetFrom) throws Exception;
 	List<AlarmDto> getAlarmListByAlarmIsNotReadBy5(String username) throws Exception;
 	Long getCntNotReadAlarmList(String username) throws Exception;
-	
+	//알람 읽음 처리
+	void updateAlarmRead(Integer no) throws Exception;
 }

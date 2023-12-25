@@ -2,9 +2,11 @@ package com.kosta.mbtisland.controller;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -263,6 +266,42 @@ public class MbattleController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	//특정유저의 mbattleList
+	@GetMapping("/mbattlelistbyuser")
+	public ResponseEntity<Object> mabttleListByUser(@RequestParam String username,@RequestParam(required = false) Integer page){
+		Map<String, Object> res = new HashMap<>();
+		PageInfo pageInfo = PageInfo.builder()
+				.curPage(page == null ? 1 : page).build();
+		try {
+			List<Mbattle> mbattleList = mbattleService.findByWriterIdAndPage(username,pageInfo);
+			res.put("mbattleList", mbattleList);
+			res.put("pageInfo", pageInfo);
+		return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}	
+	}
+	
+	//checkList로 mbattle삭제
+	@DeleteMapping("/deletembattlelist")
+	public ResponseEntity<Object> deleteMbattleList(@RequestParam String sendArrayItems){
+		System.out.println("noList 삭제 컨트롤러 진입");
+		System.out.println(sendArrayItems);
+		//숫자 형태의 리스트로 변환
+		List<Integer> noList = Arrays.stream(sendArrayItems.split(","))
+		        .map(Integer::parseInt)
+		        .collect(Collectors.toList());
+		
+		try {
+			mbattleService.deleteMbattleListByNoList(noList);
+			return new ResponseEntity<Object>("삭제 성공",HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
 	}
 }

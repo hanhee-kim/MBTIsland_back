@@ -68,7 +68,11 @@ public class AlarmServiceImpl implements AlarmService{
 			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("NOTE")) {
 				type = "NOTE";
 			} else {
-				type = "SWAL";
+				if(alarm.getAlarmType().equals("경고")) {
+					type = "WARN";
+				} else {
+					type = "BAN";
+				}
 			}
 			
 			//detailNo정할떄		
@@ -224,6 +228,19 @@ public class AlarmServiceImpl implements AlarmService{
 	public Long getCntNotReadAlarmList(String username) throws Exception {
 		Long cnt = alarmDslRepository.findCntAlarmNotReadByUsername(username);
 		return cnt;
+	}
+
+	//알람 읽음여부와 시간
+	@Override
+	public void updateAlarmRead(Integer no) throws Exception {
+		Optional<Alarm> optionalAlarm = alarmRepository.findById(no);
+		if(optionalAlarm.isEmpty()) {
+			throw new Exception("해당 알림 없음");
+		} else { 
+			optionalAlarm.get().setAlarmIsRead("Y");
+			optionalAlarm.get().setAlarmReadDate(new Timestamp(new Date().getTime()));
+			alarmRepository.save(optionalAlarm.get());
+		}
 	}
 	
 	

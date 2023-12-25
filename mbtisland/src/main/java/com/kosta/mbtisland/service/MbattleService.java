@@ -22,4 +22,8 @@ public interface MbattleService {
 	public void deleteMbattleComment(Integer commentNo) throws Exception; // 댓글 삭제
 	
 	public MbattleVoter selectIsVoteByUsernameAndPostNo(String username, Integer no) throws Exception; // 투표 데이터 조회
+	//특정유저로 MbattleList 가져오기
+	public List<Mbattle> findByWriterIdAndPage(String username,PageInfo pageInfo) throws Exception;
+	//noList로 게시글삭제
+	public void deleteMbattleListByNoList(List<Integer> noList) throws Exception;
 }

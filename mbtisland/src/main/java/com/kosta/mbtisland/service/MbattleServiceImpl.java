@@ -14,6 +14,7 @@ import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbattleVoter;
+import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbattleDslRepository;
@@ -151,5 +152,44 @@ public class MbattleServiceImpl implements MbattleService {
 	@Override
 	public MbattleVoter selectIsVoteByUsernameAndPostNo(String voterId, Integer no) throws Exception {
 		return mbattleVoterRepository.findByVoterIdAndMbattleNo(voterId, no);
+	}
+
+	//특정 유저로 mbattleList불러오기
+	@Override
+	public List<Mbattle> findByWriterIdAndPage(String username, PageInfo pageInfo) throws Exception {
+		Integer itemsPerPage = 10;
+		int pagesPerGroup = 10;
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
+//		
+		List<Mbattle> mbattleList = mbattleDslRepository.findMbattleListByUserAndPage(username,pageRequest);
+		if(mbattleList.size()==0) {
+			throw new Exception("해당하는 게시글이 존재하지 않습니다.");
+		}
+		//
+		Long allCount = mbattleDslRepository.findMbattleCntByUser(username);
+		Integer allPage = (int) Math.ceil((double) allCount / itemsPerPage);
+		Integer startPage = (int) ((pageInfo.getCurPage() - 1) / pagesPerGroup) * pagesPerGroup + 1;
+		Integer endPage = Math.min(startPage + pagesPerGroup - 1, allPage);
+		if(endPage>allPage) endPage = allPage;
+		
+		pageInfo.setAllPage(allPage);
+		pageInfo.setStartPage(startPage);
+		pageInfo.setEndPage(endPage);
+		if(pageInfo.getCurPage()>allPage) pageInfo.setCurPage(allPage); // 게시글 삭제시 예외처리
+		
+		return mbattleList;
+	}
+
+	//noList로 삭제
+	@Override
+	public void deleteMbattleListByNoList(List<Integer> noList) throws Exception {
+		for (Integer no : noList) {
+			Optional<Mbattle> optionalMbattle = mbattleRepository.findById(no);
+			if (optionalMbattle.isPresent()) {
+				mbattleRepository.deleteById(no);
+			} else {
+				throw new Exception("해당 번호 Mbattle게시글 없음");
+			}
+		}
 	}
 }

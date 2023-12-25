@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -91,6 +92,16 @@ public class AlarmController {
 			res.put("noteList", noteDtoList);
 			res.put("noteCnt", noteCnt);
 			return new ResponseEntity<Object>(res,HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+	}
+	@PutMapping("/checkalarm/{no}")
+	public ResponseEntity<Object> checkAlarm(@PathVariable Integer no){
+		try {
+			alarmService.updateAlarmRead(no);
+			return new ResponseEntity<Object>("읽음처리성공",HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
