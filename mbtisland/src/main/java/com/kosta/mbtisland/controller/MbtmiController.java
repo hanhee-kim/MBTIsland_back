@@ -396,7 +396,7 @@ public class MbtmiController {
 	@PostMapping("/quilltest")
 	public ResponseEntity<Object> quillTest (@RequestBody MbtmiDto mbtmiDto) {
 		System.out.println("quillTest가 받은 mbtmiDto: " + mbtmiDto); // title, category, writerId등, content
-		System.out.println("*quillTest가 받은 mbtmiDto의 content값: " + mbtmiDto.getContent()); // <p>입력된 문자열 state에 저장하여 서버로 보내기 테스트</p>
+		System.out.println("*quillTest가 받은 mbtmiDto의 content값: " + mbtmiDto.getContent());
 		
 		try {
 				
@@ -413,7 +413,7 @@ public class MbtmiController {
 	
 	// 프런트의 삽입된이미지핸들러 함수 안에서 호출되며 에디터에 삽입된 이미지를 업로드(저장)하고 업로드된 이미지의 url을 리턴하는 메서드
 	@PostMapping("/uploadImage")
-	public ResponseEntity<Object> handleImageUpload(@RequestParam("image") MultipartFile file) {
+	public ResponseEntity<Object> handleImageUpload(@RequestParam("image") MultipartFile file, @RequestParam("postNo") Integer postNo) {
 		
 		System.out.println("/uploadImage메서드 호출됨");
 		
@@ -437,6 +437,8 @@ public class MbtmiController {
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
 			fileVo.setUploadDate(writeDate);
+			fileVo.setPostNo(postNo);
+			fileVo.setBoardType("mbtmi");
 			
 			// 파일테이블에 인서트 먼저 수행
 			fileVoRepository.save(fileVo);
@@ -444,15 +446,10 @@ public class MbtmiController {
 			File uploadFile = new File(uploadPath + fileVo.getFileIdx());
 			file.transferTo(uploadFile);
 			
-			
+			// 파일테이블에 자동생성된 idx값 반환
+			Integer fileIdx = fileVo.getFileIdx();
             
-            // 업로드완료된 파일의 url생성
-            String imageUrl = "uploaded" + fileName;
-            
-            // 프론트로 리턴
-            Map<String, Object> response = new HashMap<>();
-            response.put("imageUrl", imageUrl);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(fileIdx, HttpStatus.OK);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
