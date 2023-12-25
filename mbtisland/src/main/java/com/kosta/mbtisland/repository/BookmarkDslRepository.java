@@ -20,6 +20,7 @@ public class BookmarkDslRepository {
 		QBookmark qBookmark = QBookmark.bookmark;
 		return jpaQueryFactory.selectFrom(qBookmark)
 					.where(qBookmark.username.eq(username))
+					.orderBy(qBookmark.no.desc())
 					.offset(pageRequest.getOffset())
 					.limit(pageRequest.getPageSize())
 					.fetch();

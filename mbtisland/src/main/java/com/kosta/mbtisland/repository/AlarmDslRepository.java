@@ -51,7 +51,7 @@ public class AlarmDslRepository {
 		List<Alarm> alarmList = jpaQueryfactory
 				.selectFrom(alarm)
 				.where(alarm.username.eq(username).and(alarm.alarmIsRead.eq("N")))
-				.orderBy(alarm.alarmUpdateDate.asc())
+				.orderBy(alarm.alarmUpdateDate.desc())
 				.limit(5)
 				.fetch();
 		return alarmList;
