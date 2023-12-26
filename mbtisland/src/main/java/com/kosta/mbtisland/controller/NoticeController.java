@@ -96,6 +96,7 @@ public class NoticeController {
 	// 공지사항 등록
 	@PostMapping("/noticewrite")
 	public ResponseEntity<Object> addNotice (@RequestBody NoticeDto noticeDto) {
+//		System.out.println("noticeDto 출력: " + noticeDto);
 		try {
 			Notice writtenNotice = noticeService.addNotice(noticeDto);
 			Map<String, Object> res = new HashMap<>();
