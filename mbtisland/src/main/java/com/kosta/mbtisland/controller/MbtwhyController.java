@@ -292,7 +292,7 @@ public class MbtwhyController {
 			// 2-2. 2차댓글 등록의 경우
 			} else {
 				Alarm alarmForParentcommentWriter = alarmService
-						.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo, "mbtwhyComment");
+						.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo, "mbtwhy");
 				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtwhy");
 
 				Integer alarmCnt1 = mbtwhyService.selectMbtwhyChildCommentCount(parentcommentNo); // 알림Cnt1
@@ -312,7 +312,7 @@ public class MbtwhyController {
 					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값만 업데이트 수행
 				} else if (alarmForParentcommentWriter == null && !isWrittenByParentcommentWriter) {
 					Alarm alarm1 = Alarm.builder().username(username1).alarmType("댓글").alarmTargetNo(parentcommentNo)
-							.alarmTargetFrom("mbtwhyComment").alarmUpdateDate(writeDate).alarmCnt(alarmCnt1).build();
+							.alarmTargetFrom("mbtwhy").alarmUpdateDate(writeDate).alarmCnt(alarmCnt1).build();
 					alarmService.addAlarm(alarm1); // 인서트 수행
 				}
 

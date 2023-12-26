@@ -1,7 +1,9 @@
 package com.kosta.mbtisland.controller;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Alarm;
+import com.kosta.mbtisland.entity.Ban;
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.Mbtmi;
@@ -27,6 +31,8 @@ import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.entity.Report;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.service.AlarmService;
+import com.kosta.mbtisland.service.BanService;
 import com.kosta.mbtisland.service.FileVoService;
 import com.kosta.mbtisland.service.MbattleService;
 import com.kosta.mbtisland.service.MbtmiService;
@@ -54,6 +60,11 @@ public class ReportController {
 	@Autowired
 	private MbattleService mbattleService;
 	
+	@Autowired
+	private BanService banService;
+	
+	@Autowired
+	private AlarmService alarmService;
 	
 	// 신고
 	@PostMapping("/report")
@@ -145,25 +156,56 @@ public class ReportController {
 			// user 테이블에 제재 기간에 해당되는 DATE 타입 컬럼을 추가하여 기간 지정
 			LocalDate currentDate = LocalDate.now();
 			LocalDate plusDate = null;
-			Timestamp banDate = null;
+			Timestamp banEndDate = null;
 			
-			if(user.getUserWarnCnt() % 3 == 0) {
-				user.setIsBanned("Y");
-				if(user.getUserWarnCnt() >= 3) {
-					plusDate = currentDate.plusDays(30);
-					banDate = Timestamp.valueOf(plusDate.atStartOfDay());
-				} else if(user.getUserWarnCnt() >= 6) {
-					plusDate = currentDate.plusDays(60);
-					banDate = Timestamp.valueOf(plusDate.atStartOfDay());
-				} else if(user.getUserWarnCnt() >= 9) {
-					plusDate = currentDate.plusDays(90);
-					banDate = Timestamp.valueOf(plusDate.atStartOfDay());
+			// Ban 테이블에서 username으로 조회
+			Ban ban = banService.selectBanByUsername(username);
+			
+			// 경고 횟수가 3의 배수가 되어 제재 처리되는 경우
+			if(user.getUserWarnCnt() != 0 && user.getUserWarnCnt() % 3 == 0) {
+				if(user.getIsBanned().equals("N") && ban == null) { // 현재 정지당한 상태가 아닐 경우
+					user.setIsBanned("Y");
+					
+					if(user.getUserWarnCnt() >= 3) {
+						plusDate = currentDate.plusDays(30);
+						banEndDate = Timestamp.valueOf(plusDate.atStartOfDay());
+					} else if(user.getUserWarnCnt() >= 6) {
+						plusDate = currentDate.plusDays(60);
+						banEndDate = Timestamp.valueOf(plusDate.atStartOfDay());
+					} else if(user.getUserWarnCnt() >= 9) {
+						plusDate = currentDate.plusDays(90);
+						banEndDate = Timestamp.valueOf(plusDate.atStartOfDay());
+					}
+					// user 테이블에 set
+					user.setBanDate(banEndDate);
+					// ban 테이블 build
+					ban = Ban.builder()
+							.username(username)
+							.banStartDate(Timestamp.valueOf(currentDate.atStartOfDay()))
+							.banEndDate(banEndDate).build();
+				} else if(user.getIsBanned().equals("Y") && ban != null) { // 이미 정지당한 상태일 경우
+					// Timestamp => Instant => LocalDate 형변환
+					Instant instant = ban.getBanEndDate().toInstant();
+					// 기존 정지 종료일에 새로운 정지 기간을 더해줌
+			        LocalDate oldBanEndDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
+					if(user.getUserWarnCnt() >= 6) {
+						plusDate = oldBanEndDate.plusDays(60);
+						banEndDate = Timestamp.valueOf(plusDate.atStartOfDay());
+					} else if(user.getUserWarnCnt() >= 9) {
+						plusDate = oldBanEndDate.plusDays(90);
+						banEndDate = Timestamp.valueOf(plusDate.atStartOfDay());
+					}					
+					// user 테이블에 set
+					user.setBanDate(banEndDate);
+					// ban 테이블에 set
+					ban.setBanEndDate(banEndDate);
 				}
-				user.setBanDate(banDate);
 			}
 			
 			// user 업데이트
 			userService.modifyUser(user);
+			// ban 삽입(업데이트)
+			banService.insertBan(ban);
 			
 			// tableType에 해당하는 테이블의 postNo 게시글의 isBlocked를 Y로 업데이트
 			if(tableType=="mbtmi") {
@@ -196,6 +238,19 @@ public class ReportController {
 					mbattleComment.setIsBlocked("Y");
 					mbattleService.insertMbattleComment(mbattleComment);
 				}
+			}
+			
+			// 경고 알람 처리
+			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+			Alarm warningAlarm = Alarm.builder().username(username).alarmType("경고").alarmTargetNo(reportList.get(0).getNo())
+					.alarmTargetFrom("report").alarmUpdateDate(writeDate).build();
+			alarmService.addAlarm(warningAlarm);
+			
+			// 새로운 밴이 삽입되는 경우 알람 처리
+			if(user.getUserWarnCnt() != 0 && user.getUserWarnCnt() % 3 == 0) {
+				Alarm banAlarm = Alarm.builder().username(username).alarmType("제재").alarmTargetNo(reportList.get(0).getNo())
+						.alarmTargetFrom("ban").alarmUpdateDate(writeDate).build();
+				alarmService.addAlarm(banAlarm);
 			}
 			
 			return new ResponseEntity<Object>(HttpStatus.OK);
