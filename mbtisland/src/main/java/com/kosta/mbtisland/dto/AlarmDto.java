@@ -35,4 +35,6 @@ public class AlarmDto {
 	private Timestamp alarmReadDate;
 	private Timestamp alarmUpdateDate;
 	private Integer alarmCnt;
+	private Timestamp banDate;
+	private Integer warnCnt;
 }
