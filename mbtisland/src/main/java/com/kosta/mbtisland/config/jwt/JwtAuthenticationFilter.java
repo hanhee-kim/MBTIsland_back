@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
-		System.out.println("JwtAuthenticationFilter : 진입");
+//		System.out.println("JwtAuthenticationFilter : 진입");
 		//request에 있는 username과 password를 파싱해서 자바 Object로 받기
 		ObjectMapper om = new ObjectMapper();
 		LoginRequestDto loginRequestDto = null;
