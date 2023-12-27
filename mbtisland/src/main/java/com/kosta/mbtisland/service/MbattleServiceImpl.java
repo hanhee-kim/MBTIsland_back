@@ -1,5 +1,6 @@
 package com.kosta.mbtisland.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,12 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.kosta.mbtisland.dto.MbattleDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbattleResult;
 import com.kosta.mbtisland.entity.MbattleVoter;
-import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbattleDslRepository;
 import com.kosta.mbtisland.repository.MbattleRepository;
@@ -38,13 +39,29 @@ public class MbattleServiceImpl implements MbattleService {
 	
 	// 게시글 목록 조회
 	@Override
-	public List<Mbattle> selectMbattleListByPageAndSearchAndSort(PageInfo pageInfo, String search, String sort)
+	public List<MbattleDto> selectMbattleListByPageAndSearchAndSort(PageInfo pageInfo, String search, String sort)
 			throws Exception {
 		// 페이지 번호, 한 페이지에 보여줄 게시글 수
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 4);
 		List<Mbattle> mbattleList = mbattleDslRepository.findMbattleListByPageAndSearchAndSort(pageRequest, search, sort);
 
+		List<MbattleDto> dtoList = new ArrayList();
 		if(mbattleList.size()!=0) {
+			// Entity => Dto
+			// 각 Mbattle 객체 변수마다 댓글 개수 추가
+			for(Mbattle mbattle : mbattleList) {
+				Integer commentCnt = selectMbattleCommentCountByMbattleNo(mbattle.getNo());
+				
+				MbattleDto dto = MbattleDto.builder().no(mbattle.getNo()).voteItem1(mbattle.getVoteItem1()).voteItem2(mbattle.getVoteItem2())
+							.viewCnt(mbattle.getViewCnt()).voteCnt(mbattle.getVoteCnt()).writeDate(mbattle.getWriteDate())
+							.isBlocked(mbattle.getIsBlocked()).writerId(mbattle.getWriterId()).writerNickname(mbattle.getWriterNickname())
+							.writerMbti(mbattle.getWriterMbti()).writerMbtiColor(mbattle.getWriterMbtiColor())
+							.title(mbattle.getTitle()).fileIdx1(mbattle.getFileIdx1()).fileIdx2(mbattle.getFileIdx2())
+							.commentCnt(commentCnt).build();
+				
+				dtoList.add(dto);
+			}
+			
 			// 페이징 계산
 			// MbattleController에서 넘겨준 pageInfo를 참조하기에, 반환하지 않아도 됨
 			Long allCount = mbattleDslRepository.findMbattleCountBySearch(search);
@@ -57,10 +74,10 @@ public class MbattleServiceImpl implements MbattleService {
 			pageInfo.setStartPage(startPage);
 			pageInfo.setEndPage(endPage);
 			
-			return mbattleList;
+			return dtoList;
 		}
 
-		return mbattleList;
+		return dtoList;
 	}
 	
 	// 일간 인기 게시글 조회

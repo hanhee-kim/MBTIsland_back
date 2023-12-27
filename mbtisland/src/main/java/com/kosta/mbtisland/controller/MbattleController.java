@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kosta.mbtisland.dto.MbattleDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.Bookmark;
@@ -57,7 +57,7 @@ public class MbattleController {
 			@RequestParam(required = false) String search, @RequestParam(required = false) String sort) {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1 : page).build();
-			List<Mbattle> mbattleList = mbattleService.selectMbattleListByPageAndSearchAndSort(pageInfo, search, sort);
+			List<MbattleDto> mbattleList = mbattleService.selectMbattleListByPageAndSearchAndSort(pageInfo, search, sort);
 			List<Mbattle> hotMbattleList= mbattleService.selectDailyHotMbattle();
 			
 			Map<String, Object> res = new HashMap<>();

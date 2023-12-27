@@ -1,6 +1,7 @@
 package com.kosta.mbtisland.repository;
 
 import static com.kosta.mbtisland.entity.QReport.report;
+import static com.kosta.mbtisland.entity.QUserEntity.userEntity;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.mbtisland.entity.Report;
-import com.querydsl.core.BooleanBuilder;
+import com.kosta.mbtisland.entity.UserEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -31,6 +32,16 @@ public class ReportDslRepository {
 						.fetch();
 	}
 	
+	// 밴 페이지에서의 신고 목록 조회 (페이지)
+	public List<Report> findReportListByPageAndUsername(PageRequest pageRequest, String username) throws Exception {
+		return jpaQueryFactory.selectFrom(report)
+				.where(report.reportedId.eq(username))
+				.orderBy(report.no.desc()) // 정렬
+				.offset(pageRequest.getOffset()) // 인덱스
+				.limit(pageRequest.getPageSize()) // 개수 제한
+				.fetch();
+	}
+	
 	// 신고 개수
 	public Long findReportCountByFilterAndBoardTypeAndReportType(String filter, String boardType, String reportType) throws Exception {
 		return jpaQueryFactory.select(report.count())
@@ -38,6 +49,15 @@ public class ReportDslRepository {
 				.where(filter.equals("all")? null : report.isCompleted.eq(filter),
 						boardType.equals("all")? null : report.tableType.eq(boardType),
 						reportType.equals("전체")? null : report.reportReason.eq(reportType))
+				.orderBy(report.no.desc())
+				.fetchOne();
+	}
+	
+	// 밴 페이지에서의 신고 개수
+	public Long findReportCountByUsername(String username) throws Exception {
+		return jpaQueryFactory.select(report.count())
+				.where(report.reportedId.eq(username))
+				.from(report)
 				.orderBy(report.no.desc())
 				.fetchOne();
 	}
@@ -61,4 +81,5 @@ public class ReportDslRepository {
 						report.isCompleted.eq("N"))
 				.fetch();
 	}
+	
 }
