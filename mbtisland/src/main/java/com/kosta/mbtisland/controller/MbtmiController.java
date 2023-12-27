@@ -236,9 +236,11 @@ public class MbtmiController {
 				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 댓글인지 여부)
 				Boolean isWrittenByOneSelf = username.equals(sendUser.getUsername());
 
-				// 알림의 존재여부에 따라 alarmCnt컬럼값만 업데이트 수행* or 알림데이터 인서트 수행**
+				// 알림의 존재여부에 따라 alarmCnt컬럼값,읽음여부,읽은일시 업데이트 수행* or 알림데이터 인서트 수행**
 				if(alarmForPostWriter!=null && !isWrittenByOneSelf) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt);
+					alarmForPostWriter.setAlarmIsRead("N");
+					alarmForPostWriter.setAlarmReadDate(null);
 					alarmService.addAlarm(alarmForPostWriter); // *
 				} else if(alarmForPostWriter==null && !isWrittenByOneSelf) {
 					Alarm alarm = Alarm.builder()
@@ -269,7 +271,9 @@ public class MbtmiController {
 				// 2-2-1. 1차댓글 작성자를 향한 알림데이터 업데이트 또는 인서트
 				if(alarmForParentcommentWriter!=null && !isWrittenByParentcommentWriter) {
 					alarmForParentcommentWriter.setAlarmCnt(alarmCnt1);
-					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값만 업데이트 수행
+					alarmForParentcommentWriter.setAlarmIsRead("N");
+					alarmForParentcommentWriter.setAlarmReadDate(null);
+					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값과 읽음여부, 읽은일시의 업데이트 수행
 				} else if(alarmForParentcommentWriter==null && !isWrittenByParentcommentWriter) {
 					Alarm alarm1 = Alarm.builder()
 							.username(username1)
