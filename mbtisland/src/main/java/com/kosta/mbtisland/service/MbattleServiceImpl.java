@@ -14,6 +14,8 @@ import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbattleResult;
 import com.kosta.mbtisland.entity.MbattleVoter;
+import com.kosta.mbtisland.repository.AlarmDslRepository;
+import com.kosta.mbtisland.repository.BookmarkDslRepository;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbattleDslRepository;
 import com.kosta.mbtisland.repository.MbattleRepository;
@@ -36,6 +38,12 @@ public class MbattleServiceImpl implements MbattleService {
 	
 	@Autowired
 	private MbattleResultRepository mbattleResultRepository;
+	
+	@Autowired
+	private AlarmDslRepository alarmDslRepository;
+	
+	@Autowired
+	private BookmarkDslRepository bookmarkDslRepository;
 	
 	// 게시글 목록 조회
 	@Override
@@ -120,6 +128,13 @@ public class MbattleServiceImpl implements MbattleService {
 	public void deleteMbattle(Integer no) throws Exception {
 		Mbattle mbattle = mbattleRepository.findById(no).get();
 		if(mbattle==null) throw new Exception("게시글이 존재하지 않습니다.");
+		
+		alarmDslRepository.deleteAlarmByTargetNoAndTargetFrom(no, "mbattle"); // 알림
+		mbattleDslRepository.deleteCommentsByMbattleNo(no); // 댓글
+		bookmarkDslRepository.deleteBookmarkByPostNoAndBoardType(no, "mbattle"); // 북마크
+		mbattleDslRepository.deleteResultsByMbattleNo(no); // 투표 결과
+		mbattleDslRepository.deleteVotersByMbattleNo(no); // 투표 통계
+		
 		mbattleRepository.deleteById(no);
 	}
 	

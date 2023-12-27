@@ -10,12 +10,14 @@ import org.springframework.stereotype.Service;
 
 import com.kosta.mbtisland.dto.MbtwhyDto;
 import com.kosta.mbtisland.dto.PageInfo;
-import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
+import com.kosta.mbtisland.repository.AlarmDslRepository;
+import com.kosta.mbtisland.repository.BookmarkDslRepository;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyDslRepository;
 import com.kosta.mbtisland.repository.MbtwhyRepository;
+import com.kosta.mbtisland.repository.RecommendDslRepository;
 
 @Service
 public class MbtwhyServiceImpl implements MbtwhyService {
@@ -30,6 +32,15 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	@Autowired
 	private MbtwhyCommentRepository mbtwhyCommentRepository;
 	
+	@Autowired
+	private AlarmDslRepository alarmDslRepository;
+	
+	@Autowired
+	private BookmarkDslRepository bookmarkDslRepository;
+	
+	@Autowired
+	private RecommendDslRepository recommendDslRepository;
+		
 	// 게시글 목록 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
 	// 댓글수 포함
 	@Override
@@ -139,6 +150,20 @@ public class MbtwhyServiceImpl implements MbtwhyService {
 	public void deleteMbtwhy(Integer no) throws Exception {
 		Mbtwhy mbtwhy = mbtwhyRepository.findById(no).get();
 		if(mbtwhy==null) throw new Exception("게시글이 존재하지 않습니다.");
+		
+		// 게시글에 속한 모든 댓글, 북마크, 추천, 알림 삭제
+		List<Integer> commentNos = mbtwhyDslRepository.findCommentNosByPostNo(no);
+		for(Integer commentNo : commentNos) {
+			// 대댓글 삭제
+			alarmDslRepository.deleteAlarmByTargetNoAndTargetFrom(commentNo, "mbtwhyComment");
+		}
+		
+		alarmDslRepository.deleteAlarmByTargetNoAndTargetFrom(no, "mbtwhy"); // 알림
+		mbtwhyDslRepository.deleteCommentsByMbtwhyNo(no); // 댓글
+		bookmarkDslRepository.deleteBookmarkByPostNoAndBoardType(no, "mbtwhy"); // 북마크
+		recommendDslRepository.deleteRecommendByPostNoAndBoardType(no, "mbtwhy"); // 추천
+		
+		// 게시글 삭제
 		mbtwhyRepository.deleteById(no);
 	}
 	

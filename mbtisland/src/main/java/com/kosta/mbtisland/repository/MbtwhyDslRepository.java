@@ -7,6 +7,8 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Repository;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -26,20 +27,6 @@ public class MbtwhyDslRepository {
 	public List<Mbtwhy> findMbtwhyListByMbtiAndPageAndSearchAndSort
 		(String mbti, PageRequest pageRequest, String search, String sort) throws Exception {
 		OrderSpecifier<?> orderSpecifier;
-		System.out.println(sort);
-
-/*
-		// 정렬 조건
-		if(sort.equals("최신순")) { // 최신순
-			orderSpecifier = mbtwhy.no.desc();
-		} else if(sort.equals("조회순")) { // 조회순
-			orderSpecifier = mbtwhy.viewCnt.desc();
-		} else if(sort.equals("추천순")) { // 추천순
-			orderSpecifier = mbtwhy.recommendCnt.desc();
-		} else { // 기본 최신순
-			orderSpecifier = mbtwhy.no.desc();
-		}
-*/		
 		
 		// 정렬 조건
 		if(sort==null) {
@@ -138,5 +125,21 @@ public class MbtwhyDslRepository {
 //				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
 //				.fetchOne();
 //	}
+	
+	// 특정 게시글에 속한 댓글 삭제(게시글 삭제시 관련데이터를 함께 삭제하기 위해 호출)
+	@Transactional
+	public void deleteCommentsByMbtwhyNo(Integer mbtwhyNo) {
+		jpaQueryFactory.delete(mbtwhyComment)
+						.where(mbtwhyComment.mbtwhyNo.eq(mbtwhyNo))
+						.execute();
+	}
+	
+	// 특정 게시글의 모든 댓글의 pk를 리스트로 반환(게시글 삭제시 관련데이터-대댓글알림-를 함께 삭제하기 위해 호출)
+	public List<Integer> findCommentNosByPostNo(Integer postNo) {
+		return jpaQueryFactory.select(mbtwhyComment.commentNo)
+								.from(mbtwhyComment)
+								.where(mbtwhyComment.mbtwhyNo.eq(postNo))
+								.fetch();
+	}
 
 }
