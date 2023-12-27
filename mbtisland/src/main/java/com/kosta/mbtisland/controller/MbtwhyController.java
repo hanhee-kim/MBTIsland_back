@@ -282,6 +282,7 @@ public class MbtwhyController {
 				// 알림의 존재여부에 따라 alarmCnt컬럼값만 업데이트 수행* or 알림데이터 인서트 수행**
 				if (alarmForPostWriter != null && !isWrittenByOneSelf) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt);
+					alarmForPostWriter.setAlarmUpdateDate(writeDate);
 					alarmForPostWriter.setAlarmIsRead("N");
 					alarmForPostWriter.setAlarmReadDate(null);
 					alarmService.addAlarm(alarmForPostWriter); // *
@@ -311,6 +312,7 @@ public class MbtwhyController {
 				// 2-2-1. 1차댓글 작성자를 향한 알림데이터 업데이트 또는 인서트
 				if (alarmForParentcommentWriter != null && !isWrittenByParentcommentWriter) {
 					alarmForParentcommentWriter.setAlarmCnt(alarmCnt1);
+					alarmForParentcommentWriter.setAlarmUpdateDate(writeDate);
 					alarmForParentcommentWriter.setAlarmIsRead("N");
 					alarmForParentcommentWriter.setAlarmReadDate(null);
 					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값만 업데이트 수행

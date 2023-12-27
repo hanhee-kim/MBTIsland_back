@@ -249,6 +249,7 @@ public class MbattleController {
 				// 알림의 존재여부에 따라 alarmCnt컬럼값만 업데이트 수행* or 알림데이터 인서트 수행**
 				if (alarmForPostWriter != null && !isWrittenByOneSelf) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt);
+					alarmForPostWriter.setAlarmUpdateDate(writeDate);
 					alarmForPostWriter.setAlarmIsRead("N");
 					alarmForPostWriter.setAlarmReadDate(null);
 					alarmService.addAlarm(alarmForPostWriter); // *
@@ -293,27 +294,6 @@ public class MbattleController {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
-	
-	// 투표
-//	@PostMapping("/mbattlevote/{no}/{voteItem}/{voterId}/{voterMbti}")
-//	public ResponseEntity<Object> voteMbattleItem(@PathVariable Integer no, @PathVariable Integer voteItem,
-//			@PathVariable String voterId, @PathVariable String voterMbti) {
-//		try {
-//			// mbattleVoter 테이블에 투표 여부 삽입
-//			MbattleVoter mbattleVoter = 
-//			mbattleService.insertMbattleVoter();
-//			
-//			// mbattleResult 테이블에 결과 삽입 (업데이트)
-//			MbattleResult mbattleResult = mbattleService.selectMbattleResultByMbattleNoAndVoteItem(no, voteItem);
-//			
-//			// 투표 후, 투표 결과 반환
-//			Map<String, Object> res = new HashMap<>();
-//			return new ResponseEntity<Object>(res, HttpStatus.OK);
-//		} catch(Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//		}
-//	}
 	
 	// 투표
 	@PostMapping("/mbattlevote/{voterMbti}/{vote}")
@@ -399,10 +379,10 @@ public class MbattleController {
 			mbattleService.insertMbattleResult(mbattleResult);
 			
 			// 투표 후, 투표 결과 반환
-			Map<String, Object> res = new HashMap<>();
-			res.put("mbattleResult", mbattleResult);
+//			Map<String, Object> res = new HashMap<>();
+//			res.put("mbattleResult", mbattleResult);
 
-			return new ResponseEntity<Object>(res, HttpStatus.OK);
+			return new ResponseEntity<Object>(HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
