@@ -1,5 +1,8 @@
 package com.kosta.mbtisland.config.auth;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,6 +28,11 @@ public class PrincipalDetailsService implements UserDetailsService {
 		System.out.println("loadUserByUsername:"+userEntity);
 		if(userEntity!=null) {	//login시 DB에 회원이 있으면?
 			userEntity.setVisitCnt(userEntity.getVisitCnt()+1);
+			if(userEntity.getBanDate() != null && userEntity.getBanDate().before(new Timestamp(new Date().getTime()))) {
+				System.out.println("정지회원 풀어주기 ");
+				userEntity.setBanDate(null);
+				userEntity.setIsBanned("N");
+			}
 			userRepository.save(userEntity);
 			return new PrincipalDetails(userEntity);
 		}
