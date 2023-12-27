@@ -158,6 +158,16 @@ public class NoteServiceImpl implements NoteService{
 			noteRepository.save(note);
 		}
 	}
+
+	@Override
+	public void readNoteByNoteNo(Integer no) throws Exception {
+		Optional<Alarm> alarm = alarmRepository.findByAlarmTargetNoAndAlarmTargetFrom(no, "NOTE");
+		Optional<Note> note = noteRepository.findById(no);
+		alarm.get().setAlarmIsRead("Y");
+		note.get().setNoteIsRead("Y");
+		alarmRepository.save(alarm.get());
+		noteRepository.save(note.get());
+	}
 	
 
 }
