@@ -28,12 +28,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
+import com.kosta.mbtisland.entity.Ban;
 import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.FileVo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.repository.BanRepository;
 import com.kosta.mbtisland.repository.FileVoRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.service.AlarmService;
@@ -59,6 +61,8 @@ public class MbtmiController {
 	private FileVoRepository fileVoRepository;
 	@Autowired
 	private FileVoService fileVoService;
+	@Autowired
+	private BanRepository banRepository;
 	
 	// 파일 업로드 경로
 	@Value("${upload.path}") // org.springframework.beans.factory.annotation.Value
@@ -198,10 +202,10 @@ public class MbtmiController {
 													  , @RequestParam(required = false) Integer commentpage) {
 		
 		
-//		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
+		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
 //		System.out.println("sendUser: " + sendUser);
 //		System.out.println("no(게시글번호): " + no);
-//		System.out.println("comment(댓글내용): " + comment);
+		System.out.println("comment(댓글내용): " + comment);
 //		System.out.println("1차댓글번호: " + parentcommentNo);
 //		System.out.println("commentPage: " + commentpage);
 
@@ -307,7 +311,7 @@ public class MbtmiController {
 	}
 	
 	
-	// 게시글 등록
+	// 게시글 등록--->대체
 	@PostMapping("/mbtmiwrite")
 	public ResponseEntity<Object> addPost(@RequestBody MbtmiDto mbtmiDto) {
 //		System.out.println("게시글작성 컨트롤러가 받은 파라미터 mbtmiDto: " + mbtmiDto);
@@ -397,8 +401,8 @@ public class MbtmiController {
 	}
 	
 	
-	// 퀼데이터 받기 테스트
-	@PostMapping("/quilltest")
+	// 이미지 없이 게시글 삽입
+	@PostMapping("/mbtmiwritewithoutimages")
 	public ResponseEntity<Object> quillTest(@RequestBody MbtmiDto mbtmiDto) {
 		System.out.println("quillTest가 받은 mbtmiDto: " + mbtmiDto); // title, category, writerId등, content
 		System.out.println("*quillTest가 받은 mbtmiDto의 content값: " + mbtmiDto.getContent());
@@ -416,7 +420,7 @@ public class MbtmiController {
 		
 	}
 	
-	// 프런트의 삽입된이미지핸들러 함수 안에서 호출되며 에디터에 삽입된 이미지를 업로드(저장)하고 업로드된 이미지의 url을 리턴하는 메서드
+	// 프런트의 uploadImage함수 안에서 호출되며 에디터에 삽입된 이미지를 디렉토리에 업로드, 파일테이블에 인서트하고 pk를 리턴
 	@PostMapping("/uploadImage")
 	public ResponseEntity<Object> handleImageUpload(@RequestParam("image") MultipartFile file, @RequestParam("postNo") Integer postNo) {
 		
@@ -429,16 +433,13 @@ public class MbtmiController {
             }
 			
 			// 원하는 디렉토리에 업로드
-//			String uploadFolderPath = "";
 			String fileName = file.getOriginalFilename();
 			
 			FileVo fileVo = new FileVo();
-//			fileVo.setFilePath(uploadFolderPath);
 			fileVo.setFilePath(uploadPath);
 			fileVo.setFileName(fileName);
 			fileVo.setFileSize(file.getSize());
 			fileVo.setFileType(file.getContentType());
-//			fileVo.setData(file.getBytes());
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
 			fileVo.setUploadDate(writeDate);
@@ -473,10 +474,6 @@ public class MbtmiController {
 
 	        Mbtmi mbtmi = mbtmiService.updateFileIdxs(postNo, fileIdx); // 게시글의 파일 컬럼 업데이트
 	        
-	        // 이미지 출력을 위하여 파일경로 반환
-	        
-
-	        // 성공 응답 반환
 	        return new ResponseEntity<>(mbtmi, HttpStatus.OK);
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -484,7 +481,7 @@ public class MbtmiController {
 	    }
 	}
 	
-	// 게시글에 file마크업이 포함되도록 업데이트
+	// 게시글 content에 <img src=fileIdx>가 포함되도록 업데이트
 	@PostMapping("/mbtmiContainingImgTags/{postNo}")
 	public ResponseEntity<Object> containImgTags(@PathVariable("postNo") Integer postNo, @RequestBody MbtmiDto mbtmiDto) {
 		System.out.println("postNo: " + postNo);
@@ -500,10 +497,10 @@ public class MbtmiController {
 		}
 	}
 	
-	// 이미지 출력
+	// 이미지 출력(게시글 상세, 게시글 수정폼)
 	@GetMapping("/mbtmiimg/{fileIdx}")
 	public void imageView(@PathVariable Integer fileIdx, HttpServletResponse response) {
-		System.out.println("imageView메서드 호출!");
+		System.out.println("imageView메서드 호출");
 		try {
 			fileVoService.readImage(fileIdx, response.getOutputStream());
 		} catch(Exception e) {
@@ -513,5 +510,16 @@ public class MbtmiController {
 	
 	
 	
-	
+	// * 메인페이지 로그인한 활동정지 회원의 정지기간 조회
+	@GetMapping("/usersbanperiod/{username}")
+	public ResponseEntity<Object> usersBanPeriod(@PathVariable String username) {
+//		System.out.println("usersBanPeriod메서드 호출! usename: " + username);
+		try {
+			Ban ban = banRepository.findByUsername(username);
+			return new ResponseEntity<>(ban, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

@@ -30,6 +30,7 @@ public class AnswerController {
 	// 문의 답글 등록
 	@PostMapping("/answerwrite")
 	public ResponseEntity<Object> addAnswer(@RequestBody AnswerDto answerDto) {
+		System.out.println("answerDto 출력: " + answerDto);
 		try {
 			// 답글데이터 삽입
 			Answer writtenAnswer = answerService.addAnswer(answerDto);
