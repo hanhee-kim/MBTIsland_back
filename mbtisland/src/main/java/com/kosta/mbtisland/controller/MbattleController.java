@@ -249,6 +249,8 @@ public class MbattleController {
 				// 알림의 존재여부에 따라 alarmCnt컬럼값만 업데이트 수행* or 알림데이터 인서트 수행**
 				if (alarmForPostWriter != null && !isWrittenByOneSelf) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt);
+					alarmForPostWriter.setAlarmIsRead("N");
+					alarmForPostWriter.setAlarmReadDate(null);
 					alarmService.addAlarm(alarmForPostWriter); // *
 				} else if (alarmForPostWriter == null && !isWrittenByOneSelf) {
 					Alarm alarm = Alarm.builder().username(username).alarmType("댓글").alarmTargetNo(no)
