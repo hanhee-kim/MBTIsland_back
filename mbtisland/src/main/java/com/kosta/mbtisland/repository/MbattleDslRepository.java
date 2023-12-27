@@ -2,10 +2,14 @@ package com.kosta.mbtisland.repository;
 
 import static com.kosta.mbtisland.entity.QMbattle.mbattle;
 import static com.kosta.mbtisland.entity.QMbattleComment.mbattleComment;
+import static com.kosta.mbtisland.entity.QMbattleResult.mbattleResult;
+import static com.kosta.mbtisland.entity.QMbattleVoter.mbattleVoter;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +17,6 @@ import org.springframework.stereotype.Repository;
 
 import com.kosta.mbtisland.entity.Mbattle;
 import com.kosta.mbtisland.entity.MbattleComment;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -91,6 +94,30 @@ public class MbattleDslRepository {
 				.offset(pageRequest.getOffset()) // 인덱스
 				.limit(pageRequest.getPageSize()) // 개수 제한
 				.fetch();
+	}
+	
+	// 특정 게시글에 속한 댓글 삭제(게시글 삭제시 관련데이터를 함께 삭제하기 위해 호출)
+	@Transactional
+	public void deleteCommentsByMbattleNo(Integer mbattleNo) {
+		jpaQueryFactory.delete(mbattleComment)
+						.where(mbattleComment.mbattleNo.eq(mbattleNo))
+						.execute();
+	}
+	
+	// 특정 게시글에 속한 MbattleResult 삭제
+	@Transactional
+	public void deleteResultsByMbattleNo(Integer mbattleNo) {
+		jpaQueryFactory.delete(mbattleResult)
+						.where(mbattleResult.mbattleNo.eq(mbattleNo))
+						.execute();
+	}
+	
+	// 특정 게시글에 속한 MbattleVoter 삭제
+	@Transactional
+	public void deleteVotersByMbattleNo(Integer mbattleNo) {
+		jpaQueryFactory.delete(mbattleVoter)
+						.where(mbattleVoter.mbattleNo.eq(mbattleNo))
+						.execute();
 	}
 	
 	public List<Mbattle> findMbattleListByUserAndPage (String username,PageRequest pageRequest){
