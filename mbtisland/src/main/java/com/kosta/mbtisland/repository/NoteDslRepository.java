@@ -46,7 +46,7 @@ public class NoteDslRepository {
 	}
 	
 	public List<NoteDto> findNoteListByUserAndReadTypeAndPaging(String username,String noteType,String noteIsRead,PageRequest pageRequest){
-		System.out.println("dsl쿼리문진입");
+//		System.out.println("dsl쿼리문진입");
 		QNote note = QNote.note;
 		QUserEntity sentUser = new QUserEntity("sentUser");
 		QUserEntity receiveUser = new QUserEntity("receiveUser");
@@ -119,7 +119,7 @@ public class NoteDslRepository {
 	}
 
 	public Long findNoteCntByUserAndNoteTypeAndReadType(String username,String noteType,String readType) {
-		System.out.println("dsl:"+username+noteType+readType);
+//		System.out.println("dsl:"+username+noteType+readType);
 		if(noteType.equals("sent")) {
 			return jpaQueryfactory
 					.select(note.count())

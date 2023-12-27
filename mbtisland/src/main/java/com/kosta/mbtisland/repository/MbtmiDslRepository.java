@@ -36,6 +36,8 @@ public class MbtmiDslRepository {
 		LocalDate todayMinus6Days = today.minusDays(6);
 		Timestamp startDate = Timestamp.valueOf(todayMinus6Days.atStartOfDay()); // Timestamp타입으로 변환
 		
+//		System.out.println("인기글목록dsl레파지토리에서출력 startDate: " + startDate);
+		
 		// 다중열 다중행이므로 List<Tuple>로 반환
 		return jpaQueryfactory
                 .select(mbtmi.category, mbtmi.recommendCnt.max())
@@ -66,7 +68,8 @@ public class MbtmiDslRepository {
 						                .selectFrom(mbtmi)
 						                .where(mbtmi.category.eq(category),
 						                        mbtmi.recommendCnt.eq(maxRecommendCnt),
-						                        mbtmi.isBlocked.eq("N")
+						                        mbtmi.isBlocked.eq("N"),
+						                        mbtmi.writeDate.after(startDate)
 						                )
 						                .fetchFirst();
 

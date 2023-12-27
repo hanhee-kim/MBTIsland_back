@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,10 +203,10 @@ public class MbtmiController {
 													  , @RequestParam(required = false) Integer commentpage) {
 		
 		
-		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
+//		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
 //		System.out.println("sendUser: " + sendUser);
 //		System.out.println("no(게시글번호): " + no);
-		System.out.println("comment(댓글내용): " + comment);
+//		System.out.println("comment(댓글내용): " + comment);
 //		System.out.println("1차댓글번호: " + parentcommentNo);
 //		System.out.println("commentPage: " + commentpage);
 
@@ -213,6 +214,9 @@ public class MbtmiController {
 			// 1. 댓글 삽입
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+			Timestamp writeDate2 = new Timestamp(new Date().getTime()); // java.util.Date
+			System.out.println("mbtmi컨트롤러의댓글작성메서드에서출력 writeDate: " + writeDate + ", writeDate2: " + writeDate2); 
+			// writeDate: 2023-12-28 00:00:00.0, writeDate2: 2023-12-28 03:16:51.288
 			MbtmiComment mbtmiComment = MbtmiComment.builder()
 										.commentContent(comment)
 										.mbtmiNo(no)
@@ -241,7 +245,7 @@ public class MbtmiController {
 					alarmForPostWriter.setAlarmCnt(alarmCnt);
 					alarmForPostWriter.setAlarmIsRead("N");
 					alarmForPostWriter.setAlarmReadDate(null);
-					alarmForPostWriter.setAlarmUpdateDate(writeDate);
+					alarmForPostWriter.setAlarmUpdateDate(writeDate2);
 					alarmService.addAlarm(alarmForPostWriter); // *
 				} else if(alarmForPostWriter==null && !isWrittenByOneSelf) {
 					Alarm alarm = Alarm.builder()
@@ -272,7 +276,7 @@ public class MbtmiController {
 				// 2-2-1. 1차댓글 작성자를 향한 알림데이터 업데이트 또는 인서트
 				if(alarmForParentcommentWriter!=null && !isWrittenByParentcommentWriter) {
 					alarmForParentcommentWriter.setAlarmCnt(alarmCnt1);
-					alarmForParentcommentWriter.setAlarmUpdateDate(writeDate);
+					alarmForParentcommentWriter.setAlarmUpdateDate(writeDate2);
 					alarmForParentcommentWriter.setAlarmIsRead("N");
 					alarmForParentcommentWriter.setAlarmReadDate(null);
 					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값과 읽음여부, 읽은일시, 알림업데이트일시 컬럼값 업데이트 수행
@@ -291,7 +295,7 @@ public class MbtmiController {
 				// 2-2-2. 게시글 작성자를 향한 알림데이터 업데이트
 				if(alarmForPostWriter!=null && !isWrittenByPostWriter) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt2);
-					alarmForPostWriter.setAlarmUpdateDate(writeDate);
+					alarmForPostWriter.setAlarmUpdateDate(writeDate2);
 					alarmService.addAlarm(alarmForPostWriter); // alarmCnt컬럼값만 업데이트 수행
 				}
 			}
