@@ -19,4 +19,5 @@ public interface NoteService {
 	Long getCntNotReadNoteList(String username) throws Exception;
 	//유저한테온 쪽지 모두 읽기
 	void allReadNoteByUser(String username) throws Exception;
+	void readNoteByNoteNo(Integer no) throws Exception;
 }

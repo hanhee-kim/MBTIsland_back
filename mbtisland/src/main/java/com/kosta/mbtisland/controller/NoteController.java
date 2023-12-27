@@ -89,4 +89,16 @@ public class NoteController {
 		}
 	}
 	
+	@PutMapping("/readnote")
+	public ResponseEntity<Object> readNote(@RequestParam(required = false) Integer noteNo){
+		try {
+			noteService.readNoteByNoteNo(noteNo);
+			return new ResponseEntity<Object>("읽음처리 성공",HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	
 }

@@ -17,12 +17,14 @@ import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
+import com.kosta.mbtisland.entity.Note;
 import com.kosta.mbtisland.repository.AlarmDslRepository;
 import com.kosta.mbtisland.repository.AlarmRepository;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyRepository;
+import com.kosta.mbtisland.repository.NoteRepository;
 import com.kosta.mbtisland.repository.UserRepository;
 @Service
 public class AlarmServiceImpl implements AlarmService{
@@ -41,6 +43,8 @@ public class AlarmServiceImpl implements AlarmService{
 	private MbattleCommentRepository mbattleCommentRepository;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private NoteRepository noteRepository;
 	
 	public List<AlarmDto> alarmToAlarmDto(List<Alarm> alarmList) throws Exception{
 
@@ -188,6 +192,9 @@ public class AlarmServiceImpl implements AlarmService{
 				Alarm alarm = optionalAlarm.get();
 				alarm.setAlarmIsRead("Y");
 				alarm.setAlarmReadDate(new Timestamp(new Date().getTime()));
+				if(alarm.getAlarmType().equals("댓글")) {
+					alarm.setAlarmCnt(0);
+				}
 				alarmRepository.save(alarm);
 			}else {
 				throw new Exception("해당 번호 알람 없음");
@@ -205,6 +212,9 @@ public class AlarmServiceImpl implements AlarmService{
 			for(Alarm alarm : alarmList) {
 				alarm.setAlarmIsRead("Y");
 				alarm.setAlarmReadDate(new Timestamp(new Date().getTime()));
+				if(alarm.getAlarmType().equals("댓글")) {
+					alarm.setAlarmCnt(0);
+				}
 				alarmRepository.save(alarm);
 			}
 		}
@@ -248,6 +258,14 @@ public class AlarmServiceImpl implements AlarmService{
 		} else { 
 			optionalAlarm.get().setAlarmIsRead("Y");
 			optionalAlarm.get().setAlarmReadDate(new Timestamp(new Date().getTime()));
+			if(optionalAlarm.get().getAlarmType().equals("댓글")) {
+				optionalAlarm.get().setAlarmCnt(0);
+			}
+			if(optionalAlarm.get().getAlarmTargetFrom().toUpperCase().equals("NOTE")) {
+				Optional<Note> note = noteRepository.findById(optionalAlarm.get().getAlarmTargetNo());
+				note.get().setNoteIsRead("Y");
+				noteRepository.save(note.get());
+			}
 			alarmRepository.save(optionalAlarm.get());
 		}
 	}
