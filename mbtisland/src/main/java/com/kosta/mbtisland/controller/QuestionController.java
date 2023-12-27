@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Answer;
 import com.kosta.mbtisland.entity.Question;
+import com.kosta.mbtisland.repository.AnswerRepository;
 import com.kosta.mbtisland.service.AnswerService;
 import com.kosta.mbtisland.service.QuestionService;
 
@@ -26,13 +27,10 @@ public class QuestionController {
 	
 	@Autowired
 	private QuestionService questionService;
-	
-
-	/* 관리자페이지 */
-
 	@Autowired
 	private AnswerService answerService;
 	
+
 	// 문의글 목록
 	@GetMapping("/questionlist")
 	public ResponseEntity<Object> questionList(@RequestParam(required = false) String search
@@ -58,6 +56,7 @@ public class QuestionController {
 		}
 	}
 	
+	
 	//문의글 등록
 	@PostMapping("questionwrite")
 	public ResponseEntity<String> questionWrite(@RequestBody Question question){
@@ -78,11 +77,9 @@ public class QuestionController {
 		Map<String, Object> res = new HashMap<>();
 		try {
 			Question question = questionService.questionDetailByNo(no);
-			Optional<Answer> answer = answerService.findByQuestionNo(no);
+			Answer answer = answerService.selectAnswerByQuestionNo(no); // 질문글에 대한 답글 조회
 			res.put("question", question);
-			if(answer.isPresent()) {
-				res.put("answer", answer.get());
-			}
+			if(answer!=null) res.put("answer", answer);
 			return new ResponseEntity<Object>(res,HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -92,7 +89,6 @@ public class QuestionController {
 	
 
 		
-	/* 마이페이지 */
 		
 		
 }

@@ -15,12 +15,17 @@ import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
 import com.kosta.mbtisland.entity.MbattleComment;
 import com.kosta.mbtisland.entity.MbtmiComment;
+import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
+import com.kosta.mbtisland.entity.Note;
 import com.kosta.mbtisland.repository.AlarmDslRepository;
 import com.kosta.mbtisland.repository.AlarmRepository;
 import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
+import com.kosta.mbtisland.repository.MbtwhyRepository;
+import com.kosta.mbtisland.repository.NoteRepository;
+import com.kosta.mbtisland.repository.UserRepository;
 @Service
 public class AlarmServiceImpl implements AlarmService{
 	
@@ -29,11 +34,17 @@ public class AlarmServiceImpl implements AlarmService{
 	@Autowired
 	private AlarmDslRepository alarmDslRepository;
 	@Autowired
+	private MbtwhyRepository mbtwhyRepository;
+	@Autowired
 	private MbtwhyCommentRepository mbtwhyCommentRepository;
 	@Autowired
 	private MbtmiCommentRepository mbtmiCommentRepository;
 	@Autowired
 	private MbattleCommentRepository mbattleCommentRepository;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private NoteRepository noteRepository;
 	
 	public List<AlarmDto> alarmToAlarmDto(List<Alarm> alarmList) throws Exception{
 
@@ -42,6 +53,9 @@ public class AlarmServiceImpl implements AlarmService{
 			String myContent = null;
 			String type = null;
 			Integer no = null;
+			String mbti = null;
+			Timestamp date = null;
+			Integer warnCnt = null;
 			//myContent 정할때
 			if(alarm.getAlarmTargetFrom().toUpperCase().contains("COMMENT")) {
 				myContent = "내 댓글";
@@ -51,7 +65,7 @@ public class AlarmServiceImpl implements AlarmService{
 			} else {
 				myContent = "내 게시글";
 			}
-			//detailType정할떄
+			//detailType정하고 경고와 벤에 따른 데이터 삽입
 			if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBTMI")) {
 				type = "MBTMI";
 			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBTWHY")) {
@@ -63,7 +77,13 @@ public class AlarmServiceImpl implements AlarmService{
 			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("NOTE")) {
 				type = "NOTE";
 			} else {
-				type = "SWAL";
+				if(alarm.getAlarmType().equals("경고")) {
+					type = "WARN";
+					warnCnt = userRepository.findByUsername(alarm.getUsername()).getUserWarnCnt();
+				} else {
+					type = "BAN";
+					date = userRepository.findByUsername(alarm.getUsername()).getBanDate();
+				}
 			}
 			
 			//detailNo정할떄		
@@ -93,6 +113,12 @@ public class AlarmServiceImpl implements AlarmService{
 			} else {
 				no = alarm.getAlarmTargetNo();
 			}
+			if(type.equals("MBTWHY")) {
+				Optional<Mbtwhy> optionalWhy = mbtwhyRepository.findById(no);
+				mbti = optionalWhy.get().getMbtiCategory();
+			}else {
+				mbti = "";
+			}
 			
 		alarmDtoList.add(AlarmDto.builder()
 				.alarmNo(alarm.getAlarmNo())
@@ -100,12 +126,16 @@ public class AlarmServiceImpl implements AlarmService{
 				.alarmType(alarm.getAlarmType())
 				.detailType(type)
 				.detailNo(no)
-				.alarmContent("["+myContent+"] 에 "+alarm.getAlarmType()+"(이)/가 도착했습니다.")
+				.detailMbti(mbti)
+				.alarmContent("["+myContent+"] 에 "+alarm.getAlarmType()+"(이)/가 도착했습니다. ( "+alarm.getAlarmCnt()+" )")
 				.alarmTargetNo(alarm.getAlarmTargetNo())
 				.alarmTargetFrom(alarm.getAlarmTargetFrom())
 				.alarmIsRead(alarm.getAlarmIsRead())
 				.alarmReadDate(alarm.getAlarmReadDate())
 				.alarmUpdateDate(alarm.getAlarmUpdateDate())
+				.alarmCnt(alarm.getAlarmCnt())
+				.warnCnt(warnCnt)
+				.banDate(date)
 				.build()
 				);
 		
@@ -151,6 +181,7 @@ public class AlarmServiceImpl implements AlarmService{
 			return alarmDtoList;
 		}
 	}
+	
 
 
 	@Override
@@ -161,6 +192,9 @@ public class AlarmServiceImpl implements AlarmService{
 				Alarm alarm = optionalAlarm.get();
 				alarm.setAlarmIsRead("Y");
 				alarm.setAlarmReadDate(new Timestamp(new Date().getTime()));
+				if(alarm.getAlarmType().equals("댓글")) {
+					alarm.setAlarmCnt(0);
+				}
 				alarmRepository.save(alarm);
 			}else {
 				throw new Exception("해당 번호 알람 없음");
@@ -178,8 +212,61 @@ public class AlarmServiceImpl implements AlarmService{
 			for(Alarm alarm : alarmList) {
 				alarm.setAlarmIsRead("Y");
 				alarm.setAlarmReadDate(new Timestamp(new Date().getTime()));
+				if(alarm.getAlarmType().equals("댓글")) {
+					alarm.setAlarmCnt(0);
+				}
 				alarmRepository.save(alarm);
 			}
+		}
+	}
+
+	
+	// 댓글작성시, 문의답글시, 회원제재시 알림 데이터 삽입
+	@Override
+	public void addAlarm(Alarm alarm) throws Exception {
+		alarmRepository.save(alarm);
+	}
+
+	// 기존 알림데이터 조회
+	@Override
+	public Alarm selectAlarmByAlarmTargetNoAndAlarmTargetFrom(Integer alarmTargetNo, String alarmTargetFrom) throws Exception {
+		Optional<Alarm> oalarm = alarmRepository.findByAlarmTargetNoAndAlarmTargetFrom(alarmTargetNo, alarmTargetFrom);
+		if(oalarm.isEmpty()) return null; // 기존 알림 데이터가 없으면 null반환
+		return oalarm.get();
+	}
+
+
+	@Override
+	public List<AlarmDto> getAlarmListByAlarmIsNotReadBy5(String username) throws Exception {
+		List<Alarm> alarmList = alarmDslRepository.findAlarmListNotReadByUsername(username);
+		return alarmToAlarmDto(alarmList);
+	}
+
+
+	@Override
+	public Long getCntNotReadAlarmList(String username) throws Exception {
+		Long cnt = alarmDslRepository.findCntAlarmNotReadByUsername(username);
+		return cnt;
+	}
+
+	//알람 읽음여부와 시간
+	@Override
+	public void updateAlarmRead(Integer no) throws Exception {
+		Optional<Alarm> optionalAlarm = alarmRepository.findById(no);
+		if(optionalAlarm.isEmpty()) {
+			throw new Exception("해당 알림 없음");
+		} else { 
+			optionalAlarm.get().setAlarmIsRead("Y");
+			optionalAlarm.get().setAlarmReadDate(new Timestamp(new Date().getTime()));
+			if(optionalAlarm.get().getAlarmType().equals("댓글")) {
+				optionalAlarm.get().setAlarmCnt(0);
+			}
+			if(optionalAlarm.get().getAlarmTargetFrom().toUpperCase().equals("NOTE")) {
+				Optional<Note> note = noteRepository.findById(optionalAlarm.get().getAlarmTargetNo());
+				note.get().setNoteIsRead("Y");
+				noteRepository.save(note.get());
+			}
+			alarmRepository.save(optionalAlarm.get());
 		}
 	}
 	

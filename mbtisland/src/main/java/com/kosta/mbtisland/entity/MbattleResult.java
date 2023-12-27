@@ -8,6 +8,7 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,4 +58,7 @@ public class MbattleResult {
 	
 	@Column
 	private Integer P;
+	
+	@Column
+	private Integer voteCnt;	
 }

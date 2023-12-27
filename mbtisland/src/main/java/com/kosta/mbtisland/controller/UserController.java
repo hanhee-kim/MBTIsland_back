@@ -94,14 +94,10 @@ public class UserController {
 	
 	//main 로드시에 실행
 	@GetMapping("/user")
-	public ResponseEntity<UserEntity> user(Authentication authentication) {
+	public ResponseEntity<Object> user(Authentication authentication) {
 		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
-		System.out.println(principalDetails.getUser().getUserIdx());
-		System.out.println(principalDetails.getUser().getUsername());
-		System.out.println(principalDetails.getUser().getUserPassword());
-		System.out.println(principalDetails.getUser().getUserRole());
-		return new ResponseEntity<UserEntity>(principalDetails.getUser(), HttpStatus.OK);
-		
+		UserEntity user = principalDetails.getUser();
+		return new ResponseEntity<Object>(user, HttpStatus.OK);
 	}
 	
 	//마이페이지에서 유저정보 수정
@@ -111,10 +107,11 @@ public class UserController {
 		PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
 		try {
 			UserEntity user = userService.modifyUser(principalDetails.getUser(), param);
+			System.out.println("비번"+principalDetails.getUser().getUserPassword());
 			return new ResponseEntity<Object>(user, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.OK);
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		}
 	}
 	
@@ -144,7 +141,7 @@ public class UserController {
 		try {
 			UserEntity user =  userService.getUserByUserEmailAndProviderNull(email);
 			if(user == null) {
-				return new ResponseEntity<Object>("해당 Email 존재하지 않음.", HttpStatus.OK);
+				return new ResponseEntity<Object>("해당 Email 존재하지 않음.", HttpStatus.BAD_REQUEST);
 			}else {
 				if(type.equals("ID")) {
 					//id찾기
@@ -182,7 +179,32 @@ public class UserController {
 		}		
 	}
 	
-
+	//마이페이지(프로필) 진입시
+	@GetMapping("/mypage/{username}")
+	public ResponseEntity<Object> mypage(@PathVariable String username){
+		Map<String, Object> res = new HashMap<>();
+		try {
+			Integer totalCnt = userService.getCountTotalBoardByUser(username);
+			res.put("totalCnt", totalCnt);
+			return new ResponseEntity<Object>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
 	
-
+	//탈퇴눌렀을떄
+	@GetMapping("/leaveuser")
+	public ResponseEntity<Object> leaveUser(Authentication authentication){
+		try {
+			PrincipalDetails principalDetails = (PrincipalDetails)authentication.getPrincipal();
+			UserEntity user = principalDetails.getUser();
+			userService.leaveUser(user);
+			return new ResponseEntity<Object>("탈퇴성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+		
 }

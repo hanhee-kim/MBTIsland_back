@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.MbtwhyComment;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -26,7 +27,8 @@ public class MbtwhyDslRepository {
 		(String mbti, PageRequest pageRequest, String search, String sort) throws Exception {
 		OrderSpecifier<?> orderSpecifier;
 		System.out.println(sort);
-		
+
+/*
 		// 정렬 조건
 		if(sort.equals("최신순")) { // 최신순
 			orderSpecifier = mbtwhy.no.desc();
@@ -37,11 +39,27 @@ public class MbtwhyDslRepository {
 		} else { // 기본 최신순
 			orderSpecifier = mbtwhy.no.desc();
 		}
+*/		
+		
+		// 정렬 조건
+		if(sort==null) {
+			orderSpecifier = mbtwhy.no.desc();
+		} else if(sort.equals("최신순")) { // 최신순
+			orderSpecifier = mbtwhy.no.desc();
+		} else if(sort.equals("조회순")) { // 조회순
+			orderSpecifier = mbtwhy.viewCnt.desc();
+		} else if(sort.equals("추천순")) { // 추천순
+			orderSpecifier = mbtwhy.recommendCnt.desc();
+		} 
+		else { // 기본 최신순
+			orderSpecifier = mbtwhy.no.desc();
+		}
 		
 		return jpaQueryFactory.selectFrom(mbtwhy)
 				.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,
 						mbtwhy.isBlocked.eq("N"),
-						mbtwhy.mbtiCategory.eq(mbti))
+//						mbtwhy.mbtiCategory.eq(mbti))
+						mbti!=null? mbtwhy.mbtiCategory.eq(mbti) : null)
 						.orderBy(orderSpecifier) // 정렬
 						.offset(pageRequest.getOffset()) // 인덱스
 						.limit(pageRequest.getPageSize()) // 개수 제한
@@ -50,12 +68,13 @@ public class MbtwhyDslRepository {
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값)
 	public Long findMbtwhyCountByMbtiAndSearch(String mbti, String search) throws Exception {
-		
 		return jpaQueryFactory.select(mbtwhy.count())
 						.from(mbtwhy)
 						.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,
 										mbtwhy.isBlocked.eq("N"),
-										mbtwhy.mbtiCategory.eq(mbti)).fetchOne();
+//										mbtwhy.mbtiCategory.eq(mbti))
+										mbti!=null? mbtwhy.mbtiCategory.eq(mbti) : null)
+						.fetchOne();
 	}
 	
 	// 일간 인기 게시글 조회 (MBTI)
@@ -67,31 +86,45 @@ public class MbtwhyDslRepository {
 		return jpaQueryFactory.select(mbtwhy)
 				.from(mbtwhy)
 				.where(mbtwhy.writeDate.after(startDate),
-						mbtwhy.mbtiCategory.eq(mbti),
+//						mbtwhy.mbtiCategory.eq(mbti),
+						mbti!=null? mbtwhy.mbtiCategory.eq(mbti) : null,
 						mbtwhy.isBlocked.eq("N"))
 				.orderBy(mbtwhy.recommendCnt.desc())
 				.limit(1).fetchOne();
 	}
 	
 	// 댓글 목록 조회 (게시글 번호)
-	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) {
+	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) throws Exception {
 		return jpaQueryFactory.selectFrom(mbtwhyComment)
-				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
-				.orderBy(mbtwhyComment.commentNo.asc()) // 정렬
+//				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
+				.where(mbtwhyComment.mbtwhyNo.eq(no))
+//				.orderBy(mbtwhyComment.commentNo.asc()) // 정렬
+//				.orderBy(NumberTemplate.create(Number.class, "COALESCE({0}, {1})", QComment.comment.b, QComment.comment.a).asc(), QComment.comment.a.asc())
+//				.orderBy(NumberTemplate.create(Number.class, "COALESCE({0}, {1})", mbtwhyComment.parentcommentNo, mbtwhyComment.commentNo).asc(), mbtwhyComment.commentNo.asc())
+				.orderBy(mbtwhyComment.parentcommentNo.coalesce(mbtwhyComment.commentNo).asc(), mbtwhyComment.commentNo.asc())
 				.offset(pageRequest.getOffset()) // 인덱스
 				.limit(pageRequest.getPageSize()) // 개수 제한
 				.fetch();
 	}
 
 	// 댓글 개수 조회 (게시글 번호)
-	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) {
+	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception{
 		return jpaQueryFactory.select(mbtwhyComment.count()).from(mbtwhyComment)
 				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
 				.fetchOne();
 	}
 	
+	// 댓글의 대댓글 수 조회
+	public Long countCommentByParentcommentNo(Integer commentNo) throws Exception {
+		return jpaQueryFactory
+				.select(mbtwhyComment.count())
+				.from(mbtwhyComment)
+				.where(mbtwhyComment.parentcommentNo.eq(commentNo))
+				.fetchOne();
+	}
+	
 	//
-	public List<Mbtwhy> findMbtwhyListUserAndPaging(String username, PageRequest pageRequest){
+	public List<Mbtwhy> findMbtwhyListUserAndPaging(String username, PageRequest pageRequest) throws Exception {
 		return jpaQueryFactory.selectFrom(mbtwhy)
 //			.where(mbtwhy.writerId.eq(username).and(mbtwhy.isRemoved.eq("N"))
 			.orderBy(mbtwhy.no.desc())

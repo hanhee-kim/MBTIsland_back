@@ -51,6 +51,8 @@ public class NoteServiceImpl implements NoteService{
 				.alarmTargetNo(note.getNoteNo())
 				.alarmTargetFrom("NOTE")
 				.alarmReadDate(null)
+				.alarmIsRead("N")
+				.alarmCnt(1)
 				.build();
 		
 		alarmRepository.save(alarm);
@@ -130,6 +132,41 @@ public class NoteServiceImpl implements NoteService{
 			            .noteIsRead(optionalNote.get().getNoteIsRead())
 			            .build();
 		return note;
+	}
+
+	@Override
+	public List<NoteDto> getNoteListNotReadByUsername(String username) throws Exception {
+		PageRequest pageRequest = PageRequest.of(0, 5);
+		List<NoteDto> noteDtoList = noteDslRepository.findNoteListByUserAndReadTypeAndPaging(username,"receive","N",pageRequest);
+//		if(noteDtoList.isEmpty())throw new Exception("해당 노트 없음");
+		return noteDtoList;
+	}
+
+	@Override
+	public Long getCntNotReadNoteList(String username) throws Exception {
+		Long cnt = noteDslRepository.findNoteCntByUserAndNoteTypeAndReadType(username,"receive","N");
+		return cnt;
+	}
+
+	@Override
+	public void allReadNoteByUser(String username) throws Exception {
+		//userType이 receive라면 읽음 여부 변경
+		List<Note> noteList = noteRepository.findByReceiveUsername(username);
+		if(noteList.isEmpty())throw new Exception("user가 받은 쪽지리스트 없음");
+		for(Note note : noteList) {
+			note.setNoteIsRead("Y");
+			noteRepository.save(note);
+		}
+	}
+
+	@Override
+	public void readNoteByNoteNo(Integer no) throws Exception {
+		Optional<Alarm> alarm = alarmRepository.findByAlarmTargetNoAndAlarmTargetFrom(no, "NOTE");
+		Optional<Note> note = noteRepository.findById(no);
+		alarm.get().setAlarmIsRead("Y");
+		note.get().setNoteIsRead("Y");
+		alarmRepository.save(alarm.get());
+		noteRepository.save(note.get());
 	}
 	
 

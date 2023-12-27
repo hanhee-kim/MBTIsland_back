@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,9 +38,9 @@ public class FileVo {
 	@Column
 	private String fileName;
 	@Column
-	private String type;
+	private String fileType;
 	@Column
-	private Integer fileSize;
+	private Long fileSize; // 타입 Integer->Long 변경
 	@Column
 	@CreationTimestamp
 	private Timestamp uploadDate;

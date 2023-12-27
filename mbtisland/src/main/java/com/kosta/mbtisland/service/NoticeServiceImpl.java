@@ -1,5 +1,7 @@
 package com.kosta.mbtisland.service;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.kosta.mbtisland.dto.NoticeDto;
 import com.kosta.mbtisland.dto.PageInfo;
+import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.Notice;
 import com.kosta.mbtisland.repository.NoticeDslRepository;
 import com.kosta.mbtisland.repository.NoticeRepository;
@@ -32,14 +36,14 @@ public class NoticeServiceImpl implements NoticeService {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
 		List<Notice> noticeList = noticeDslRepository.findNoticeListBySearchAndFilterAndPaging(searchTerm, isHidden, pageRequest);
 		
-		System.out.println("***서비스 파라미터\nsearchTerm: " + searchTerm + "\nisHidden: " + isHidden);
-		System.out.println("noticeList: " + noticeList);
+//		System.out.println("***서비스 파라미터\nsearchTerm: " + searchTerm + "\nisHidden: " + isHidden);
+//		System.out.println("noticeList: " + noticeList);
 		
 		
 		if(noticeList.size()==0) throw new Exception("해당하는 게시글이 존재하지 않습니다.");
 		
 		Integer allCount = noticeCntByCriteria(isHidden, searchTerm);
-		System.out.println("***서비스에서 출력:\n필터유무와 검색어유무를 적용한 전체 데이터 수 allCount: " + allCount);
+//		System.out.println("***서비스에서 출력:\n필터유무와 검색어유무를 적용한 전체 데이터 수 allCount: " + allCount);
 		Integer allPage = (int) Math.ceil((double) allCount / itemsPerPage);
 		Integer startPage = (int) ((pageInfo.getCurPage() - 1) / pagesPerGroup) * pagesPerGroup + 1;
 		Integer endPage = Math.min(startPage + pagesPerGroup - 1, allPage);
@@ -57,7 +61,7 @@ public class NoticeServiceImpl implements NoticeService {
 	@Override
 	public Map<String, Integer> getNoticeCounts(String searchTerm, String isHidden) throws Exception {
 		
-		System.out.println("검색어: " + searchTerm + ", 필터값: " + isHidden);
+//		System.out.println("검색어: " + searchTerm + ", 필터값: " + isHidden);
 		
 		Map<String, Integer> counts = new HashMap<>();
 		Long totalCnt = noticeRepository.count();
@@ -139,6 +143,40 @@ public class NoticeServiceImpl implements NoticeService {
 		notice.setViewCnt(notice.getViewCnt()+1);
 		noticeRepository.save(notice);
 	}
+
+	// 공지사항 등록
+	@Override
+	public Notice addNotice(NoticeDto noticeDto) throws Exception {
+		LocalDate currentDate = LocalDate.now();
+		Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+		Notice notice = Notice.builder()
+							.title(noticeDto.getTitle())
+							.content(noticeDto.getContent())
+							.writeDate(writeDate)
+							.writerId(noticeDto.getWriterId())
+							.build();
+		noticeRepository.save(notice);
+		Optional<Notice> onotice = noticeRepository.findById(notice.getNo());
+		if(onotice.isPresent()) return onotice.get(); 
+		else return null;
+	}
+
+	// 공지사항 수정
+	@Override
+	public Notice modifyNotice(NoticeDto noticeDto) throws Exception {
+		Notice existNotice = noticeRepository.findById(noticeDto.getNo()).get();
+		if(existNotice==null) throw new Exception("해당 공지사항이 존재하지 않습니다.");
+		
+		existNotice.setTitle(noticeDto.getTitle());
+		existNotice.setContent(noticeDto.getContent());
+		existNotice.setWriterId(noticeDto.getWriterId());
+
+		noticeRepository.save(existNotice); // 업데이트
+		return existNotice;
+	}
+	
+
+	
 
 	
 }

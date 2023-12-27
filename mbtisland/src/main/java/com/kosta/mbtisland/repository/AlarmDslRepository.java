@@ -2,6 +2,8 @@ package com.kosta.mbtisland.repository;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
@@ -43,5 +45,40 @@ public class AlarmDslRepository {
 						)
 				.fetchOne();
 		return cnt;
+	}
+	
+	//5개씩만 가져옴
+	public List<Alarm> findAlarmListNotReadByUsername(String username){
+		QAlarm alarm = QAlarm.alarm;
+		List<Alarm> alarmList = jpaQueryfactory
+				.selectFrom(alarm)
+				.where(alarm.username.eq(username).and(alarm.alarmIsRead.eq("N")))
+				.orderBy(alarm.alarmUpdateDate.desc())
+				.limit(5)
+				.fetch();
+		return alarmList;
+	}
+	
+	public Long findCntAlarmNotReadByUsername(String username) {
+		QAlarm alarm = QAlarm.alarm;
+		Long cnt = jpaQueryfactory
+				.select(alarm.count())
+				.from(alarm)
+				.where(alarm.username.eq(username).and(alarm.alarmIsRead.eq("N")))
+				.fetchOne();
+		return cnt;
+	}
+	
+	
+	// 특정 게시글과 관련된 알림 삭제(게시글 삭제시 호출됨)
+	@Transactional
+	public void deleteAlarmByTargetNoAndTargetFrom(Integer targetNo, String targetFrom) {
+		QAlarm alarm = QAlarm.alarm;
+		jpaQueryfactory.delete(alarm)
+						.where(
+								alarm.alarmTargetNo.eq(targetNo),
+								alarm.alarmTargetFrom.lower().eq(targetFrom.toLowerCase())
+								)
+						.execute();
 	}
 }

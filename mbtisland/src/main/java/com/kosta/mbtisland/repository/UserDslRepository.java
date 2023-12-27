@@ -1,5 +1,7 @@
 package com.kosta.mbtisland.repository;
 
+import static com.kosta.mbtisland.entity.QUserEntity.userEntity;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.kosta.mbtisland.entity.Mbtwhy;
 import com.kosta.mbtisland.entity.QMbtwhy;
 import com.kosta.mbtisland.entity.QUserEntity;
+import com.kosta.mbtisland.entity.UserEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
@@ -43,5 +46,34 @@ public class UserDslRepository {
 					.fetch();
 		}
 	
+	// 경고된 모든 유저 목록 조회
+	public List<UserEntity> findBannedUserListByPageAndFilterAndUsername(PageRequest pageRequest, String filter, String username) throws Exception {
+		return jpaQueryFactory.selectFrom(userEntity)
+				.where(filter.equals("all")? null : userEntity.isBanned.eq(filter),
+						username.equals("")? null : userEntity.username.containsIgnoreCase(username),
+						userEntity.userWarnCnt.gt(0))
+						.orderBy(userEntity.userIdx.desc()) // 정렬
+						.offset(pageRequest.getOffset()) // 인덱스
+						.limit(pageRequest.getPageSize()) // 개수 제한
+						.fetch();
+	}
 	
+	// 경고된 모든 유저 목록 개수
+	public Long findBanCountByFilterAndUsername(String filter, String username) throws Exception {
+		return jpaQueryFactory.select(userEntity.count())
+				.from(userEntity)
+				.where(filter.equals("all")? null : userEntity.isBanned.eq(filter),
+						username.equals("")? null : userEntity.username.containsIgnoreCase(username),
+						userEntity.userWarnCnt.gt(0))
+				.orderBy(userEntity.userIdx.desc())
+				.fetchOne();
+	}
+	
+	// 경고된 유저 조회 (단일)
+	public UserEntity findBannedUserByUsername(String username) throws Exception {
+		return jpaQueryFactory.selectFrom(userEntity)
+				.where(userEntity.username.eq(username),
+						userEntity.userWarnCnt.gt(0))
+						.fetchOne();
+	}
 }

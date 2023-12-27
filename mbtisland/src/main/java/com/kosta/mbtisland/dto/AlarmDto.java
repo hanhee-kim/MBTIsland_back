@@ -27,10 +27,14 @@ public class AlarmDto {
 	private String alarmType;
 	private String detailType;
 	private Integer detailNo;
+	private String detailMbti;
 	private String alarmContent;
 	private Integer alarmTargetNo;
 	private String alarmTargetFrom;
 	private String alarmIsRead;
 	private Timestamp alarmReadDate;
 	private Timestamp alarmUpdateDate;
+	private Integer alarmCnt;
+	private Timestamp banDate;
+	private Integer warnCnt;
 }

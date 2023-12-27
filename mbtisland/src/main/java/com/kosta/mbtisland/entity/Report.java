@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,6 +41,9 @@ public class Report {
 	
 	@Column
 	private Integer reportedPostNo;
+	
+	@Column
+	private Integer reportedCommentNo;
 	
 	@Column
 	private String reportedId;

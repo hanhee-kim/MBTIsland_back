@@ -48,6 +48,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 			 loginType = "login";
 		}
 		response.setCharacterEncoding("UTF-8");
+//		String targetUrl = UriComponentsBuilder.fromUriString("http://3.36.65.170:3000/oauth/redirect/"+JwtProperties.TOKEN_PREFIX+jwtToken+"/"+loginType)
 		String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/oauth/redirect/"+JwtProperties.TOKEN_PREFIX+jwtToken+"/"+loginType)
 				.build().toUriString();
 			response.sendRedirect(targetUrl);	//리다이렉트로 보내줌	

@@ -3,11 +3,10 @@ package com.kosta.mbtisland.service;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -17,10 +16,12 @@ import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
+import com.kosta.mbtisland.repository.AlarmDslRepository;
+import com.kosta.mbtisland.repository.BookmarkDslRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiDslRepository;
 import com.kosta.mbtisland.repository.MbtmiRepository;
-import com.querydsl.core.Tuple;
+import com.kosta.mbtisland.repository.RecommendDslRepository;
 
 @Service
 public class MbtmiServiceImpl implements MbtmiService {
@@ -31,6 +32,12 @@ public class MbtmiServiceImpl implements MbtmiService {
 	private MbtmiDslRepository mbtmiDslRepository;
 	@Autowired
 	private MbtmiCommentRepository mbtmiCommentRepository;
+	@Autowired
+	private BookmarkDslRepository bookmarkDslRepository;
+	@Autowired
+	private RecommendDslRepository recommendDslRepository;
+	@Autowired
+	private AlarmDslRepository alarmDslRepository;
 
 	
 	// 주간인기글 목록
@@ -55,12 +62,13 @@ public class MbtmiServiceImpl implements MbtmiService {
 
 	// 최신글 목록
 	@Override
-	public List<MbtmiDto> mbtmiListByCategoryAndTypeAndSearch(String category, String type, String searchTerm, PageInfo pageInfo, String sort) throws Exception {
+	public List<MbtmiDto> mbtmiListByCategoryAndTypeAndSearch(String category, String type, String searchTerm, PageInfo pageInfo, String sort, String username) throws Exception {
 		// PageInfo를 PageRequest로 가공하여 Repository의 메서드를 호출
 		Integer itemsPerPage = 10;
 		int pagesPerGroup = 10;
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage()-1, itemsPerPage);
-		List<Mbtmi> mbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort);
+//		List<Mbtmi> mbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort);
+		List<Mbtmi> mbtmiList = mbtmiDslRepository.findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(category, type, searchTerm, pageRequest, sort, username);
 		
 		if(mbtmiList.size()==0) throw new Exception("해당하는 게시글이 존재하지 않습니다.");
 		
@@ -76,7 +84,7 @@ public class MbtmiServiceImpl implements MbtmiService {
 			dtoList.add(dto);
 		}
 		
-		Integer allCount = mbtmiCntByCriteria(category, type, searchTerm);
+		Integer allCount = mbtmiCntByCriteria(category, type, searchTerm, username);
 		Integer allPage = (int) Math.ceil((double) allCount / itemsPerPage);
 		Integer startPage = (int) ((pageInfo.getCurPage() - 1) / pagesPerGroup) * pagesPerGroup + 1;
 		Integer endPage = Math.min(startPage + pagesPerGroup - 1, allPage);
@@ -92,21 +100,22 @@ public class MbtmiServiceImpl implements MbtmiService {
 
 	// 최신글수 조회 (PageInfo의 allPage값 계산시 필요)
 	@Override
-	public Integer mbtmiCntByCriteria(String category, String type, String searchTerm) throws Exception {
+	public Integer mbtmiCntByCriteria(String category, String type, String searchTerm, String username) throws Exception {
 		// 경우의 수 2^3=8
-		Long mbtmiCnt = 0L;
-		if (category == null && type == null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, null, null);
+//		Long mbtmiCnt = 0L;
+//		if (category == null && type == null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, null, null);
+//		
+//		else if (category != null && type == null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, null, null);
+//		else if (category == null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, type, null);
+//		else if (category == null && type == null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, null, searchTerm);
+//		
+//		else if (category != null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, null);
+//		else if (category != null && type == null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, null, searchTerm);
+//		else if (category == null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, type, searchTerm);
+//		
+//		else if (category != null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, searchTerm);
 		
-		else if (category != null && type == null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, null, null);
-		else if (category == null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, type, null);
-		else if (category == null && type == null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, null, searchTerm);
-		
-		else if (category != null && type != null && searchTerm == null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, null);
-		else if (category != null && type == null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, null, searchTerm);
-		else if (category == null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(null, type, searchTerm);
-		
-		else if (category != null && type != null && searchTerm != null) mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, searchTerm);
-		
+		Long mbtmiCnt = mbtmiDslRepository.countByCategoryPlusWriterMbtiPlusSearch(category, type, searchTerm, username);
 		return mbtmiCnt.intValue();
 	}
 	
@@ -161,9 +170,23 @@ public class MbtmiServiceImpl implements MbtmiService {
 
 	// 게시글 삭제
 	@Override
+	@Transactional
 	public void deleteMbtmi(Integer no) throws Exception {
 		Mbtmi mbtmi = mbtmiRepository.findById(no).get();
 		if(mbtmi==null) throw new Exception("게시글이 존재하지 않습니다.");
+		
+		// (1) 게시글 삭제시 관련데이터 삭제 - 게시글에 속한 모든 댓글, 북마크, 추천, 알림
+		List<Integer> commentNos = mbtmiDslRepository.findCommentNosByPostNo(no);
+		for (Integer commentNo : commentNos) {
+			alarmDslRepository.deleteAlarmByTargetNoAndTargetFrom(commentNo, "mbtmiComment"); // 대댓글에 대한 알림
+		}
+		alarmDslRepository.deleteAlarmByTargetNoAndTargetFrom(no, "mbtmi"); // 알림
+		mbtmiDslRepository.deleteCommentsByMbtmiNo(no); // 댓글
+		bookmarkDslRepository.deleteBookmarkByPostNoAndBoardType(no, "mbtmi"); // 북마크
+		recommendDslRepository.deleteRecommendByPostNoAndBoardType(no, "mbtmi"); // 추천
+		
+		
+		// (2) 게시글 삭제
 		mbtmiRepository.deleteById(no);
 	}
 	
@@ -179,13 +202,13 @@ public class MbtmiServiceImpl implements MbtmiService {
 		mbtmiCommentRepository.save(targetComment.get());
 	}
 
-	// 댓글 작성
+	// 댓글 등록
 	@Override
 	public void addMbtmiComment(MbtmiComment mbtmiComment) throws Exception {
 		mbtmiCommentRepository.save(mbtmiComment);
 	}
 
-	// 게시글 작성
+	// 게시글 등록
 	@Override
 	public Mbtmi addMbtmi(MbtmiDto mbtmiDto) throws Exception {
 		LocalDate currentDate = LocalDate.now();
@@ -203,12 +226,96 @@ public class MbtmiServiceImpl implements MbtmiService {
 		mbtmiRepository.save(mbtmi);
 		Optional<Mbtmi> ombtmi = mbtmiRepository.findById(mbtmi.getNo());
 		if(ombtmi.isPresent()) return ombtmi.get(); 
-		return null;
+		else return null;
+	}
+
+	// 추천수 증가, 감소
+	@Override
+	public void increaseRecommendCnt(Integer no) throws Exception {
+		Mbtmi mbtmi = mbtmiDetail(no);
+		mbtmi.setRecommendCnt(mbtmi.getRecommendCnt()+1);
+		mbtmiRepository.save(mbtmi);
+	}
+	@Override
+	public void decreaseRecommendCnt(Integer no) throws Exception {
+		Mbtmi mbtmi = mbtmiDetail(no);
+		mbtmi.setRecommendCnt(mbtmi.getRecommendCnt()-1);
+		mbtmiRepository.save(mbtmi);
+	}
+
+	// 댓글의 대댓글 수 조회
+	@Override
+	public Integer mbtmiChildCommentCnt(Integer mbtmiCommentNo) throws Exception {
+		Long mbtmiChildCommentCnt = mbtmiDslRepository.countCommentByParentcommentNo(mbtmiCommentNo);
+		return mbtmiChildCommentCnt.intValue();
+	}
+
+	// 게시글 수정
+	@Override
+	public Mbtmi modifyMbtmi(MbtmiDto mbtmiDto) throws Exception {
+		Mbtmi existMbtmi = mbtmiRepository.findById(mbtmiDto.getNo()).get();
+		if(existMbtmi==null) throw new Exception("해당 게시글이 존재하지 않습니다.");
+		
+		// 변경 가능한 값
+		existMbtmi.setTitle(mbtmiDto.getTitle());
+		existMbtmi.setContent(mbtmiDto.getContent());
+		existMbtmi.setCategory(mbtmiDto.getCategory());
+
+		if(existMbtmi.getViewCnt()>2) existMbtmi.setViewCnt(existMbtmi.getViewCnt()-2);
+		else existMbtmi.setViewCnt(0);
+
+		mbtmiRepository.save(existMbtmi); // 업데이트
+		return existMbtmi;
+	}
+
+	@Override
+	public void deleteMbtmiList(List<Integer> noList) throws Exception {
+		for (Integer no : noList) {
+			Optional<Mbtmi> optionalMbtmi = mbtmiRepository.findById(no);
+			if (optionalMbtmi.isPresent()) {
+				mbtmiRepository.deleteById(no);
+			} else {
+				throw new Exception("해당 번호 Mbtmi게시글 없음");
+			}
+		}
+	}
+
+	// fileIdxs 업데이트
+	@Override
+	public Mbtmi updateFileIdxs(Integer postNo, Integer fileIdx) throws Exception {
+		Optional<Mbtmi> ombtmi = mbtmiRepository.findById(postNo);
+		if(ombtmi.isEmpty()) throw new Exception(postNo + "번 게시글이 존재하지 않습니다.");
+		Mbtmi mbtmi = ombtmi.get();
+		String fileIdxs = String.valueOf(fileIdx);
+		mbtmi.setFileIdxs(fileIdxs);
+		mbtmiRepository.save(mbtmi);
+		return mbtmi;
+	}
+
+	// fileIdxs를 포함하는 content로 업데이트
+	@Override
+	public Mbtmi updateContainingFileIdxs(MbtmiDto mbtmiDto) throws Exception {
+		Optional<Mbtmi> ombtmi = mbtmiRepository.findById(mbtmiDto.getNo());
+		if(ombtmi.isEmpty()) throw new Exception(mbtmiDto.getNo() + "번 게시글이 존재하지 않습니다.");
+		Mbtmi mbtmi = ombtmi.get();
+		mbtmi.setContent(mbtmiDto.getContent());
+		mbtmiRepository.save(mbtmi);
+		return mbtmi;
 	}
 	
 	
-
-
+	// 게시글 등록 (업데이트용)
+	@Override
+	public void addMbtmiForUpdate(Mbtmi mbtmi) throws Exception {
+		mbtmiRepository.save(mbtmi);
+	}
 	
-
+	// 댓글 조회
+	@Override
+	public MbtmiComment mbtmiComment(Integer no) throws Exception {
+		Optional<MbtmiComment> ombtmiComment = mbtmiCommentRepository.findById(no);
+		if(ombtmiComment.isEmpty()) throw new Exception(no + "번 댓글이 존재하지 않습니다.");
+		MbtmiComment mbtmiComment = ombtmiComment.get();
+		return mbtmiComment;
+	}
 }

@@ -1,6 +1,8 @@
 package com.kosta.mbtisland.config.jwt;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -16,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.mbtisland.config.auth.PrincipalDetails;
 import com.kosta.mbtisland.dto.LoginRequestDto;
+import com.kosta.mbtisland.entity.UserEntity;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -30,7 +33,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
-		System.out.println("JwtAuthenticationFilter : 진입");
+//		System.out.println("JwtAuthenticationFilter : 진입");
 		//request에 있는 username과 password를 파싱해서 자바 Object로 받기
 		ObjectMapper om = new ObjectMapper();
 		LoginRequestDto loginRequestDto = null;
@@ -66,11 +69,19 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 							.withClaim("username", principalDetails.getUser().getUsername())
 							.sign(Algorithm.HMAC512(JwtProperties.SECRET));
 		
-//		response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+//		response.setHeader("Access-Control-Allow-Origin", "http://:3000");
 //		response.setStatus(HttpServletResponse.SC_OK);
 		System.out.println("토큰:"+jwtToken);
 		response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
-		om.writeValue(response.getOutputStream(), principalDetails.getUser());
+		Map<String,Object> res = new HashMap<>();
+		res.put("user", principalDetails.getUser());
+		if(principalDetails.getUser().getIsLeave().equals("Y")) {
+			res.put("checkLeave", "Y");
+		} 
+//		om.writeValue(response.getOutputStream(), principalDetails.getUser());			
+		om.writeValue(response.getOutputStream(),res);			
 		response.setContentType("application/json; charset=utf-8");
 	}
+	
+	
 }

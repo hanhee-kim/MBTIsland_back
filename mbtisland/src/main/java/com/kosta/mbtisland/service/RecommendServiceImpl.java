@@ -30,7 +30,7 @@ public class RecommendServiceImpl implements RecommendService {
 		recommendRepository.deleteById(no);
 	}
 
-	// 로그인유저의 게시글 추천여부 조회
+	// 로그인 유저의 게시글 추천여부 조회
 	@Override
 	public Boolean selectIsRecommendByUsernameAndPostNoAndBoardType(String username, Integer postNo, String boardType) throws Exception {
 		return recommendRepository.existsByUsernameAndPostNoAndBoardType(username, postNo, boardType);

@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
@@ -33,6 +35,8 @@ public class MbtmiDslRepository {
 		LocalDate today = LocalDate.now();
 		LocalDate todayMinus6Days = today.minusDays(6);
 		Timestamp startDate = Timestamp.valueOf(todayMinus6Days.atStartOfDay()); // Timestamp타입으로 변환
+		
+//		System.out.println("인기글목록dsl레파지토리에서출력 startDate: " + startDate);
 		
 		// 다중열 다중행이므로 List<Tuple>로 반환
 		return jpaQueryfactory
@@ -64,7 +68,8 @@ public class MbtmiDslRepository {
 						                .selectFrom(mbtmi)
 						                .where(mbtmi.category.eq(category),
 						                        mbtmi.recommendCnt.eq(maxRecommendCnt),
-						                        mbtmi.isBlocked.eq("N")
+						                        mbtmi.isBlocked.eq("N"),
+						                        mbtmi.writeDate.after(startDate)
 						                )
 						                .fetchFirst();
 
@@ -76,27 +81,8 @@ public class MbtmiDslRepository {
 	}
 	
 	
-	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징)
-//	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest, String sort) {
-//		return jpaQueryfactory.selectFrom(mbtmi)
-//							.where(
-//									category!=null? mbtmi.category.eq(category) : null,
-//									type!=null? isWriterMbtiContainsStr(type) : null,
-//									searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
-//											.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
-//									mbtmi.isBlocked.eq("N")
-//							)
-//							.orderBy(
-//									sort!=null&&sort.equals("최신순")? mbtmi.no.desc() :
-//									sort!=null&&sort.equals("조회순")? mbtmi.viewCnt.desc() :
-//									sort!=null&&sort.equals("추천순")? mbtmi.recommendCnt.desc() : null
-//									)
-//							.offset(pageRequest.getOffset())
-//							.limit(pageRequest.getPageSize())
-//							.fetch();
-//	}
-	
-	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest, String sort) {
+	// 2. 최신글 목록 (카테고리, 타입, 검색, 페이징, 정렬, 작성자)
+	public List<Mbtmi> findNewlyMbtmiListByCategoryAndTypeAndSearchAndPaging(String category, String type, String searchTerm, PageRequest pageRequest, String sort, String username) {
 //		System.out.println("dsl의 파라미터 정렬값: " + sort);
 	    JPAQuery<Mbtmi> query = jpaQueryfactory.selectFrom(mbtmi)
 	            .where(
@@ -104,6 +90,7 @@ public class MbtmiDslRepository {
 	                    type != null ? isWriterMbtiContainsStr(type) : null,
 	                    searchTerm != null ? mbtmi.title.containsIgnoreCase(searchTerm)
 	                            .or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+	                    username != null? mbtmi.writerId.eq(username) : null,
 	                    mbtmi.isBlocked.eq("N")
 	            );
 
@@ -141,7 +128,7 @@ public class MbtmiDslRepository {
 	}
 	
 	// 3. 최신글수 조회 (PageInfo의 allPage값 계산시 필요)
-	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm) {
+	public Long countByCategoryPlusWriterMbtiPlusSearch(String category, String type, String searchTerm, String username) {
 
 	    return jpaQueryfactory.select(mbtmi.count()).from(mbtmi)
 	    		.where(
@@ -149,6 +136,7 @@ public class MbtmiDslRepository {
 	    				type!=null? isWriterMbtiContainsStr(type) : null,
 	    				searchTerm!=null? mbtmi.title.containsIgnoreCase(searchTerm)
 				    					.or(mbtmi.content.containsIgnoreCase(searchTerm)) : null,
+				    	username != null? mbtmi.writerId.eq(username) : null,
 				    	mbtmi.isBlocked.eq("N")
 	    				)
 	    		.fetchOne();
@@ -159,11 +147,13 @@ public class MbtmiDslRepository {
 	public List<MbtmiComment> findMbtmiCommentListByMbtmiNoAndPaging(Integer mbtmiNo, PageRequest pageRequest) {
 		return jpaQueryfactory.selectFrom(mbtmiComment)
 								.where(mbtmiComment.mbtmiNo.eq(mbtmiNo))
-								.orderBy(mbtmiComment.writeDate.asc())
+//								.orderBy(mbtmiComment.writeDate.asc())
+								.orderBy(mbtmiComment.parentcommentNo.coalesce(mbtmiComment.commentNo).asc(), mbtmiComment.commentNo.asc())
 								.offset(pageRequest.getOffset())
 								.limit(pageRequest.getPageSize())
 								.fetch();
 	}
+	
 	
 	// 5. 특정 게시글의 댓글수 조회 (PageInfo의 allPage값 계산시 필요)
 	public Long countCommentByMbtmiNo(Integer mbtmiNo) {
@@ -177,6 +167,35 @@ public class MbtmiDslRepository {
 	            )
 	            .fetchOne();
 	}
+	
+	// 6. 댓글의 대댓글 수 조회
+	public Long countCommentByParentcommentNo(Integer mbtmiCommentNo) {
+		return jpaQueryfactory
+				.select(mbtmiComment.count())
+				.from(mbtmiComment)
+				.where(
+						mbtmiComment.parentcommentNo.eq(mbtmiCommentNo)
+				)
+				.fetchOne();
+	}
 
+	
+	// 7. 특정 게시글에 속한 댓글 삭제(게시글 삭제시 관련데이터를 함께 삭제하기 위해 호출)
+	@Transactional
+	public void deleteCommentsByMbtmiNo(Integer mbtmiNo) {
+		jpaQueryfactory.delete(mbtmiComment)
+						.where(mbtmiComment.mbtmiNo.eq(mbtmiNo))
+						.execute();
+	}
+	
+	// 8. 특정 게시글의 모든 댓글의 pk를 리스트로 반환(게시글 삭제시 관련데이터-대댓글알림-를 함께 삭제하기 위해 호출)
+	public List<Integer> findCommentNosByPostNo(Integer postNo) {
+		return jpaQueryfactory.select(mbtmiComment.commentNo)
+								.from(mbtmiComment)
+								.where(mbtmiComment.mbtmiNo.eq(postNo))
+								.fetch();
+	}
+	
+	
 	
 }
