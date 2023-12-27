@@ -28,12 +28,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kosta.mbtisland.dto.MbtmiDto;
 import com.kosta.mbtisland.dto.PageInfo;
 import com.kosta.mbtisland.entity.Alarm;
+import com.kosta.mbtisland.entity.Ban;
 import com.kosta.mbtisland.entity.Bookmark;
 import com.kosta.mbtisland.entity.FileVo;
 import com.kosta.mbtisland.entity.Mbtmi;
 import com.kosta.mbtisland.entity.MbtmiComment;
 import com.kosta.mbtisland.entity.Recommend;
 import com.kosta.mbtisland.entity.UserEntity;
+import com.kosta.mbtisland.repository.BanRepository;
 import com.kosta.mbtisland.repository.FileVoRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.service.AlarmService;
@@ -59,6 +61,8 @@ public class MbtmiController {
 	private FileVoRepository fileVoRepository;
 	@Autowired
 	private FileVoService fileVoService;
+	@Autowired
+	private BanRepository banRepository;
 	
 	// 파일 업로드 경로
 	@Value("${upload.path}") // org.springframework.beans.factory.annotation.Value
@@ -198,10 +202,10 @@ public class MbtmiController {
 													  , @RequestParam(required = false) Integer commentpage) {
 		
 		
-//		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
+		System.out.println("=======댓글등록 컨트롤러에서 출력=======");
 //		System.out.println("sendUser: " + sendUser);
 //		System.out.println("no(게시글번호): " + no);
-//		System.out.println("comment(댓글내용): " + comment);
+		System.out.println("comment(댓글내용): " + comment);
 //		System.out.println("1차댓글번호: " + parentcommentNo);
 //		System.out.println("commentPage: " + commentpage);
 
@@ -506,5 +510,16 @@ public class MbtmiController {
 	
 	
 	
-	
+	// * 메인페이지 로그인한 활동정지 회원의 정지기간 조회
+	@GetMapping("/usersbanperiod/{username}")
+	public ResponseEntity<Object> usersBanPeriod(@PathVariable String username) {
+//		System.out.println("usersBanPeriod메서드 호출! usename: " + username);
+		try {
+			Ban ban = banRepository.findByUsername(username);
+			return new ResponseEntity<>(ban, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
