@@ -23,6 +23,7 @@ import com.kosta.mbtisland.repository.MbattleCommentRepository;
 import com.kosta.mbtisland.repository.MbtmiCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyCommentRepository;
 import com.kosta.mbtisland.repository.MbtwhyRepository;
+import com.kosta.mbtisland.repository.UserRepository;
 @Service
 public class AlarmServiceImpl implements AlarmService{
 	
@@ -38,6 +39,8 @@ public class AlarmServiceImpl implements AlarmService{
 	private MbtmiCommentRepository mbtmiCommentRepository;
 	@Autowired
 	private MbattleCommentRepository mbattleCommentRepository;
+	@Autowired
+	private UserRepository userRepository;
 	
 	public List<AlarmDto> alarmToAlarmDto(List<Alarm> alarmList) throws Exception{
 
@@ -47,6 +50,8 @@ public class AlarmServiceImpl implements AlarmService{
 			String type = null;
 			Integer no = null;
 			String mbti = null;
+			Timestamp date = null;
+			Integer warnCnt = null;
 			//myContent 정할때
 			if(alarm.getAlarmTargetFrom().toUpperCase().contains("COMMENT")) {
 				myContent = "내 댓글";
@@ -56,7 +61,7 @@ public class AlarmServiceImpl implements AlarmService{
 			} else {
 				myContent = "내 게시글";
 			}
-			//detailType정할떄
+			//detailType정하고 경고와 벤에 따른 데이터 삽입
 			if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBTMI")) {
 				type = "MBTMI";
 			} else if(alarm.getAlarmTargetFrom().toUpperCase().contains("MBTWHY")) {
@@ -70,8 +75,10 @@ public class AlarmServiceImpl implements AlarmService{
 			} else {
 				if(alarm.getAlarmType().equals("경고")) {
 					type = "WARN";
+					warnCnt = userRepository.findByUsername(alarm.getUsername()).getUserWarnCnt();
 				} else {
 					type = "BAN";
+					date = userRepository.findByUsername(alarm.getUsername()).getBanDate();
 				}
 			}
 			
@@ -123,6 +130,8 @@ public class AlarmServiceImpl implements AlarmService{
 				.alarmReadDate(alarm.getAlarmReadDate())
 				.alarmUpdateDate(alarm.getAlarmUpdateDate())
 				.alarmCnt(alarm.getAlarmCnt())
+				.warnCnt(warnCnt)
+				.banDate(date)
 				.build()
 				);
 		
