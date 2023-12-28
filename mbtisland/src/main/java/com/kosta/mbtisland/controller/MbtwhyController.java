@@ -3,6 +3,7 @@ package com.kosta.mbtisland.controller;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -254,6 +255,7 @@ public class MbtwhyController {
 			// 1. 댓글 삽입
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+			Timestamp writeDate2 = new Timestamp(new Date().getTime()); // java.util.Date
 			// 댓글 Entity 빌드
 			MbtwhyComment mbtwhyComment = MbtwhyComment.builder()
 					.commentContent(comment)
@@ -273,22 +275,35 @@ public class MbtwhyController {
 			if (parentcommentNo == null) {
 				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtwhy");
 
-				Integer alarmCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no); // alarmCnt컬럼값
-				String username = mbtwhyService.selectMbtwhyByNo(no).getWriterId(); // 알림의 주인==게시글작성자
+//	            Integer alarmCnt = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no); // (alarmCnt 컬럼값) - (게시글이 가진 댓글수)
+				Integer alarmCnt = 0;
+				if(alarmForPostWriter != null) {
+					alarmCnt = alarmForPostWriter.getAlarmCnt() + 1; // (alarmCnt 컬럼값) - (게시글이 가진 댓글 수)
+				} else {
+					alarmCnt = 1;
+				}
+				
+				String username = mbtwhyService.selectMbtwhyByNo(no).getWriterId(); // 알림의 주인 == 게시글 작성자
 
-				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 댓글인지 여부)
+				// 알림 처리 제외 대상에 해당하는지 여부 (게시글 작성자 본인의 댓글인지 여부)
 				Boolean isWrittenByOneSelf = username.equals(sendUser.getUsername());
 
 				// 알림의 존재여부에 따라 alarmCnt컬럼값만 업데이트 수행* or 알림데이터 인서트 수행**
 				if (alarmForPostWriter != null && !isWrittenByOneSelf) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt);
-					alarmForPostWriter.setAlarmUpdateDate(writeDate);
 					alarmForPostWriter.setAlarmIsRead("N");
 					alarmForPostWriter.setAlarmReadDate(null);
+					alarmForPostWriter.setAlarmUpdateDate(writeDate2);
 					alarmService.addAlarm(alarmForPostWriter); // *
 				} else if (alarmForPostWriter == null && !isWrittenByOneSelf) {
-					Alarm alarm = Alarm.builder().username(username).alarmType("댓글").alarmTargetNo(no)
-							.alarmTargetFrom("mbtwhy").alarmUpdateDate(writeDate).alarmCnt(alarmCnt).build();
+					Alarm alarm = Alarm.builder()
+							.username(username)
+							.alarmType("댓글")
+							.alarmTargetNo(no)
+							.alarmTargetFrom("mbtwhy")
+							.alarmUpdateDate(writeDate)
+							.alarmCnt(alarmCnt)
+							.build();
 					alarmService.addAlarm(alarm); // **
 				}
 
@@ -298,11 +313,23 @@ public class MbtwhyController {
 						.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo, "mbtwhy");
 				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtwhy");
 
-				Integer alarmCnt1 = mbtwhyService.selectMbtwhyChildCommentCount(parentcommentNo); // 알림Cnt1
+//				Integer alarmCnt1 = mbtwhyService.selectMbtwhyChildCommentCount(parentcommentNo); // 알림Cnt1
+				Integer alarmCnt1 = 0;
+				if(alarmForParentcommentWriter != null) {
+					alarmCnt1 = alarmForParentcommentWriter.getAlarmCnt() + 1; // (alarmCnt 컬럼값) - (게시글이 가진 댓글 수)
+				} else {
+					alarmCnt1 = 1;
+				}
 				String username1 = mbtwhyCommentRepository.findById(parentcommentNo).get().getWriterId(); // 알림의
 																											// 주인1==1차댓글의
 																											// 작성자
-				Integer alarmCnt2 = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no); // 알림Cnt2
+//				Integer alarmCnt2 = mbtwhyService.selectMbtwhyCommentCountByMbtwhyNo(no); // 알림Cnt2
+				Integer alarmCnt2 = 0;
+				if(alarmForPostWriter != null) {
+					alarmCnt2 = alarmForPostWriter.getAlarmCnt() + 1; // (alarmCnt 컬럼값) - (게시글이 가진 댓글 수)
+				} else {
+					alarmCnt2 = 1;
+				}
 				String username2 = mbtwhyService.selectMbtwhyByNo(no).getWriterId(); // 알림의 주인2==게시글작성자
 
 				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 2차댓글인지, 1차댓글작성자 본인의 2차댓글인지 여부)
@@ -312,19 +339,26 @@ public class MbtwhyController {
 				// 2-2-1. 1차댓글 작성자를 향한 알림데이터 업데이트 또는 인서트
 				if (alarmForParentcommentWriter != null && !isWrittenByParentcommentWriter) {
 					alarmForParentcommentWriter.setAlarmCnt(alarmCnt1);
-					alarmForParentcommentWriter.setAlarmUpdateDate(writeDate);
 					alarmForParentcommentWriter.setAlarmIsRead("N");
 					alarmForParentcommentWriter.setAlarmReadDate(null);
+					alarmForParentcommentWriter.setAlarmUpdateDate(writeDate2);
 					alarmService.addAlarm(alarmForParentcommentWriter); // alarmCnt컬럼값만 업데이트 수행
 				} else if (alarmForParentcommentWriter == null && !isWrittenByParentcommentWriter) {
-					Alarm alarm1 = Alarm.builder().username(username1).alarmType("댓글").alarmTargetNo(parentcommentNo)
-							.alarmTargetFrom("mbtwhy").alarmUpdateDate(writeDate).alarmCnt(alarmCnt1).build();
+					Alarm alarm1 = Alarm.builder()
+							.username(username1)
+							.alarmType("댓글")
+							.alarmTargetNo(parentcommentNo)
+							.alarmTargetFrom("mbtwhy")
+							.alarmUpdateDate(writeDate)
+							.alarmCnt(alarmCnt1)
+							.build();
 					alarmService.addAlarm(alarm1); // 인서트 수행
 				}
 
 				// 2-2-2. 게시글 작성자를 향한 알림데이터 업데이트
 				if (alarmForPostWriter != null && !isWrittenByPostWriter) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt2);
+					alarmForPostWriter.setAlarmUpdateDate(writeDate2);
 					alarmService.addAlarm(alarmForPostWriter); // alarmCnt컬럼값만 업데이트 수행
 				}
 			}

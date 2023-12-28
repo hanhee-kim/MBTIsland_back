@@ -215,7 +215,7 @@ public class MbtmiController {
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
 			Timestamp writeDate2 = new Timestamp(new Date().getTime()); // java.util.Date
-			System.out.println("mbtmi컨트롤러의댓글작성메서드에서출력 writeDate: " + writeDate + ", writeDate2: " + writeDate2); 
+//			System.out.println("mbtmi컨트롤러의댓글작성메서드에서출력 writeDate: " + writeDate + ", writeDate2: " + writeDate2); 
 			// writeDate: 2023-12-28 00:00:00.0, writeDate2: 2023-12-28 03:16:51.288
 			MbtmiComment mbtmiComment = MbtmiComment.builder()
 										.commentContent(comment)
@@ -234,8 +234,12 @@ public class MbtmiController {
 			if(parentcommentNo==null) {
 				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtmi");
 
-				Integer alarmCnt = mbtmiService.mbtmiCommentCnt(no); // alarmCnt컬럼값
+//				Integer alarmCnt = mbtmiService.mbtmiCommentCnt(no); // alarmCnt컬럼값(수정전): 게시글이 가진 댓글수
+				Integer alarmCnt = 0; // alarmCnt컬럼값: 기존알림데이터가 있다면 알림cnt+1 없다면 1
+				if(alarmForPostWriter!=null) alarmCnt = alarmForPostWriter.getAlarmCnt()+1;
+				else alarmCnt = 1;
 				String username = mbtmiService.mbtmiDetail(no).getWriterId(); // 알림의 주인==게시글작성자
+//				System.out.println("알림카운트: " + alarmCnt);
 				
 				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 댓글인지 여부)
 				Boolean isWrittenByOneSelf = username.equals(sendUser.getUsername());
@@ -264,9 +268,15 @@ public class MbtmiController {
 				Alarm alarmForParentcommentWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(parentcommentNo, "mbtmiComment");
 				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbtmi");
 				
-				Integer alarmCnt1 = mbtmiService.mbtmiChildCommentCnt(parentcommentNo); // 알림Cnt1
+//				Integer alarmCnt1 = mbtmiService.mbtmiChildCommentCnt(parentcommentNo); // 알림Cnt1(수정전): 1차댓글이 가진 2차댓글 수
+				Integer alarmCnt1 = 0; // 알림Cnt1: 기존알림데이터가 있다면 알림cnt+1 없다면 1
+				if(alarmForParentcommentWriter!=null) alarmCnt1 = alarmForParentcommentWriter.getAlarmCnt()+1;
+				else alarmCnt1 = 1;
 				String username1 = mbtmiCommentRepository.findById(parentcommentNo).get().getWriterId(); // 알림의 주인1==1차댓글의 작성자
-				Integer alarmCnt2 = mbtmiService.mbtmiCommentCnt(no); // 알림Cnt2
+//				Integer alarmCnt2 = mbtmiService.mbtmiCommentCnt(no); // 알림Cnt2(수정전): 게시글이 가진 댓글수
+				Integer alarmCnt2 = 0;
+				if(alarmForPostWriter!=null) alarmCnt2 = alarmForPostWriter.getAlarmCnt()+1;
+				else alarmCnt2 = 1;
 				String username2 = mbtmiService.mbtmiDetail(no).getWriterId(); // 알림의 주인2==게시글작성자
 				
 				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 2차댓글인지, 1차댓글작성자 본인의 2차댓글인지 여부)
