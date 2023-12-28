@@ -261,14 +261,24 @@ public class ReportController {
 			
 			// 경고 알람 처리
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
-			Alarm warningAlarm = Alarm.builder().username(username).alarmType("경고").alarmTargetNo(reportList.get(0).getNo())
-					.alarmTargetFrom("report").alarmUpdateDate(writeDate).build();
+			Alarm warningAlarm = Alarm.builder()
+					.username(username)
+					.alarmType("경고")
+					.alarmTargetNo(reportList.get(0).getNo())
+					.alarmTargetFrom("report")
+					.alarmUpdateDate(writeDate)
+					.build();
 			alarmService.addAlarm(warningAlarm);
 			
 			// 새로운 밴이 삽입되는 경우 알람 처리
 			if(user.getUserWarnCnt() != 0 && user.getUserWarnCnt() % 3 == 0) {
-				Alarm banAlarm = Alarm.builder().username(username).alarmType("제재").alarmTargetNo(reportList.get(0).getNo())
-						.alarmTargetFrom("ban").alarmUpdateDate(writeDate).build();
+				Alarm banAlarm = Alarm.builder()
+						.username(username)
+						.alarmType("제재")
+						.alarmTargetNo(reportList.get(0).getNo())
+						.alarmTargetFrom("ban")
+						.alarmUpdateDate(writeDate)
+						.build();
 				alarmService.addAlarm(banAlarm);
 			}
 			
