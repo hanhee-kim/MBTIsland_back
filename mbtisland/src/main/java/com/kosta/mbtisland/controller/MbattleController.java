@@ -3,6 +3,7 @@ package com.kosta.mbtisland.controller;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,11 +60,13 @@ public class MbattleController {
 			PageInfo pageInfo = PageInfo.builder().curPage(page==null? 1 : page).build();
 			List<MbattleDto> mbattleList = mbattleService.selectMbattleListByPageAndSearchAndSort(pageInfo, search, sort);
 			List<Mbattle> hotMbattleList= mbattleService.selectDailyHotMbattle();
+			System.out.println("앰배틀");
+			System.out.println(hotMbattleList);
 			
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("mbattleList", mbattleList);
-			res.put("hotMbattleList", hotMbattleList);
+			res.put("hotMbattleList", hotMbattleList);				
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -223,6 +226,7 @@ public class MbattleController {
 			// 1. 댓글 삽입
 			LocalDate currentDate = LocalDate.now();
 			Timestamp writeDate = Timestamp.valueOf(currentDate.atStartOfDay());
+			Timestamp writeDate2 = new Timestamp(new Date().getTime()); // java.util.Date
 			// 댓글 Entity 빌드
 			MbattleComment mbattleComment = MbattleComment.builder()
 					.commentContent(comment)
@@ -240,22 +244,34 @@ public class MbattleController {
 			if (parentcommentNo == null) {
 				Alarm alarmForPostWriter = alarmService.selectAlarmByAlarmTargetNoAndAlarmTargetFrom(no, "mbattle");
 
-				Integer alarmCnt = mbattleService.selectMbattleCommentCountByMbattleNo(no); // alarmCnt컬럼값
-				String username = mbattleService.selectMbattleByNo(no).getWriterId(); // 알림의 주인==게시글작성자
+//				Integer alarmCnt = mbattleService.selectMbattleCommentCountByMbattleNo(no); // (alarmCnt 컬럼값) - (게시글이 가진 댓글수)
+				Integer alarmCnt = 0;
+				if(alarmForPostWriter != null) {
+					alarmCnt = alarmForPostWriter.getAlarmCnt() + 1; // (alarmCnt 컬럼값) - (게시글이 가진 댓글 수)
+				} else {
+					alarmCnt = 1;
+				}
+				String username = mbattleService.selectMbattleByNo(no).getWriterId(); // 알림의 주인 == 게시글작성자
 
-				// 알림 처리 제외 대상에 해당하는지 여부(게시글작성자 본인의 댓글인지 여부)
+				// 알림 처리 제외 대상에 해당하는지 여부 (게시글 작성자 본인의 댓글인지 여부)
 				Boolean isWrittenByOneSelf = username.equals(sendUser.getUsername());
 
 				// 알림의 존재여부에 따라 alarmCnt컬럼값만 업데이트 수행* or 알림데이터 인서트 수행**
 				if (alarmForPostWriter != null && !isWrittenByOneSelf) {
 					alarmForPostWriter.setAlarmCnt(alarmCnt);
-					alarmForPostWriter.setAlarmUpdateDate(writeDate);
 					alarmForPostWriter.setAlarmIsRead("N");
 					alarmForPostWriter.setAlarmReadDate(null);
+					alarmForPostWriter.setAlarmUpdateDate(writeDate2);
 					alarmService.addAlarm(alarmForPostWriter); // *
 				} else if (alarmForPostWriter == null && !isWrittenByOneSelf) {
-					Alarm alarm = Alarm.builder().username(username).alarmType("댓글").alarmTargetNo(no)
-							.alarmTargetFrom("mbattle").alarmUpdateDate(writeDate).alarmCnt(alarmCnt).build();
+					Alarm alarm = Alarm.builder()
+							.username(username)
+							.alarmType("댓글")
+							.alarmTargetNo(no)
+							.alarmTargetFrom("mbattle")
+							.alarmUpdateDate(writeDate)
+							.alarmCnt(alarmCnt)
+							.build();
 					alarmService.addAlarm(alarm); // **
 				}
 			}
@@ -274,8 +290,6 @@ public class MbattleController {
 			res.put("mbattleCommentList", mbattleCommentList);
 			res.put("mbattleCommentCount", mbattleCommentCount);
 			res.put("writtenCommentNo", writtenCommentNo);
-			System.out.println(pageInfo);
-			System.out.println("올페이지" + pageInfo.getAllPage());
 			return new ResponseEntity<Object>(res, HttpStatus.OK);
 		} catch(Exception e) {
 			e.printStackTrace();
