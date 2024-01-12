@@ -28,7 +28,7 @@ public class MbattleDslRepository {
 	
 	// 게시글 목록 조회 (특정 페이지, 검색 값, 정렬 옵션)
 	public List<Mbattle> findMbattleListByPageAndSearchAndSort
-		(PageRequest pageRequest, String search, String sort) throws Exception {
+		(PageRequest pageRequest, String search, String sort) {
 		OrderSpecifier<?> orderSpecifier;
 
 		// 정렬 조건
@@ -55,7 +55,7 @@ public class MbattleDslRepository {
 	}
 	
 	// 일간 인기 게시글 조회
-	public List<Mbattle> findDailyHotMbattle() throws Exception {
+	public List<Mbattle> findDailyHotMbattle() {
 		// 현재 날짜
 		LocalDate currentDate = LocalDate.now();
 		Timestamp startDate = Timestamp.valueOf(currentDate.atStartOfDay());
@@ -70,7 +70,7 @@ public class MbattleDslRepository {
 	}
 	
 	// 게시글 개수 조회 (검색 값)
-	public Long findMbattleCountBySearch(String search) throws Exception {
+	public Long findMbattleCountBySearch(String search) {
 		return jpaQueryFactory.select(mbattle.count())
 						.from(mbattle)
 						.where(search!=null? mbattle.title.containsIgnoreCase(search) : null,
@@ -79,7 +79,7 @@ public class MbattleDslRepository {
 	}
 	
 	// 랜덤 게시글 조회
-	public Integer findRandomMbattleNo() throws Exception {
+	public Integer findRandomMbattleNo() {
 		return jpaQueryFactory.select(mbattle.no)
 				.from(mbattle)
 				.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
@@ -87,7 +87,7 @@ public class MbattleDslRepository {
 	}
 	
 	// 댓글 목록 조회 (게시글 번호)
-	public List<MbattleComment> findMbattleCommentListByMbattleNoAndPage(Integer no, PageRequest pageRequest) throws Exception {
+	public List<MbattleComment> findMbattleCommentListByMbattleNoAndPage(Integer no, PageRequest pageRequest) {
 		return jpaQueryFactory.selectFrom(mbattleComment)
 				.where(mbattleComment.mbattleNo.eq(no))
 				.orderBy(mbattleComment.commentNo.asc()) // 정렬

@@ -25,7 +25,7 @@ public class MbtwhyDslRepository {
 	
 	// 게시글 목록 조회 (MBTI 타입, 특정 페이지, 검색 값, 정렬 옵션)
 	public List<Mbtwhy> findMbtwhyListByMbtiAndPageAndSearchAndSort
-		(String mbti, PageRequest pageRequest, String search, String sort) throws Exception {
+		(String mbti, PageRequest pageRequest, String search, String sort) {
 		OrderSpecifier<?> orderSpecifier;
 		
 		// 정렬 조건
@@ -54,7 +54,7 @@ public class MbtwhyDslRepository {
 	}
 	
 	// 게시글 개수 조회 (MBTI 타입, 검색 값)
-	public Long findMbtwhyCountByMbtiAndSearch(String mbti, String search) throws Exception {
+	public Long findMbtwhyCountByMbtiAndSearch(String mbti, String search) {
 		return jpaQueryFactory.select(mbtwhy.count())
 						.from(mbtwhy)
 						.where(search!=null? mbtwhy.content.containsIgnoreCase(search) : null,
@@ -65,7 +65,7 @@ public class MbtwhyDslRepository {
 	}
 	
 	// 일간 인기 게시글 조회 (MBTI)
-	public Mbtwhy findDailyHotMbtwhy(String mbti) throws Exception {
+	public Mbtwhy findDailyHotMbtwhy(String mbti) {
 		// 현재 날짜
 		LocalDate currentDate = LocalDate.now();
 		Timestamp startDate = Timestamp.valueOf(currentDate.atStartOfDay());
@@ -81,7 +81,7 @@ public class MbtwhyDslRepository {
 	}
 	
 	// 댓글 목록 조회 (게시글 번호)
-	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) throws Exception {
+	public List<MbtwhyComment> findMbtwhyCommentListByMbtwhyNoAndPage(Integer no, PageRequest pageRequest) {
 		return jpaQueryFactory.selectFrom(mbtwhyComment)
 //				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
 				.where(mbtwhyComment.mbtwhyNo.eq(no))
@@ -95,14 +95,14 @@ public class MbtwhyDslRepository {
 	}
 
 	// 댓글 개수 조회 (게시글 번호)
-	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) throws Exception{
+	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) {
 		return jpaQueryFactory.select(mbtwhyComment.count()).from(mbtwhyComment)
 				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
 				.fetchOne();
 	}
 	
 	// 댓글의 대댓글 수 조회
-	public Long countCommentByParentcommentNo(Integer commentNo) throws Exception {
+	public Long countCommentByParentcommentNo(Integer commentNo) {
 		return jpaQueryFactory
 				.select(mbtwhyComment.count())
 				.from(mbtwhyComment)
@@ -111,7 +111,7 @@ public class MbtwhyDslRepository {
 	}
 	
 	//
-	public List<Mbtwhy> findMbtwhyListUserAndPaging(String username, PageRequest pageRequest) throws Exception {
+	public List<Mbtwhy> findMbtwhyListUserAndPaging(String username, PageRequest pageRequest) {
 		return jpaQueryFactory.selectFrom(mbtwhy)
 //			.where(mbtwhy.writerId.eq(username).and(mbtwhy.isRemoved.eq("N"))
 			.orderBy(mbtwhy.no.desc())
@@ -119,12 +119,6 @@ public class MbtwhyDslRepository {
 			.limit(pageRequest.getPageSize())
 			.fetch();
 	}
-	
-//	public Long findMbtwhyCommentCountByMbtwhyNo(Integer no) {
-//		return jpaQueryFactory.select(mbtwhyComment.count()).from(mbtwhyComment)
-//				.where(mbtwhyComment.isBlocked.eq("N"), mbtwhyComment.isRemoved.eq("N"), mbtwhyComment.mbtwhyNo.eq(no))
-//				.fetchOne();
-//	}
 	
 	// 특정 게시글에 속한 댓글 삭제(게시글 삭제시 관련데이터를 함께 삭제하기 위해 호출)
 	@Transactional

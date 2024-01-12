@@ -17,6 +17,7 @@ public class BookmarkDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
 
+	// 특정 사용자의 북마크 목록 조회 (페이징)
 	public List<Bookmark> findByUsernameAndPaging(String username,PageRequest pageRequest){
 		QBookmark qBookmark = QBookmark.bookmark;
 		return jpaQueryFactory.selectFrom(qBookmark)
@@ -27,6 +28,7 @@ public class BookmarkDslRepository {
 					.fetch();
 	}
 	
+	// 특정 사용자의 북마크 목록 개수 조회
 	public Long findCntBookmarkListByuser(String username) {
 		QBookmark qBookmark = QBookmark.bookmark;
 		return jpaQueryFactory.select(qBookmark.count())

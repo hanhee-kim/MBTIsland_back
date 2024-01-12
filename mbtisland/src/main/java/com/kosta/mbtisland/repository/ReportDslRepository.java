@@ -20,7 +20,7 @@ public class ReportDslRepository {
 	
 	// 신고 목록 조회 (특정 페이지, 필터링, 게시판 유형, 신고 유형)
 	public List<Report> findReportListByPageAndFilterAndBoardTypeAndReportType
-		(PageRequest pageRequest, String filter, String boardType, String reportType) throws Exception {
+		(PageRequest pageRequest, String filter, String boardType, String reportType) {
 
 		return jpaQueryFactory.selectFrom(report)
 				.where(filter.equals("all")? null : report.isCompleted.eq(filter),
@@ -33,7 +33,7 @@ public class ReportDslRepository {
 	}
 	
 	// 밴 페이지에서의 신고 목록 조회 (페이지)
-	public List<Report> findReportListByPageAndUsername(PageRequest pageRequest, String username) throws Exception {
+	public List<Report> findReportListByPageAndUsername(PageRequest pageRequest, String username) {
 		return jpaQueryFactory.selectFrom(report)
 				.where(report.reportedId.eq(username))
 				.orderBy(report.no.desc()) // 정렬
@@ -43,7 +43,7 @@ public class ReportDslRepository {
 	}
 	
 	// 신고 개수
-	public Long findReportCountByFilterAndBoardTypeAndReportType(String filter, String boardType, String reportType) throws Exception {
+	public Long findReportCountByFilterAndBoardTypeAndReportType(String filter, String boardType, String reportType) {
 		return jpaQueryFactory.select(report.count())
 				.from(report)
 				.where(filter.equals("all")? null : report.isCompleted.eq(filter),
@@ -54,7 +54,7 @@ public class ReportDslRepository {
 	}
 	
 	// 밴 페이지에서의 신고 개수
-	public Long findReportCountByUsername(String username) throws Exception {
+	public Long findReportCountByUsername(String username) {
 		return jpaQueryFactory.select(report.count())
 				.where(report.reportedId.eq(username))
 				.from(report)
@@ -63,7 +63,7 @@ public class ReportDslRepository {
 	}
 	
 	// 신고 목록 조회 (테이블 타입, 게시글 번호)
-	public List<Report> findReportListByBoardTypeAndPostNo(String tableType, Integer postNo) throws Exception {
+	public List<Report> findReportListByBoardTypeAndPostNo(String tableType, Integer postNo) {
 		return jpaQueryFactory.selectFrom(report)
 				.where(report.tableType.eq(tableType),
 						report.reportedPostNo.eq(postNo),
@@ -72,7 +72,7 @@ public class ReportDslRepository {
 	}
 	
 	// 신고 목록 조회 (테이블 타입, 게시글 번호, 댓글 번호)
-	public List<Report> findReportListByBoardTypeAndPostNoAndCommentNo(String tableType, Integer postNo, Integer commentNo) throws Exception {
+	public List<Report> findReportListByBoardTypeAndPostNoAndCommentNo(String tableType, Integer postNo, Integer commentNo) {
 		System.out.println("댓글 번호" + commentNo);
 		return jpaQueryFactory.selectFrom(report)
 				.where(report.tableType.eq(tableType),
