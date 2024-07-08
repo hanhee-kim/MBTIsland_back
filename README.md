@@ -43,6 +43,12 @@ MBTI를 주제로 한 고유의 기능을 제공하기 위해 개발하게 되�
 <br>
 <br>
 
+## 🖥️ PPT
+[MBTIsland-Canva URL](https://www.canva.com/design/DAF4RcrUE2o/1Pq6oL6TxNsJdy3-8AgoKQ/edit?utm_content=DAF4RcrUE2o&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+
+<br>
+<br>
+
 ## 💾 ERD
 ![그림1](https://github.com/hanhee-kim/MBTIsland_back/assets/68523711/798bcb7c-544c-477b-b86f-ced180e14008)
 <br>
